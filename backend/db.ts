@@ -19,6 +19,8 @@ db.run(`
 db.run(`
   CREATE TABLE IF NOT EXISTS readings (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    device_id TEXT,
+    session_id INTEGER REFERENCES therapy_sessions(id),
     timestamp TEXT NOT NULL,
     is_device_on INTEGER NOT NULL,
     is_therapy_active INTEGER NOT NULL,
@@ -36,4 +38,8 @@ db.run(`
     is_adapter_connected INTEGER NOT NULL,
     system_voltage REAL NOT NULL
   )
+`);
+
+db.run(`
+  CREATE INDEX IF NOT EXISTS idx_readings_timestamp ON readings(timestamp)
 `);

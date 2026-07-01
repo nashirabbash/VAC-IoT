@@ -30,6 +30,8 @@ function sessionApiShape(row: any) {
 // tied to that app — any client that sends this JSON shape is accepted.
 
 const readingBody = t.Object({
+  deviceId: t.Optional(t.String()),
+  sessionId: t.Optional(t.Integer()),
   timestamp: t.String(),
   isDeviceOn: t.Boolean(),
   isTherapyActive: t.Boolean(),
@@ -66,6 +68,8 @@ const readingBody = t.Object({
 function readingApiShape(row: any) {
   return {
     id: row.id,
+    deviceId: row.device_id,
+    sessionId: row.session_id,
     timestamp: row.timestamp,
     isDeviceOn: !!row.is_device_on,
     isTherapyActive: !!row.is_therapy_active,
@@ -151,15 +155,17 @@ const app = new Elysia()
       const row = db
         .query(
           `INSERT INTO readings
-            (timestamp, is_device_on, is_therapy_active, connection_status,
+            (device_id, session_id, timestamp, is_device_on, is_therapy_active, connection_status,
              pressure_value, pressure_stability, is_pump_active,
              pump_cumulative_seconds, pump_current_session_seconds,
              canister_volume_ml, is_canister_full, canister_needs_replacement,
              active_alarms, battery_level, is_adapter_connected, system_voltage)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
            RETURNING *`
         )
         .get(
+          body.deviceId ?? null,
+          body.sessionId ?? null,
           body.timestamp,
           body.isDeviceOn ? 1 : 0,
           body.isTherapyActive ? 1 : 0,
