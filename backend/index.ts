@@ -147,6 +147,78 @@ const app = new Elysia()
     },
     { body: sessionBody }
   )
+  // Opens a session in-progress; device tags subsequent /readings with the
+  // returned id so the average pressure can be computed on /sessions/:id/end.
+  .post(
+    "/sessions/start",
+    ({ body, set }) => {
+      const { count } = db
+        .query("SELECT COUNT(*) as count FROM therapy_sessions")
+        .get() as { count: number };
+      const sessionNumber = count + 1;
+
+      const row = db
+        .query(
+          `INSERT INTO therapy_sessions (session_number, start_date)
+           VALUES (?, ?)
+           RETURNING *`
+        )
+        .get(sessionNumber, body.startDate ?? new Date().toISOString());
+
+      set.status = 201;
+      return sessionApiShape(row);
+    },
+    { body: t.Object({ startDate: t.Optional(t.String()) }) }
+  )
+  .post(
+    "/sessions/:id/end",
+    ({ params, body, set }) => {
+      const session = db
+        .query("SELECT * FROM therapy_sessions WHERE id = ?")
+        .get(params.id) as any;
+      if (!session) {
+        set.status = 404;
+        return { error: "session not found" };
+      }
+
+      const endDate = body.endDate ?? new Date().toISOString();
+      const durationSeconds = Math.max(
+        0,
+        Math.round(
+          (new Date(endDate).getTime() - new Date(session.start_date).getTime()) / 1000
+        )
+      );
+
+      const { avg } = db
+        .query(
+          "SELECT AVG(pressure_value) as avg FROM readings WHERE session_id = ?"
+        )
+        .get(params.id) as { avg: number | null };
+
+      const row = db
+        .query(
+          `UPDATE therapy_sessions
+           SET end_date = ?, duration_seconds = ?, average_pressure_mmhg = ?, badge_level = ?
+           WHERE id = ?
+           RETURNING *`
+        )
+        .get(
+          endDate,
+          durationSeconds,
+          avg ?? 0,
+          body.badgeLevel ?? session.badge_level ?? null,
+          params.id
+        );
+
+      return sessionApiShape(row);
+    },
+    {
+      body: t.Object({
+        endDate: t.Optional(t.String()),
+        badgeLevel: t.Optional(t.String()),
+      }),
+    }
+  )
 
   // readings
   .post(

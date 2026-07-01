@@ -8,9 +8,9 @@ db.run(`
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     session_number INTEGER NOT NULL,
     start_date TEXT NOT NULL,
-    end_date TEXT NOT NULL,
-    duration_seconds INTEGER NOT NULL,
-    average_pressure_mmhg REAL NOT NULL,
+    end_date TEXT,
+    duration_seconds INTEGER,
+    average_pressure_mmhg REAL,
     badge_level TEXT
   )
 `);
