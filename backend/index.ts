@@ -91,7 +91,19 @@ function readingApiShape(row: any) {
 
 const app = new Elysia()
   .use(cors())
-  .use(swagger({ path: "/swagger" }))
+  .use(
+    swagger({
+      path: "/swagger",
+      documentation: {
+        info: {
+          title: "NPWT Monitoring API",
+          description: "Backend for NPWT device readings and therapy session history.",
+          version: "1.0.0",
+        },
+      },
+      scalarConfig: { theme: "bluePlanet" },
+    })
+  )
   .get("/", () => ({ status: "ok", service: "npwt-backend" }))
 
   // sessions
