@@ -20,8 +20,8 @@ class ApiInterceptor extends http.BaseClient {
     // Inject token if available (except for login/register routes)
     final token = await authRepository.getToken();
     if (token != null &&
-        !request.url.path.contains('/login') &&
-        !request.url.path.contains('/register')) {
+        !request.url.path.endsWith('/login') &&
+        !request.url.path.endsWith('/register')) {
       request.headers['Authorization'] = 'Bearer $token';
     }
 

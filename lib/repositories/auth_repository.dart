@@ -1,14 +1,14 @@
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class AuthRepository {
   static const String _tokenKey = 'jwt_token';
+  final _storage = const FlutterSecureStorage();
   String? _cachedToken;
   bool _isInitialized = false;
 
   Future<void> _initCache() async {
     if (!_isInitialized) {
-      final prefs = await SharedPreferences.getInstance();
-      _cachedToken = prefs.getString(_tokenKey);
+      _cachedToken = await _storage.read(key: _tokenKey);
       _isInitialized = true;
     }
   }
@@ -16,8 +16,7 @@ class AuthRepository {
   Future<void> saveToken(String token) async {
     _cachedToken = token;
     _isInitialized = true;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_tokenKey, token);
+    await _storage.write(key: _tokenKey, value: token);
   }
 
   Future<String?> getToken() async {
@@ -28,7 +27,6 @@ class AuthRepository {
   Future<void> clearToken() async {
     _cachedToken = null;
     _isInitialized = true;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_tokenKey);
+    await _storage.delete(key: _tokenKey);
   }
 }

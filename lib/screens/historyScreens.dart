@@ -8,6 +8,8 @@ import 'package:vac_dashboard_app/services/therapy_receiver.dart';
 import 'package:vac_dashboard_app/component/menu.dart';
 import 'package:vac_dashboard_app/component/splitButton.dart';
 import 'package:vac_dashboard_app/asset/color_tokens.dart';
+import 'package:vac_dashboard_app/network/api_interceptor.dart';
+import 'package:vac_dashboard_app/screens/welcomeScreens.dart';
 
 class HistoryScreens extends StatefulWidget {
   const HistoryScreens({super.key});
@@ -45,8 +47,21 @@ class _HistoryScreensState extends State<HistoryScreens> {
     _loadFromBackend();
     _ble.startScan();
     _ble.onTherapy.listen((payload) async {
-      await TherapyReceiver.save(payload);
-      _loadFromBackend();
+      try {
+        await TherapyReceiver.save(payload);
+        _loadFromBackend();
+      } on AuthException {
+        if (!mounted) return;
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const WelcomeScreens()),
+          (route) => false,
+        );
+      } catch (e) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Gagal menyimpan data: $e')));
+      }
     });
   }
 
@@ -61,6 +76,12 @@ class _HistoryScreensState extends State<HistoryScreens> {
         _sessions = all;
         _selectedYear ??= years.isNotEmpty ? years.first : null;
       });
+    } on AuthException {
+      if (!mounted) return;
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const WelcomeScreens()),
+        (route) => false,
+      );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(
