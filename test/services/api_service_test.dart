@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:mocktail/mocktail.dart';
 import 'package:vac_dashboard_app/services/api_service.dart';
-import 'package:vac_dashboard_app/models/therapy_session.dart';
+
 
 class MockHttpClient extends Mock implements http.Client {}
 

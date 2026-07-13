@@ -11,6 +11,7 @@ import 'package:vac_dashboard_app/component/grouped_list.dart';
 import 'package:vac_dashboard_app/screens/welcomeScreens.dart';
 
 final ValueNotifier<ThemeMode> appThemeMode = ValueNotifier(ThemeMode.light);
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,6 +29,7 @@ class MainApp extends StatelessWidget {
         return MaterialApp(
           title: 'VAC Dashboard',
           themeMode: mode,
+          navigatorKey: navigatorKey,
           theme: ThemeData(
             colorScheme: AppColors.colorScheme,
             useMaterial3: true,

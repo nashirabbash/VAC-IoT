@@ -24,4 +24,26 @@ class TherapySession {
         mode: json['mode'] as String,
         duration: json['duration'] as String,
       );
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'session_date': sessionDate,
+      'title': title,
+      'date': date,
+      'mode': mode,
+      'duration': duration,
+    };
+  }
+
+  factory TherapySession.fromMap(Map<String, dynamic> map) {
+    return TherapySession(
+      id: map['id'] as int?,
+      sessionDate: map['session_date'] as String,
+      title: map['title'] as String,
+      date: map['date'] as String,
+      mode: map['mode'] as String,
+      duration: map['duration'] as String,
+    );
+  }
 }
