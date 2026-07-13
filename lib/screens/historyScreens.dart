@@ -41,6 +41,14 @@ class _HistoryScreensState extends State<HistoryScreens> {
     'Desember',
   ];
 
+  void _handleAuthException() {
+    if (!mounted) return;
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const WelcomeScreens()),
+      (route) => false,
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -51,11 +59,7 @@ class _HistoryScreensState extends State<HistoryScreens> {
         await TherapyReceiver.save(payload);
         _loadFromBackend();
       } on AuthException {
-        if (!mounted) return;
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (_) => const WelcomeScreens()),
-          (route) => false,
-        );
+        _handleAuthException();
       } catch (e) {
         if (!mounted) return;
         ScaffoldMessenger.of(
@@ -77,11 +81,7 @@ class _HistoryScreensState extends State<HistoryScreens> {
         _selectedYear ??= years.isNotEmpty ? years.first : null;
       });
     } on AuthException {
-      if (!mounted) return;
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const WelcomeScreens()),
-        (route) => false,
-      );
+      _handleAuthException();
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(
