@@ -71,6 +71,78 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
     });
   }
 
+  void _handleForgotPassword() {
+    setState(() {
+      _mode = AuthMode.login;
+      _passwordController.clear();
+      _confirmPasswordController.clear();
+    });
+  }
+
+  Future<void> _handleLogin() async {
+    final nav = Navigator.of(context);
+    final scaffoldMsg = ScaffoldMessenger.of(context);
+    setState(() => _isLoading = true);
+    try {
+      final token = await apiService.login(
+        _usernameController.text,
+        _passwordController.text,
+      );
+      final authRepo = AuthRepository();
+      await authRepo.saveToken(token);
+      if (!mounted) return;
+      nav.pop(); // Dismiss bottom sheet
+      nav.pushReplacement(
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      scaffoldMsg.showSnackBar(
+        SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  Future<void> _handleRegister() async {
+    final scaffoldMsg = ScaffoldMessenger.of(context);
+    if (_passwordController.text != _confirmPasswordController.text) {
+      scaffoldMsg.showSnackBar(
+        const SnackBar(content: Text('Passwords do not match')),
+      );
+      return;
+    }
+    setState(() => _isLoading = true);
+    try {
+      await apiService.register(
+        _usernameController.text,
+        _passwordController.text,
+        _hospitalController.text,
+      );
+      if (!mounted) return;
+      scaffoldMsg.showSnackBar(
+        const SnackBar(content: Text('Registration successful. Please login.')),
+      );
+      setState(() {
+        _mode = AuthMode.login;
+        _passwordController.clear();
+        _confirmPasswordController.clear();
+      });
+    } catch (e) {
+      if (!mounted) return;
+      scaffoldMsg.showSnackBar(
+        SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final bool isLogin = _mode == AuthMode.login;
@@ -385,93 +457,11 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
                             variant: ButtonVariant.primary,
                             onPressed: () async {
                               if (isForgotPassword) {
-                                setState(() {
-                                  _mode = AuthMode.login;
-                                  _passwordController.clear();
-                                  _confirmPasswordController.clear();
-                                });
+                                _handleForgotPassword();
                               } else if (isLogin) {
-                                setState(() => _isLoading = true);
-                                try {
-                                  final token = await apiService.login(
-                                    _usernameController.text,
-                                    _passwordController.text,
-                                  );
-                                  final authRepo = AuthRepository();
-                                  await authRepo.saveToken(token);
-                                  if (!context.mounted) return;
-                                  Navigator.of(
-                                    context,
-                                  ).pop(); // Dismiss bottom sheet
-                                  Navigator.of(context).pushReplacement(
-                                    MaterialPageRoute(
-                                      builder: (context) => const HomeScreen(),
-                                    ),
-                                  );
-                                } catch (e) {
-                                  if (!context.mounted) return;
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                        e.toString().replaceAll(
-                                          'Exception: ',
-                                          '',
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                } finally {
-                                  if (mounted) {
-                                    setState(() => _isLoading = false);
-                                  }
-                                }
+                                await _handleLogin();
                               } else {
-                                if (_passwordController.text !=
-                                    _confirmPasswordController.text) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text('Passwords do not match'),
-                                    ),
-                                  );
-                                  return;
-                                }
-                                setState(() => _isLoading = true);
-                                try {
-                                  await apiService.register(
-                                    _usernameController.text,
-                                    _passwordController.text,
-                                    _hospitalController.text,
-                                  );
-                                  if (!context.mounted) return;
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text(
-                                        'Registration successful. Please login.',
-                                      ),
-                                    ),
-                                  );
-                                  setState(() {
-                                    _mode = AuthMode.login;
-                                    _passwordController.clear();
-                                    _confirmPasswordController.clear();
-                                  });
-                                } catch (e) {
-                                  if (!context.mounted) return;
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                        e.toString().replaceAll(
-                                          'Exception: ',
-                                          '',
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                } finally {
-                                  if (mounted) {
-                                    setState(() => _isLoading = false);
-                                  }
-                                }
+                                await _handleRegister();
                               }
                             },
                           ),
