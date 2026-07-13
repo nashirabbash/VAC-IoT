@@ -1,0 +1,103 @@
+Container(
+    width: double.infinity,
+    height: double.infinity,
+    padding: const EdgeInsets.all(16),
+    clipBehavior: Clip.antiAlias,
+    decoration: BoxDecoration(),
+    child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        spacing: 14,
+        children: [
+            Expanded(
+                child: Container(
+                    width: double.infinity,
+                    child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        spacing: 10,
+                        children: [
+                            Container(
+                                width: 182,
+                                height: 182,
+                                decoration: ShapeDecoration(
+                                    shape: RoundedRectangleBorder(
+                                        side: BorderSide(
+                                            width: 3,
+                                            strokeAlign: BorderSide.strokeAlignCenter,
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ],
+                    ),
+                ),
+            ),
+            Container(
+                width: double.infinity,
+                padding: const EdgeInsets.only(bottom: 40),
+                child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    spacing: 10,
+                    children: [
+                        Container(
+                            width: double.infinity,
+                            height: 48,
+                            child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                    Expanded(
+                                        child: Container(
+                                            clipBehavior: Clip.antiAlias,
+                                            decoration: ShapeDecoration(
+                                                color: const Color(0xFF0088FF) /* Accents-Blue */,
+                                                shape: RoundedRectangleBorder(
+                                                    borderRadius: BorderRadius.circular(100),
+                                                ),
+                                            ),
+                                            child: Column(
+                                                mainAxisSize: MainAxisSize.min,
+                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                crossAxisAlignment: CrossAxisAlignment.center,
+                                                children: [
+                                                    Container(
+                                                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                                                        child: Row(
+                                                            mainAxisSize: MainAxisSize.min,
+                                                            mainAxisAlignment: MainAxisAlignment.center,
+                                                            crossAxisAlignment: CrossAxisAlignment.center,
+                                                            spacing: 8,
+                                                            children: [
+                                                                Text(
+                                                                    'Scan',
+                                                                    style: TextStyle(
+                                                                        color: Colors.white /* Schemes-On-Primary */,
+                                                                        fontSize: 14,
+                                                                        fontFamily: 'Roboto',
+                                                                        fontWeight: FontWeight.w500,
+                                                                        height: 1.43,
+                                                                        letterSpacing: 0.10,
+                                                                    ),
+                                                                ),
+                                                            ],
+                                                        ),
+                                                    ),
+                                                ],
+                                            ),
+                                        ),
+                                    ),
+                                ],
+                            ),
+                        ),
+                    ],
+                ),
+            ),
+        ],
+    ),
+)

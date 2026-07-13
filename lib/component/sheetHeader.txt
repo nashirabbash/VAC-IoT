@@ -1,0 +1,816 @@
+variant default: [
+    Container(
+    width: 402,
+    padding: const EdgeInsets.only(bottom: 10),
+    child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+            Container(
+                height: 16,
+                padding: const EdgeInsets.only(top: 5),
+                child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                        Container(
+                            width: 36,
+                            height: 5,
+                            decoration: ShapeDecoration(
+                                color: const Color(0xFFCCCCCC) /* Fills---Vibrant-Primary */,
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(100),
+                                ),
+                            ),
+                        ),
+                    ],
+                ),
+            ),
+            Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Stack(
+                    children: [
+                        Container(
+                            height: 44,
+                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                            decoration: ShapeDecoration(
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(296),
+                                ),
+                            ),
+                            child: Stack(
+                                children: [
+                                    Positioned(
+                                        left: 0,
+                                        top: 0,
+                                        child: Container(
+                                            width: 44,
+                                            height: 44,
+                                            decoration: ShapeDecoration(
+                                                color: const Color(0x28787880) /* Fills-Secondary */,
+                                                shape: OvalBorder(),
+                                            ),
+                                        ),
+                                    ),
+                                    SizedBox(
+                                        width: 36,
+                                        height: 44,
+                                        child: Text(
+                                            '􀆄',
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                                color: const Color(0xFF727272) /* Labels---Vibrant-Secondary */,
+                                                fontSize: 17,
+                                                fontFamily: 'SF Pro',
+                                                fontWeight: FontWeight.w510,
+                                            ),
+                                        ),
+                                    ),
+                                ],
+                            ),
+                        ),
+                        Container(
+                            width: 8,
+                            height: double.infinity,
+                            clipBehavior: Clip.antiAlias,
+                            decoration: BoxDecoration(),
+                        ),
+                        Container(
+                            height: 44,
+                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                            decoration: ShapeDecoration(
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(296),
+                                ),
+                            ),
+                            child: Stack(
+                                children: [
+                                    Positioned(
+                                        left: 0,
+                                        top: 0,
+                                        child: Container(
+                                            width: 44,
+                                            height: 44,
+                                            decoration: ShapeDecoration(
+                                                color: const Color(0xFF0088FF) /* Accents-Blue */,
+                                                shape: OvalBorder(),
+                                            ),
+                                        ),
+                                    ),
+                                    SizedBox(
+                                        width: 36,
+                                        height: 44,
+                                        child: Text(
+                                            '􀄨',
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 17,
+                                                fontFamily: 'SF Pro',
+                                                fontWeight: FontWeight.w510,
+                                            ),
+                                        ),
+                                    ),
+                                ],
+                            ),
+                        ),
+                        Positioned(
+                            left: 183,
+                            top: 13,
+                            child: Container(
+                                width: 36,
+                                height: 22,
+                                child: Stack(
+                                    children: [
+                                        Positioned(
+                                            left: 0,
+                                            top: 0,
+                                            child: Text(
+                                                'Title',
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(
+                                                    color: const Color(0xFF1A1A1A) /* Labels---Vibrant-Primary */,
+                                                    fontSize: 17,
+                                                    fontFamily: 'SF Pro',
+                                                    fontWeight: FontWeight.w590,
+                                                    height: 1.29,
+                                                    letterSpacing: -0.43,
+                                                ),
+                                            ),
+                                        ),
+                                    ],
+                                ),
+                            ),
+                        ),
+                    ],
+                ),
+            ),
+        ],
+    ),
+)
+]
+
+variant title 2 line: [
+    Container(
+    width: 402,
+    padding: const EdgeInsets.only(bottom: 10),
+    child: Stack(
+        children: [
+            Container(
+                height: 16,
+                padding: const EdgeInsets.only(top: 5),
+                child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                        Container(
+                            width: 36,
+                            height: 5,
+                            decoration: ShapeDecoration(
+                                color: const Color(0xFFCCCCCC) /* Fills---Vibrant-Primary */,
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(100),
+                                ),
+                            ),
+                        ),
+                    ],
+                ),
+            ),
+            Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    spacing: 66,
+                    children: [
+                        Container(
+                            height: 44,
+                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                            decoration: ShapeDecoration(
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(296),
+                                ),
+                            ),
+                            child: Stack(
+                                children: [
+                                    Positioned(
+                                        left: 0,
+                                        top: 0,
+                                        child: Container(
+                                            width: 44,
+                                            height: 44,
+                                            decoration: ShapeDecoration(
+                                                color: const Color(0x28787880) /* Fills-Secondary */,
+                                                shape: OvalBorder(),
+                                            ),
+                                        ),
+                                    ),
+                                    SizedBox(
+                                        width: 36,
+                                        height: 44,
+                                        child: Text(
+                                            '􀆄',
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                                color: const Color(0xFF727272) /* Labels---Vibrant-Secondary */,
+                                                fontSize: 17,
+                                                fontFamily: 'SF Pro',
+                                                fontWeight: FontWeight.w510,
+                                            ),
+                                        ),
+                                    ),
+                                ],
+                            ),
+                        ),
+                        Container(
+                            width: 8,
+                            height: double.infinity,
+                            clipBehavior: Clip.antiAlias,
+                            decoration: BoxDecoration(),
+                        ),
+                        Container(
+                            height: 44,
+                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                            decoration: ShapeDecoration(
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(296),
+                                ),
+                            ),
+                            child: Stack(
+                                children: [
+                                    Positioned(
+                                        left: 0,
+                                        top: 0,
+                                        child: Container(
+                                            width: 44,
+                                            height: 44,
+                                            decoration: ShapeDecoration(
+                                                color: const Color(0xFF0088FF) /* Accents-Blue */,
+                                                shape: OvalBorder(),
+                                            ),
+                                        ),
+                                    ),
+                                    SizedBox(
+                                        width: 36,
+                                        height: 44,
+                                        child: Text(
+                                            '􀄨',
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 17,
+                                                fontFamily: 'SF Pro',
+                                                fontWeight: FontWeight.w510,
+                                            ),
+                                        ),
+                                    ),
+                                ],
+                            ),
+                        ),
+                    ],
+                ),
+            ),
+            Positioned(
+                left: 76,
+                top: 22,
+                child: Container(
+                    width: 250,
+                    child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        spacing: 10,
+                        children: [
+                            Text(
+                                'Title',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                    color: const Color(0xFF1A1A1A) /* Labels---Vibrant-Primary */,
+                                    fontSize: 15,
+                                    fontFamily: 'SF Pro',
+                                    fontWeight: FontWeight.w590,
+                                    height: 1.20,
+                                    letterSpacing: -0.23,
+                                ),
+                            ),
+                        ],
+                    ),
+                ),
+            ),
+            Positioned(
+                left: 76,
+                top: 40,
+                child: Container(
+                    width: 250,
+                    child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        spacing: 10,
+                        children: [
+                            Text(
+                                'Subtitle',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                    color: const Color(0xFF727272) /* Labels---Vibrant-Secondary */,
+                                    fontSize: 12,
+                                    fontFamily: 'SF Pro',
+                                    fontWeight: FontWeight.w510,
+                                    height: 1.17,
+                                ),
+                            ),
+                        ],
+                    ),
+                ),
+            ),
+        ],
+    ),
+)
+]
+
+variant title 2 line left [
+    Container(
+    width: 402,
+    padding: const EdgeInsets.only(bottom: 10),
+    child: Stack(
+        children: [
+            Container(
+                height: 16,
+                padding: const EdgeInsets.only(top: 5),
+                child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                        Container(
+                            width: 36,
+                            height: 5,
+                            decoration: ShapeDecoration(
+                                color: const Color(0xFFCCCCCC) /* Fills---Vibrant-Primary */,
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(100),
+                                ),
+                            ),
+                        ),
+                    ],
+                ),
+            ),
+            Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    spacing: 66,
+                    children: [
+                        Container(
+                            height: 44,
+                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                            decoration: ShapeDecoration(
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(296),
+                                ),
+                            ),
+                            child: Stack(
+                                children: [
+                                    Positioned(
+                                        left: 0,
+                                        top: 0,
+                                        child: Container(
+                                            width: 44,
+                                            height: 44,
+                                            decoration: ShapeDecoration(
+                                                color: const Color(0x28787880) /* Fills-Secondary */,
+                                                shape: OvalBorder(),
+                                            ),
+                                        ),
+                                    ),
+                                    SizedBox(
+                                        width: 36,
+                                        height: 44,
+                                        child: Text(
+                                            '􀆄',
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                                color: const Color(0xFF727272) /* Labels---Vibrant-Secondary */,
+                                                fontSize: 17,
+                                                fontFamily: 'SF Pro',
+                                                fontWeight: FontWeight.w510,
+                                            ),
+                                        ),
+                                    ),
+                                ],
+                            ),
+                        ),
+                        Container(
+                            width: 8,
+                            height: double.infinity,
+                            clipBehavior: Clip.antiAlias,
+                            decoration: BoxDecoration(),
+                        ),
+                        Container(
+                            height: 44,
+                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                            decoration: ShapeDecoration(
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(296),
+                                ),
+                            ),
+                            child: Stack(
+                                children: [
+                                    Positioned(
+                                        left: 0,
+                                        top: 0,
+                                        child: Container(
+                                            width: 44,
+                                            height: 44,
+                                            decoration: ShapeDecoration(
+                                                color: const Color(0xFF0088FF) /* Accents-Blue */,
+                                                shape: OvalBorder(),
+                                            ),
+                                        ),
+                                    ),
+                                    SizedBox(
+                                        width: 36,
+                                        height: 44,
+                                        child: Text(
+                                            '􀄨',
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 17,
+                                                fontFamily: 'SF Pro',
+                                                fontWeight: FontWeight.w510,
+                                            ),
+                                        ),
+                                    ),
+                                ],
+                            ),
+                        ),
+                    ],
+                ),
+            ),
+            Positioned(
+                left: 76,
+                top: 22,
+                child: Container(
+                    width: 250,
+                    child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        spacing: 10,
+                        children: [
+                            Text(
+                                'Title',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                    color: const Color(0xFF1A1A1A) /* Labels---Vibrant-Primary */,
+                                    fontSize: 15,
+                                    fontFamily: 'SF Pro',
+                                    fontWeight: FontWeight.w590,
+                                    height: 1.20,
+                                    letterSpacing: -0.23,
+                                ),
+                            ),
+                        ],
+                    ),
+                ),
+            ),
+            Positioned(
+                left: 76,
+                top: 40,
+                child: Container(
+                    width: 250,
+                    child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        spacing: 10,
+                        children: [
+                            Text(
+                                'Subtitle',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                    color: const Color(0xFF727272) /* Labels---Vibrant-Secondary */,
+                                    fontSize: 12,
+                                    fontFamily: 'SF Pro',
+                                    fontWeight: FontWeight.w510,
+                                    height: 1.17,
+                                ),
+                            ),
+                        ],
+                    ),
+                ),
+            ),
+        ],
+    ),
+)
+]
+
+variant Large title: [
+    Container(
+    width: 402,
+    padding: const EdgeInsets.only(bottom: 10),
+    child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+            Container(
+                height: 16,
+                padding: const EdgeInsets.only(top: 5),
+                child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                        Container(
+                            width: 36,
+                            height: 5,
+                            decoration: ShapeDecoration(
+                                color: const Color(0xFFCCCCCC) /* Fills---Vibrant-Primary */,
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(100),
+                                ),
+                            ),
+                        ),
+                    ],
+                ),
+            ),
+            Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    spacing: 66,
+                    children: [
+                        Container(
+                            height: 44,
+                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                            decoration: ShapeDecoration(
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(296),
+                                ),
+                            ),
+                            child: Stack(
+                                children: [
+                                    Positioned(
+                                        left: 0,
+                                        top: 0,
+                                        child: Container(
+                                            width: 44,
+                                            height: 44,
+                                            decoration: ShapeDecoration(
+                                                color: const Color(0x28787880) /* Fills-Secondary */,
+                                                shape: OvalBorder(),
+                                            ),
+                                        ),
+                                    ),
+                                    SizedBox(
+                                        width: 36,
+                                        height: 44,
+                                        child: Text(
+                                            '􀆄',
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                                color: const Color(0xFF727272) /* Labels---Vibrant-Secondary */,
+                                                fontSize: 17,
+                                                fontFamily: 'SF Pro',
+                                                fontWeight: FontWeight.w510,
+                                            ),
+                                        ),
+                                    ),
+                                ],
+                            ),
+                        ),
+                        Container(
+                            width: 8,
+                            height: double.infinity,
+                            clipBehavior: Clip.antiAlias,
+                            decoration: BoxDecoration(),
+                        ),
+                        Container(
+                            height: 44,
+                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                            decoration: ShapeDecoration(
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(296),
+                                ),
+                            ),
+                            child: Stack(
+                                children: [
+                                    Positioned(
+                                        left: 0,
+                                        top: 0,
+                                        child: Container(
+                                            width: 44,
+                                            height: 44,
+                                            decoration: ShapeDecoration(
+                                                color: const Color(0xFF0088FF) /* Accents-Blue */,
+                                                shape: OvalBorder(),
+                                            ),
+                                        ),
+                                    ),
+                                    SizedBox(
+                                        width: 36,
+                                        height: 44,
+                                        child: Text(
+                                            '􀄨',
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 17,
+                                                fontFamily: 'SF Pro',
+                                                fontWeight: FontWeight.w510,
+                                            ),
+                                        ),
+                                    ),
+                                ],
+                            ),
+                        ),
+                    ],
+                ),
+            ),
+            Container(
+                width: double.infinity,
+                padding: const EdgeInsets.only(top: 5, left: 16, right: 16),
+                child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                        Container(
+                            width: double.infinity,
+                            height: 41,
+                            child: Stack(
+                                children: [
+                                    Positioned(
+                                        left: 0,
+                                        top: 0,
+                                        child: Text(
+                                            'Title',
+                                            style: TextStyle(
+                                                color: const Color(0xFF1A1A1A) /* Labels---Vibrant-Primary */,
+                                                fontSize: 34,
+                                                fontFamily: 'SF Pro',
+                                                fontWeight: FontWeight.w700,
+                                                height: 1.21,
+                                                letterSpacing: 0.40,
+                                            ),
+                                        ),
+                                    ),
+                                ],
+                            ),
+                        ),
+                        Row(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            spacing: 10,
+                            children: [
+                                Text(
+                                    'Subtitle',
+                                    style: TextStyle(
+                                        color: const Color(0xFF727272) /* Labels---Vibrant-Secondary */,
+                                        fontSize: 15,
+                                        fontFamily: 'SF Pro',
+                                        fontWeight: FontWeight.w510,
+                                        height: 1.33,
+                                        letterSpacing: -0.25,
+                                    ),
+                                ),
+                            ],
+                        ),
+                    ],
+                ),
+            ),
+        ],
+    ),
+)
+]
+
+variant compact large: [
+    Container(
+    width: 402,
+    padding: const EdgeInsets.only(bottom: 10),
+    child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+            Container(
+                height: 16,
+                padding: const EdgeInsets.only(top: 5),
+                child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                        Container(
+                            width: 36,
+                            height: 5,
+                            decoration: ShapeDecoration(
+                                color: const Color(0xFFCCCCCC) /* Fills---Vibrant-Primary */,
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(100),
+                                ),
+                            ),
+                        ),
+                    ],
+                ),
+            ),
+            Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    spacing: 66,
+                    children: [
+                        Expanded(
+                            child: Container(
+                                height: 41,
+                                child: Stack(
+                                    children: [
+                                        Positioned(
+                                            left: 0,
+                                            top: 0,
+                                            child: Text(
+                                                'Title',
+                                                style: TextStyle(
+                                                    color: const Color(0xFF1A1A1A) /* Labels---Vibrant-Primary */,
+                                                    fontSize: 34,
+                                                    fontFamily: 'SF Pro',
+                                                    fontWeight: FontWeight.w700,
+                                                    height: 1.21,
+                                                    letterSpacing: 0.40,
+                                                ),
+                                            ),
+                                        ),
+                                    ],
+                                ),
+                            ),
+                        ),
+                        Container(
+                            width: 8,
+                            height: double.infinity,
+                            clipBehavior: Clip.antiAlias,
+                            decoration: BoxDecoration(),
+                        ),
+                        Container(
+                            height: 44,
+                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                            decoration: ShapeDecoration(
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(296),
+                                ),
+                            ),
+                            child: Stack(
+                                children: [
+                                    Positioned(
+                                        left: 0,
+                                        top: 0,
+                                        child: Container(
+                                            width: 44,
+                                            height: 44,
+                                            decoration: ShapeDecoration(
+                                                color: const Color(0xFF0088FF) /* Accents-Blue */,
+                                                shape: OvalBorder(),
+                                            ),
+                                        ),
+                                    ),
+                                    SizedBox(
+                                        width: 36,
+                                        height: 44,
+                                        child: Text(
+                                            '􀄨',
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 17,
+                                                fontFamily: 'SF Pro',
+                                                fontWeight: FontWeight.w510,
+                                            ),
+                                        ),
+                                    ),
+                                ],
+                            ),
+                        ),
+                    ],
+                ),
+            ),
+        ],
+    ),
+)
+]

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:vac_dashboard_app/component/mode_badge.dart';
 import 'package:vac_dashboard_app/utils/text_styles.dart';
+import 'package:vac_dashboard_app/asset/color_tokens.dart';
 
 class HistoryBottomSheet extends StatelessWidget {
   const HistoryBottomSheet({
@@ -40,7 +41,7 @@ class HistoryBottomSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(24.0),
+      padding: const EdgeInsets.all(34.0),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -50,7 +51,7 @@ class HistoryBottomSheet extends StatelessWidget {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.black26,
+                color: context.colors.fillsVibrantPrimary,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),

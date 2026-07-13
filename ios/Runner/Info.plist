@@ -6,6 +6,11 @@
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
 	<key>CFBundleDisplayName</key>
 	<string>Vac Dashboard App</string>
 	<key>CFBundleExecutable</key>
@@ -66,5 +71,9 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>This app needs camera access to scan for VAC devices.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>This app needs microphone access for camera support.</string>
 </dict>
 </plist>

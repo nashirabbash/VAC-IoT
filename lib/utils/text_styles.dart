@@ -11,12 +11,12 @@ class AppTextStyles {
 
   static const TextStyle cardTitle = TextStyle(
     fontSize: 16.0,
-    fontWeight: FontWeight.bold,
+    fontWeight: FontWeight.w500,
   );
 
   static const TextStyle sheetTitle = TextStyle(
     fontSize: 18.0,
-    fontWeight: FontWeight.bold,
+    fontWeight: FontWeight.w500,
   );
 
   static const TextStyle bodyMedium = TextStyle(

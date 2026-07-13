@@ -30,7 +30,7 @@ class _SectionHistoryState extends State<SectionHistory> {
                 widget.date,
                 style: Theme.of(
                   context,
-                ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w400),
               ),
             ),
           ],

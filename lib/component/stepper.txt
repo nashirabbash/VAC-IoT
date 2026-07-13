@@ -1,0 +1,100 @@
+Container(
+    width: 92,
+    height: 32,
+    child: Stack(
+        children: [
+            Positioned(
+                left: 45.50,
+                top: 4,
+                child: Container(
+                    width: 1,
+                    height: 24,
+                    decoration: ShapeDecoration(
+                        color: const Color(0x4C3C3C43) /* Labels-Tertiary */,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    ),
+                ),
+            ),
+            Positioned(
+                left: 0,
+                top: 0,
+                child: Container(
+                    width: 46,
+                    height: 32,
+                    decoration: ShapeDecoration(
+                        color: const Color(0x14747480) /* Fills-Quaternary */,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(100),
+                                bottomLeft: Radius.circular(100),
+                            ),
+                        ),
+                    ),
+                    child: Stack(
+                        children: [
+                            Positioned(
+                                left: 0,
+                                top: 5,
+                                child: SizedBox(
+                                    width: 46,
+                                    child: Text(
+                                        '􀅽',
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                            color: Colors.black /* Labels-Primary */,
+                                            fontSize: 17,
+                                            fontFamily: 'SF Pro',
+                                            fontWeight: FontWeight.w590,
+                                            height: 1.29,
+                                            letterSpacing: -0.43,
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ],
+                    ),
+                ),
+            ),
+            Positioned(
+                left: 46,
+                top: 0,
+                child: Container(
+                    width: 46,
+                    height: 32,
+                    decoration: ShapeDecoration(
+                        color: const Color(0x14747480) /* Fills-Quaternary */,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.only(
+                                topRight: Radius.circular(100),
+                                bottomRight: Radius.circular(100),
+                            ),
+                        ),
+                    ),
+                    child: Stack(
+                        children: [
+                            Positioned(
+                                left: 0,
+                                top: 5,
+                                child: SizedBox(
+                                    width: 46,
+                                    child: Text(
+                                        '􀅼',
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                            color: Colors.black /* Labels-Primary */,
+                                            fontSize: 17,
+                                            fontFamily: 'SF Pro',
+                                            fontWeight: FontWeight.w590,
+                                            height: 1.29,
+                                            letterSpacing: -0.43,
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ],
+                    ),
+                ),
+            ),
+        ],
+    ),
+)

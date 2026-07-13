@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 
 Color modeBadgeColor(String mode) =>
     {
-      "Hard": Colors.red,
-      "Medium": Colors.orange,
-      "Easy": Colors.green,
+      "Kontinyu": Colors.blue,
+      "Intermiten": Colors.orange,
     }[mode] ??
-    Colors.blue;
+    Colors.grey;

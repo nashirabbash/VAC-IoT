@@ -1,0 +1,1567 @@
+Container(
+    width: double.infinity,
+    clipBehavior: Clip.antiAlias,
+    decoration: ShapeDecoration(
+        color: Colors.white /* Backgrounds-(Grouped)-Secondary */,
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(26),
+        ),
+    ),
+    child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+            Container(
+                width: double.infinity,
+                height: 52,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                        Expanded(
+                            child: Container(
+                                height: double.infinity,
+                                padding: const EdgeInsets.only(bottom: 1),
+                                child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                        Container(
+                                            width: double.infinity,
+                                            height: 1,
+                                            decoration: ShapeDecoration(
+                                                shape: RoundedRectangleBorder(
+                                                    side: BorderSide(
+                                                        width: 1,
+                                                        strokeAlign: BorderSide.strokeAlignOutside,
+                                                        color: const Color(0xFFE6E6E6) /* Separators-Vibrant */,
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                        Expanded(
+                                            child: Container(
+                                                width: double.infinity,
+                                                child: Row(
+                                                    mainAxisSize: MainAxisSize.min,
+                                                    mainAxisAlignment: MainAxisAlignment.start,
+                                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                                    children: [
+                                                        SizedBox(
+                                                            width: 510,
+                                                            height: 50,
+                                                            child: Text(
+                                                                'Title',
+                                                                style: TextStyle(
+                                                                    color: Colors.black /* Labels-Primary */,
+                                                                    fontSize: 17,
+                                                                    fontFamily: 'SF Pro',
+                                                                    fontWeight: FontWeight.w400,
+                                                                    height: 1.29,
+                                                                    letterSpacing: -0.43,
+                                                                ),
+                                                            ),
+                                                        ),
+                                                        Container(
+                                                            height: double.infinity,
+                                                            child: Row(
+                                                                mainAxisSize: MainAxisSize.min,
+                                                                mainAxisAlignment: MainAxisAlignment.end,
+                                                                crossAxisAlignment: CrossAxisAlignment.center,
+                                                                children: [
+                                                                    Row(
+                                                                        mainAxisSize: MainAxisSize.min,
+                                                                        mainAxisAlignment: MainAxisAlignment.end,
+                                                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                                                        spacing: 16,
+                                                                        children: [
+                                                                            Text(
+                                                                                'Detail',
+                                                                                textAlign: TextAlign.right,
+                                                                                style: TextStyle(
+                                                                                    color: const Color(0x993C3C43) /* Labels-Secondary */,
+                                                                                    fontSize: 17,
+                                                                                    fontFamily: 'SF Pro',
+                                                                                    fontWeight: FontWeight.w400,
+                                                                                    height: 1.29,
+                                                                                    letterSpacing: -0.43,
+                                                                                ),
+                                                                            ),
+                                                                            SizedBox(
+                                                                                width: 22,
+                                                                                height: 22,
+                                                                                child: Text(
+                                                                                    '􀋂',
+                                                                                    textAlign: TextAlign.center,
+                                                                                    style: TextStyle(
+                                                                                        color: const Color(0xFF0088FF) /* Accents-Blue */,
+                                                                                        fontSize: 17,
+                                                                                        fontFamily: 'SF Pro',
+                                                                                        fontWeight: FontWeight.w400,
+                                                                                        height: 1.29,
+                                                                                    ),
+                                                                                ),
+                                                                            ),
+                                                                            SizedBox(
+                                                                                width: 8,
+                                                                                child: Text(
+                                                                                    '􀆊',
+                                                                                    style: TextStyle(
+                                                                                        color: const Color(0x4C3C3C43) /* Labels-Tertiary */,
+                                                                                        fontSize: 17,
+                                                                                        fontFamily: 'SF Pro',
+                                                                                        fontWeight: FontWeight.w590,
+                                                                                        height: 1.29,
+                                                                                    ),
+                                                                                ),
+                                                                            ),
+                                                                        ],
+                                                                    ),
+                                                                ],
+                                                            ),
+                                                        ),
+                                                    ],
+                                                ),
+                                            ),
+                                        ),
+                                    ],
+                                ),
+                            ),
+                        ),
+                    ],
+                ),
+            ),
+            Container(
+                width: double.infinity,
+                height: 68,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                        Expanded(
+                            child: Container(
+                                height: double.infinity,
+                                padding: const EdgeInsets.only(bottom: 1),
+                                child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                        Container(
+                                            width: double.infinity,
+                                            height: 1,
+                                            decoration: ShapeDecoration(
+                                                shape: RoundedRectangleBorder(
+                                                    side: BorderSide(
+                                                        width: 1,
+                                                        strokeAlign: BorderSide.strokeAlignOutside,
+                                                        color: const Color(0xFFE6E6E6) /* Separators-Vibrant */,
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                        Expanded(
+                                            child: Container(
+                                                width: double.infinity,
+                                                child: Row(
+                                                    mainAxisSize: MainAxisSize.min,
+                                                    mainAxisAlignment: MainAxisAlignment.start,
+                                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                                    children: [
+                                                        Expanded(
+                                                            child: Container(
+                                                                height: 60,
+                                                                child: Column(
+                                                                    mainAxisSize: MainAxisSize.min,
+                                                                    mainAxisAlignment: MainAxisAlignment.center,
+                                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                                    children: [
+                                                                        SizedBox(
+                                                                            width: 548,
+                                                                            height: 22,
+                                                                            child: Text(
+                                                                                'Title',
+                                                                                style: TextStyle(
+                                                                                    color: Colors.black /* Labels-Primary */,
+                                                                                    fontSize: 17,
+                                                                                    fontFamily: 'SF Pro',
+                                                                                    fontWeight: FontWeight.w400,
+                                                                                    height: 1.29,
+                                                                                    letterSpacing: -0.43,
+                                                                                ),
+                                                                            ),
+                                                                        ),
+                                                                        SizedBox(
+                                                                            width: 548,
+                                                                            height: 20,
+                                                                            child: Text(
+                                                                                'Subtitle',
+                                                                                style: TextStyle(
+                                                                                    color: const Color(0x993C3C43) /* Labels-Secondary */,
+                                                                                    fontSize: 15,
+                                                                                    fontFamily: 'SF Pro',
+                                                                                    fontWeight: FontWeight.w400,
+                                                                                    height: 1.33,
+                                                                                    letterSpacing: -0.23,
+                                                                                ),
+                                                                            ),
+                                                                        ),
+                                                                    ],
+                                                                ),
+                                                            ),
+                                                        ),
+                                                        Container(
+                                                            height: double.infinity,
+                                                            child: Row(
+                                                                mainAxisSize: MainAxisSize.min,
+                                                                mainAxisAlignment: MainAxisAlignment.end,
+                                                                crossAxisAlignment: CrossAxisAlignment.center,
+                                                                children: [
+                                                                    Row(
+                                                                        mainAxisSize: MainAxisSize.min,
+                                                                        mainAxisAlignment: MainAxisAlignment.end,
+                                                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                                                        spacing: 16,
+                                                                        children: [
+                                                                            Text(
+                                                                                'Detail',
+                                                                                textAlign: TextAlign.right,
+                                                                                style: TextStyle(
+                                                                                    color: const Color(0x993C3C43) /* Labels-Secondary */,
+                                                                                    fontSize: 17,
+                                                                                    fontFamily: 'SF Pro',
+                                                                                    fontWeight: FontWeight.w400,
+                                                                                    height: 1.29,
+                                                                                    letterSpacing: -0.43,
+                                                                                ),
+                                                                            ),
+                                                                            SizedBox(
+                                                                                width: 8,
+                                                                                child: Text(
+                                                                                    '􀆊',
+                                                                                    style: TextStyle(
+                                                                                        color: const Color(0x4C3C3C43) /* Labels-Tertiary */,
+                                                                                        fontSize: 17,
+                                                                                        fontFamily: 'SF Pro',
+                                                                                        fontWeight: FontWeight.w590,
+                                                                                        height: 1.29,
+                                                                                    ),
+                                                                                ),
+                                                                            ),
+                                                                        ],
+                                                                    ),
+                                                                ],
+                                                            ),
+                                                        ),
+                                                    ],
+                                                ),
+                                            ),
+                                        ),
+                                    ],
+                                ),
+                            ),
+                        ),
+                    ],
+                ),
+            ),
+            Container(
+                width: double.infinity,
+                height: 68,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                        Container(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                    Container(
+                                        width: 68,
+                                        height: 68,
+                                        decoration: BoxDecoration(
+                                            image: DecorationImage(
+                                                image: NetworkImage("https://placehold.co/68x68"),
+                                                fit: BoxFit.cover,
+                                            ),
+                                        ),
+                                    ),
+                                ],
+                            ),
+                        ),
+                        Expanded(
+                            child: Container(
+                                height: double.infinity,
+                                padding: const EdgeInsets.only(bottom: 1),
+                                child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                        Container(
+                                            width: double.infinity,
+                                            height: 1,
+                                            decoration: ShapeDecoration(
+                                                shape: RoundedRectangleBorder(
+                                                    side: BorderSide(
+                                                        width: 1,
+                                                        strokeAlign: BorderSide.strokeAlignOutside,
+                                                        color: const Color(0xFFE6E6E6) /* Separators-Vibrant */,
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                        Expanded(
+                                            child: Container(
+                                                width: double.infinity,
+                                                child: Row(
+                                                    mainAxisSize: MainAxisSize.min,
+                                                    mainAxisAlignment: MainAxisAlignment.start,
+                                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                                    children: [
+                                                        Expanded(
+                                                            child: Container(
+                                                                height: 60,
+                                                                child: Column(
+                                                                    mainAxisSize: MainAxisSize.min,
+                                                                    mainAxisAlignment: MainAxisAlignment.center,
+                                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                                    children: [
+                                                                        SizedBox(
+                                                                            width: 472,
+                                                                            height: 22,
+                                                                            child: Text(
+                                                                                'Title',
+                                                                                style: TextStyle(
+                                                                                    color: Colors.black /* Labels-Primary */,
+                                                                                    fontSize: 17,
+                                                                                    fontFamily: 'SF Pro',
+                                                                                    fontWeight: FontWeight.w400,
+                                                                                    height: 1.29,
+                                                                                    letterSpacing: -0.43,
+                                                                                ),
+                                                                            ),
+                                                                        ),
+                                                                        SizedBox(
+                                                                            width: 472,
+                                                                            height: 20,
+                                                                            child: Text(
+                                                                                'Subtitle',
+                                                                                style: TextStyle(
+                                                                                    color: const Color(0x993C3C43) /* Labels-Secondary */,
+                                                                                    fontSize: 15,
+                                                                                    fontFamily: 'SF Pro',
+                                                                                    fontWeight: FontWeight.w400,
+                                                                                    height: 1.33,
+                                                                                    letterSpacing: -0.23,
+                                                                                ),
+                                                                            ),
+                                                                        ),
+                                                                    ],
+                                                                ),
+                                                            ),
+                                                        ),
+                                                        Container(
+                                                            height: double.infinity,
+                                                            child: Row(
+                                                                mainAxisSize: MainAxisSize.min,
+                                                                mainAxisAlignment: MainAxisAlignment.end,
+                                                                crossAxisAlignment: CrossAxisAlignment.center,
+                                                                children: [
+                                                                    Row(
+                                                                        mainAxisSize: MainAxisSize.min,
+                                                                        mainAxisAlignment: MainAxisAlignment.end,
+                                                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                                                        spacing: 16,
+                                                                        children: [
+                                                                            Text(
+                                                                                'Detail',
+                                                                                textAlign: TextAlign.right,
+                                                                                style: TextStyle(
+                                                                                    color: const Color(0x993C3C43) /* Labels-Secondary */,
+                                                                                    fontSize: 17,
+                                                                                    fontFamily: 'SF Pro',
+                                                                                    fontWeight: FontWeight.w400,
+                                                                                    height: 1.29,
+                                                                                    letterSpacing: -0.43,
+                                                                                ),
+                                                                            ),
+                                                                            SizedBox(
+                                                                                width: 8,
+                                                                                child: Text(
+                                                                                    '􀆊',
+                                                                                    style: TextStyle(
+                                                                                        color: const Color(0x4C3C3C43) /* Labels-Tertiary */,
+                                                                                        fontSize: 17,
+                                                                                        fontFamily: 'SF Pro',
+                                                                                        fontWeight: FontWeight.w590,
+                                                                                        height: 1.29,
+                                                                                    ),
+                                                                                ),
+                                                                            ),
+                                                                        ],
+                                                                    ),
+                                                                ],
+                                                            ),
+                                                        ),
+                                                    ],
+                                                ),
+                                            ),
+                                        ),
+                                    ],
+                                ),
+                            ),
+                        ),
+                    ],
+                ),
+            ),
+            Container(
+                width: double.infinity,
+                height: 52,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                        Expanded(
+                            child: Container(
+                                height: double.infinity,
+                                padding: const EdgeInsets.only(bottom: 1),
+                                child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                        Container(
+                                            width: double.infinity,
+                                            height: 1,
+                                            decoration: ShapeDecoration(
+                                                shape: RoundedRectangleBorder(
+                                                    side: BorderSide(
+                                                        width: 1,
+                                                        strokeAlign: BorderSide.strokeAlignOutside,
+                                                        color: const Color(0xFFE6E6E6) /* Separators-Vibrant */,
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                        Expanded(
+                                            child: Container(
+                                                width: double.infinity,
+                                                child: Row(
+                                                    mainAxisSize: MainAxisSize.min,
+                                                    mainAxisAlignment: MainAxisAlignment.start,
+                                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                                    children: [
+                                                        SizedBox(
+                                                            width: 564,
+                                                            height: 50,
+                                                            child: Text(
+                                                                'Title',
+                                                                style: TextStyle(
+                                                                    color: Colors.black /* Labels-Primary */,
+                                                                    fontSize: 17,
+                                                                    fontFamily: 'SF Pro',
+                                                                    fontWeight: FontWeight.w400,
+                                                                    height: 1.29,
+                                                                    letterSpacing: -0.43,
+                                                                ),
+                                                            ),
+                                                        ),
+                                                        Container(
+                                                            height: double.infinity,
+                                                            child: Row(
+                                                                mainAxisSize: MainAxisSize.min,
+                                                                mainAxisAlignment: MainAxisAlignment.end,
+                                                                crossAxisAlignment: CrossAxisAlignment.center,
+                                                                children: [
+                                                                    Container(
+                                                                        height: 22,
+                                                                        child: Row(
+                                                                            mainAxisSize: MainAxisSize.min,
+                                                                            mainAxisAlignment: MainAxisAlignment.end,
+                                                                            crossAxisAlignment: CrossAxisAlignment.center,
+                                                                            children: [
+                                                                                SizedBox(
+                                                                                    width: 52,
+                                                                                    height: 16,
+                                                                                    child: Text(
+                                                                                        'Button',
+                                                                                        textAlign: TextAlign.right,
+                                                                                        style: TextStyle(
+                                                                                            color: const Color(0xFF0088FF) /* Accents-Blue */,
+                                                                                            fontSize: 17,
+                                                                                            fontFamily: 'SF Pro',
+                                                                                            fontWeight: FontWeight.w400,
+                                                                                            height: 1.29,
+                                                                                            letterSpacing: -0.43,
+                                                                                        ),
+                                                                                    ),
+                                                                                ),
+                                                                            ],
+                                                                        ),
+                                                                    ),
+                                                                ],
+                                                            ),
+                                                        ),
+                                                    ],
+                                                ),
+                                            ),
+                                        ),
+                                    ],
+                                ),
+                            ),
+                        ),
+                    ],
+                ),
+            ),
+            Container(
+                width: double.infinity,
+                height: 52,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                        Expanded(
+                            child: Container(
+                                height: double.infinity,
+                                padding: const EdgeInsets.only(bottom: 1),
+                                child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                        Container(
+                                            width: double.infinity,
+                                            height: 1,
+                                            decoration: ShapeDecoration(
+                                                shape: RoundedRectangleBorder(
+                                                    side: BorderSide(
+                                                        width: 1,
+                                                        strokeAlign: BorderSide.strokeAlignOutside,
+                                                        color: const Color(0xFFE6E6E6) /* Separators-Vibrant */,
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                        Expanded(
+                                            child: Container(
+                                                width: double.infinity,
+                                                child: Row(
+                                                    mainAxisSize: MainAxisSize.min,
+                                                    mainAxisAlignment: MainAxisAlignment.start,
+                                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                                    children: [
+                                                        SizedBox(
+                                                            width: 552,
+                                                            height: 50,
+                                                            child: Text(
+                                                                'Title',
+                                                                style: TextStyle(
+                                                                    color: Colors.black /* Labels-Primary */,
+                                                                    fontSize: 17,
+                                                                    fontFamily: 'SF Pro',
+                                                                    fontWeight: FontWeight.w400,
+                                                                    height: 1.29,
+                                                                    letterSpacing: -0.43,
+                                                                ),
+                                                            ),
+                                                        ),
+                                                        Container(
+                                                            height: double.infinity,
+                                                            child: Row(
+                                                                mainAxisSize: MainAxisSize.min,
+                                                                mainAxisAlignment: MainAxisAlignment.end,
+                                                                crossAxisAlignment: CrossAxisAlignment.center,
+                                                                children: [
+                                                                    Row(
+                                                                        mainAxisSize: MainAxisSize.min,
+                                                                        mainAxisAlignment: MainAxisAlignment.end,
+                                                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                                                        spacing: 12,
+                                                                        children: [
+                                                                            Text(
+                                                                                'Detail',
+                                                                                textAlign: TextAlign.right,
+                                                                                style: TextStyle(
+                                                                                    color: const Color(0x993C3C43) /* Labels-Secondary */,
+                                                                                    fontSize: 17,
+                                                                                    fontFamily: 'SF Pro',
+                                                                                    fontWeight: FontWeight.w400,
+                                                                                    height: 1.29,
+                                                                                    letterSpacing: -0.43,
+                                                                                ),
+                                                                            ),
+                                                                            Container(
+                                                                                width: 8,
+                                                                                height: 32,
+                                                                                child: Stack(
+                                                                                    children: [
+                                                                                        Positioned(
+                                                                                            left: -3,
+                                                                                            top: 7,
+                                                                                            child: SizedBox(
+                                                                                                width: 11,
+                                                                                                height: 18,
+                                                                                                child: Text(
+                                                                                                    '􀆊',
+                                                                                                    textAlign: TextAlign.center,
+                                                                                                    style: TextStyle(
+                                                                                                        color: const Color(0xFF0088FF) /* Accents-Blue */,
+                                                                                                        fontSize: 17,
+                                                                                                        fontFamily: 'SF Pro',
+                                                                                                        fontWeight: FontWeight.w590,
+                                                                                                        height: 1.47,
+                                                                                                    ),
+                                                                                                ),
+                                                                                            ),
+                                                                                        ),
+                                                                                    ],
+                                                                                ),
+                                                                            ),
+                                                                        ],
+                                                                    ),
+                                                                ],
+                                                            ),
+                                                        ),
+                                                    ],
+                                                ),
+                                            ),
+                                        ),
+                                    ],
+                                ),
+                            ),
+                        ),
+                    ],
+                ),
+            ),
+            Container(
+                width: double.infinity,
+                height: 52,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                        Expanded(
+                            child: Container(
+                                height: double.infinity,
+                                padding: const EdgeInsets.only(bottom: 1),
+                                child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                        Container(
+                                            width: double.infinity,
+                                            height: 1,
+                                            decoration: ShapeDecoration(
+                                                shape: RoundedRectangleBorder(
+                                                    side: BorderSide(
+                                                        width: 1,
+                                                        strokeAlign: BorderSide.strokeAlignOutside,
+                                                        color: const Color(0xFFE6E6E6) /* Separators-Vibrant */,
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                        Expanded(
+                                            child: Container(
+                                                width: double.infinity,
+                                                child: Row(
+                                                    mainAxisSize: MainAxisSize.min,
+                                                    mainAxisAlignment: MainAxisAlignment.start,
+                                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                                    children: [
+                                                        SizedBox(
+                                                            width: 510,
+                                                            height: 50,
+                                                            child: Text(
+                                                                'Title',
+                                                                style: TextStyle(
+                                                                    color: Colors.black /* Labels-Primary */,
+                                                                    fontSize: 17,
+                                                                    fontFamily: 'SF Pro',
+                                                                    fontWeight: FontWeight.w400,
+                                                                    height: 1.29,
+                                                                    letterSpacing: -0.43,
+                                                                ),
+                                                            ),
+                                                        ),
+                                                        Container(
+                                                            height: double.infinity,
+                                                            child: Row(
+                                                                mainAxisSize: MainAxisSize.min,
+                                                                mainAxisAlignment: MainAxisAlignment.end,
+                                                                crossAxisAlignment: CrossAxisAlignment.center,
+                                                                children: [
+                                                                    Row(
+                                                                        mainAxisSize: MainAxisSize.min,
+                                                                        mainAxisAlignment: MainAxisAlignment.end,
+                                                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                                                        children: [
+                                                                            Container(
+                                                                                height: 34,
+                                                                                decoration: ShapeDecoration(
+                                                                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                                                                                ),
+                                                                                child: Row(
+                                                                                    mainAxisSize: MainAxisSize.min,
+                                                                                    mainAxisAlignment: MainAxisAlignment.end,
+                                                                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                                                                    spacing: 6,
+                                                                                    children: [
+                                                                                        Container(
+                                                                                            padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
+                                                                                            decoration: ShapeDecoration(
+                                                                                                color: const Color(0x1E767680) /* Fills-Tertiary */,
+                                                                                                shape: RoundedRectangleBorder(
+                                                                                                    borderRadius: BorderRadius.circular(100),
+                                                                                                ),
+                                                                                            ),
+                                                                                            child: Row(
+                                                                                                mainAxisSize: MainAxisSize.min,
+                                                                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                                                                crossAxisAlignment: CrossAxisAlignment.center,
+                                                                                                spacing: 5,
+                                                                                                children: [
+                                                                                                    Text(
+                                                                                                        'June',
+                                                                                                        textAlign: TextAlign.center,
+                                                                                                        style: TextStyle(
+                                                                                                            color: Colors.black /* Labels-Primary */,
+                                                                                                            fontSize: 17,
+                                                                                                            fontFamily: 'SF Pro',
+                                                                                                            fontWeight: FontWeight.w400,
+                                                                                                            height: 1.29,
+                                                                                                            letterSpacing: -0.43,
+                                                                                                        ),
+                                                                                                    ),
+                                                                                                    Text(
+                                                                                                        '2024',
+                                                                                                        textAlign: TextAlign.center,
+                                                                                                        style: TextStyle(
+                                                                                                            color: Colors.black /* Labels-Primary */,
+                                                                                                            fontSize: 17,
+                                                                                                            fontFamily: 'SF Pro',
+                                                                                                            fontWeight: FontWeight.w400,
+                                                                                                            height: 1.29,
+                                                                                                            letterSpacing: -0.43,
+                                                                                                        ),
+                                                                                                    ),
+                                                                                                ],
+                                                                                            ),
+                                                                                        ),
+                                                                                    ],
+                                                                                ),
+                                                                            ),
+                                                                        ],
+                                                                    ),
+                                                                ],
+                                                            ),
+                                                        ),
+                                                    ],
+                                                ),
+                                            ),
+                                        ),
+                                    ],
+                                ),
+                            ),
+                        ),
+                    ],
+                ),
+            ),
+            Container(
+                width: double.infinity,
+                height: 52,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                        Expanded(
+                            child: Container(
+                                height: double.infinity,
+                                padding: const EdgeInsets.only(bottom: 1),
+                                child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                        Container(
+                                            width: double.infinity,
+                                            height: 1,
+                                            decoration: ShapeDecoration(
+                                                shape: RoundedRectangleBorder(
+                                                    side: BorderSide(
+                                                        width: 1,
+                                                        strokeAlign: BorderSide.strokeAlignOutside,
+                                                        color: const Color(0xFFE6E6E6) /* Separators-Vibrant */,
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                        Expanded(
+                                            child: Container(
+                                                width: double.infinity,
+                                                child: Row(
+                                                    mainAxisSize: MainAxisSize.min,
+                                                    mainAxisAlignment: MainAxisAlignment.start,
+                                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                                    children: [
+                                                        SizedBox(
+                                                            width: 418,
+                                                            height: 50,
+                                                            child: Text(
+                                                                'Title',
+                                                                style: TextStyle(
+                                                                    color: Colors.black /* Labels-Primary */,
+                                                                    fontSize: 17,
+                                                                    fontFamily: 'SF Pro',
+                                                                    fontWeight: FontWeight.w400,
+                                                                    height: 1.29,
+                                                                    letterSpacing: -0.43,
+                                                                ),
+                                                            ),
+                                                        ),
+                                                        Container(
+                                                            height: double.infinity,
+                                                            child: Row(
+                                                                mainAxisSize: MainAxisSize.min,
+                                                                mainAxisAlignment: MainAxisAlignment.end,
+                                                                crossAxisAlignment: CrossAxisAlignment.center,
+                                                                children: [
+                                                                    Row(
+                                                                        mainAxisSize: MainAxisSize.min,
+                                                                        mainAxisAlignment: MainAxisAlignment.end,
+                                                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                                                        spacing: 6,
+                                                                        children: [
+                                                                            Container(
+                                                                                height: 34,
+                                                                                decoration: ShapeDecoration(
+                                                                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                                                                                ),
+                                                                                child: Row(
+                                                                                    mainAxisSize: MainAxisSize.min,
+                                                                                    mainAxisAlignment: MainAxisAlignment.end,
+                                                                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                                                                    spacing: 6,
+                                                                                    children: [
+                                                                                        Container(
+                                                                                            padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
+                                                                                            decoration: ShapeDecoration(
+                                                                                                color: const Color(0x1E767680) /* Fills-Tertiary */,
+                                                                                                shape: RoundedRectangleBorder(
+                                                                                                    borderRadius: BorderRadius.circular(100),
+                                                                                                ),
+                                                                                            ),
+                                                                                            child: Row(
+                                                                                                mainAxisSize: MainAxisSize.min,
+                                                                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                                                                crossAxisAlignment: CrossAxisAlignment.center,
+                                                                                                spacing: 5,
+                                                                                                children: [
+                                                                                                    Text(
+                                                                                                        'June',
+                                                                                                        textAlign: TextAlign.center,
+                                                                                                        style: TextStyle(
+                                                                                                            color: Colors.black /* Labels-Primary */,
+                                                                                                            fontSize: 17,
+                                                                                                            fontFamily: 'SF Pro',
+                                                                                                            fontWeight: FontWeight.w400,
+                                                                                                            height: 1.29,
+                                                                                                            letterSpacing: -0.43,
+                                                                                                        ),
+                                                                                                    ),
+                                                                                                    Text(
+                                                                                                        '2024',
+                                                                                                        textAlign: TextAlign.center,
+                                                                                                        style: TextStyle(
+                                                                                                            color: Colors.black /* Labels-Primary */,
+                                                                                                            fontSize: 17,
+                                                                                                            fontFamily: 'SF Pro',
+                                                                                                            fontWeight: FontWeight.w400,
+                                                                                                            height: 1.29,
+                                                                                                            letterSpacing: -0.43,
+                                                                                                        ),
+                                                                                                    ),
+                                                                                                ],
+                                                                                            ),
+                                                                                        ),
+                                                                                        Container(
+                                                                                            padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
+                                                                                            decoration: ShapeDecoration(
+                                                                                                color: const Color(0x1E767680) /* Fills-Tertiary */,
+                                                                                                shape: RoundedRectangleBorder(
+                                                                                                    borderRadius: BorderRadius.circular(100),
+                                                                                                ),
+                                                                                            ),
+                                                                                            child: Row(
+                                                                                                mainAxisSize: MainAxisSize.min,
+                                                                                                mainAxisAlignment: MainAxisAlignment.start,
+                                                                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                                                                spacing: 10,
+                                                                                                children: [
+                                                                                                    Text(
+                                                                                                        '9:41 AM',
+                                                                                                        textAlign: TextAlign.center,
+                                                                                                        style: TextStyle(
+                                                                                                            color: Colors.black /* Labels-Primary */,
+                                                                                                            fontSize: 17,
+                                                                                                            fontFamily: 'SF Pro',
+                                                                                                            fontWeight: FontWeight.w400,
+                                                                                                            height: 1.29,
+                                                                                                            letterSpacing: -0.43,
+                                                                                                        ),
+                                                                                                    ),
+                                                                                                ],
+                                                                                            ),
+                                                                                        ),
+                                                                                    ],
+                                                                                ),
+                                                                            ),
+                                                                        ],
+                                                                    ),
+                                                                ],
+                                                            ),
+                                                        ),
+                                                    ],
+                                                ),
+                                            ),
+                                        ),
+                                    ],
+                                ),
+                            ),
+                        ),
+                    ],
+                ),
+            ),
+            Container(
+                width: double.infinity,
+                height: 52,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                        Expanded(
+                            child: Container(
+                                height: double.infinity,
+                                padding: const EdgeInsets.only(bottom: 1),
+                                child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                        Container(
+                                            width: double.infinity,
+                                            height: 1,
+                                            decoration: ShapeDecoration(
+                                                shape: RoundedRectangleBorder(
+                                                    side: BorderSide(
+                                                        width: 1,
+                                                        strokeAlign: BorderSide.strokeAlignOutside,
+                                                        color: const Color(0xFFE6E6E6) /* Separators-Vibrant */,
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                        Expanded(
+                                            child: Container(
+                                                width: double.infinity,
+                                                child: Row(
+                                                    mainAxisSize: MainAxisSize.min,
+                                                    mainAxisAlignment: MainAxisAlignment.start,
+                                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                                    children: [
+                                                        SizedBox(
+                                                            width: 496,
+                                                            height: 50,
+                                                            child: Text(
+                                                                'Title',
+                                                                style: TextStyle(
+                                                                    color: Colors.black /* Labels-Primary */,
+                                                                    fontSize: 17,
+                                                                    fontFamily: 'SF Pro',
+                                                                    fontWeight: FontWeight.w400,
+                                                                    height: 1.29,
+                                                                    letterSpacing: -0.43,
+                                                                ),
+                                                            ),
+                                                        ),
+                                                        Container(
+                                                            height: double.infinity,
+                                                            child: Row(
+                                                                mainAxisSize: MainAxisSize.min,
+                                                                mainAxisAlignment: MainAxisAlignment.end,
+                                                                crossAxisAlignment: CrossAxisAlignment.center,
+                                                                children: [
+                                                                    Row(
+                                                                        mainAxisSize: MainAxisSize.min,
+                                                                        mainAxisAlignment: MainAxisAlignment.end,
+                                                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                                                        spacing: 8,
+                                                                        children: [
+                                                                            Container(
+                                                                                height: 34,
+                                                                                decoration: ShapeDecoration(
+                                                                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                                                                                ),
+                                                                                child: Row(
+                                                                                    mainAxisSize: MainAxisSize.min,
+                                                                                    mainAxisAlignment: MainAxisAlignment.end,
+                                                                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                                                                    spacing: 6,
+                                                                                    children: [
+                                                                                        Container(
+                                                                                            padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
+                                                                                            decoration: ShapeDecoration(
+                                                                                                color: const Color(0x1E767680) /* Fills-Tertiary */,
+                                                                                                shape: RoundedRectangleBorder(
+                                                                                                    borderRadius: BorderRadius.circular(100),
+                                                                                                ),
+                                                                                            ),
+                                                                                            child: Row(
+                                                                                                mainAxisSize: MainAxisSize.min,
+                                                                                                mainAxisAlignment: MainAxisAlignment.start,
+                                                                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                                                                spacing: 10,
+                                                                                                children: [
+                                                                                                    Text(
+                                                                                                        '9:41 AM',
+                                                                                                        textAlign: TextAlign.center,
+                                                                                                        style: TextStyle(
+                                                                                                            color: Colors.black /* Labels-Primary */,
+                                                                                                            fontSize: 17,
+                                                                                                            fontFamily: 'SF Pro',
+                                                                                                            fontWeight: FontWeight.w400,
+                                                                                                            height: 1.29,
+                                                                                                            letterSpacing: -0.43,
+                                                                                                        ),
+                                                                                                    ),
+                                                                                                ],
+                                                                                            ),
+                                                                                        ),
+                                                                                    ],
+                                                                                ),
+                                                                            ),
+                                                                        ],
+                                                                    ),
+                                                                    Container(
+                                                                        height: double.infinity,
+                                                                        padding: const EdgeInsets.only(left: 12),
+                                                                        child: Column(
+                                                                            mainAxisSize: MainAxisSize.min,
+                                                                            mainAxisAlignment: MainAxisAlignment.center,
+                                                                            crossAxisAlignment: CrossAxisAlignment.center,
+                                                                            spacing: 10,
+                                                                            children: [
+                                                                                SizedBox(
+                                                                                    width: 22,
+                                                                                    child: Text(
+                                                                                        '􀌇',
+                                                                                        textAlign: TextAlign.center,
+                                                                                        style: TextStyle(
+                                                                                            color: const Color(0x4C3C3C43) /* Labels-Tertiary */,
+                                                                                            fontSize: 17,
+                                                                                            fontFamily: 'SF Pro',
+                                                                                            fontWeight: FontWeight.w400,
+                                                                                            height: 1.47,
+                                                                                        ),
+                                                                                    ),
+                                                                                ),
+                                                                            ],
+                                                                        ),
+                                                                    ),
+                                                                ],
+                                                            ),
+                                                        ),
+                                                    ],
+                                                ),
+                                            ),
+                                        ),
+                                    ],
+                                ),
+                            ),
+                        ),
+                    ],
+                ),
+            ),
+            Container(
+                width: double.infinity,
+                height: 52,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                        Expanded(
+                            child: Container(
+                                height: double.infinity,
+                                padding: const EdgeInsets.only(bottom: 1),
+                                child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                        Container(
+                                            width: double.infinity,
+                                            height: 1,
+                                            decoration: ShapeDecoration(
+                                                shape: RoundedRectangleBorder(
+                                                    side: BorderSide(
+                                                        width: 1,
+                                                        strokeAlign: BorderSide.strokeAlignOutside,
+                                                        color: const Color(0xFFE6E6E6) /* Separators-Vibrant */,
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                        Expanded(
+                                            child: Container(
+                                                width: double.infinity,
+                                                child: Row(
+                                                    mainAxisSize: MainAxisSize.min,
+                                                    mainAxisAlignment: MainAxisAlignment.start,
+                                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                                    children: [
+                                                        SizedBox(
+                                                            width: 519,
+                                                            height: 50,
+                                                            child: Text(
+                                                                'Title',
+                                                                style: TextStyle(
+                                                                    color: Colors.black /* Labels-Primary */,
+                                                                    fontSize: 17,
+                                                                    fontFamily: 'SF Pro',
+                                                                    fontWeight: FontWeight.w400,
+                                                                    height: 1.29,
+                                                                    letterSpacing: -0.43,
+                                                                ),
+                                                            ),
+                                                        ),
+                                                        Container(
+                                                            height: double.infinity,
+                                                            child: Row(
+                                                                mainAxisSize: MainAxisSize.min,
+                                                                mainAxisAlignment: MainAxisAlignment.end,
+                                                                crossAxisAlignment: CrossAxisAlignment.center,
+                                                                children: [
+                                                                    Container(
+                                                                        padding: const EdgeInsets.only(right: 16),
+                                                                        child: Row(
+                                                                            mainAxisSize: MainAxisSize.min,
+                                                                            mainAxisAlignment: MainAxisAlignment.end,
+                                                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                                                            spacing: 10,
+                                                                            children: [
+                                                                                Text(
+                                                                                    'Pop-up',
+                                                                                    textAlign: TextAlign.right,
+                                                                                    style: TextStyle(
+                                                                                        color: const Color(0x993C3C43) /* Labels-Secondary */,
+                                                                                        fontSize: 17,
+                                                                                        fontFamily: 'SF Pro',
+                                                                                        fontWeight: FontWeight.w400,
+                                                                                        height: 1.29,
+                                                                                        letterSpacing: -0.43,
+                                                                                    ),
+                                                                                ),
+                                                                                Text(
+                                                                                    '􀆏',
+                                                                                    textAlign: TextAlign.right,
+                                                                                    style: TextStyle(
+                                                                                        color: const Color(0x993C3C43) /* Labels-Secondary */,
+                                                                                        fontSize: 17,
+                                                                                        fontFamily: 'SF Pro',
+                                                                                        fontWeight: FontWeight.w400,
+                                                                                        height: 1.29,
+                                                                                    ),
+                                                                                ),
+                                                                            ],
+                                                                        ),
+                                                                    ),
+                                                                ],
+                                                            ),
+                                                        ),
+                                                    ],
+                                                ),
+                                            ),
+                                        ),
+                                    ],
+                                ),
+                            ),
+                        ),
+                    ],
+                ),
+            ),
+            Container(
+                width: double.infinity,
+                height: 52,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                        Expanded(
+                            child: Container(
+                                height: double.infinity,
+                                padding: const EdgeInsets.only(bottom: 1),
+                                child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                        Container(
+                                            width: double.infinity,
+                                            height: 1,
+                                            decoration: ShapeDecoration(
+                                                shape: RoundedRectangleBorder(
+                                                    side: BorderSide(
+                                                        width: 1,
+                                                        strokeAlign: BorderSide.strokeAlignOutside,
+                                                        color: const Color(0xFFE6E6E6) /* Separators-Vibrant */,
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                        Expanded(
+                                            child: Container(
+                                                width: double.infinity,
+                                                child: Row(
+                                                    mainAxisSize: MainAxisSize.min,
+                                                    mainAxisAlignment: MainAxisAlignment.start,
+                                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                                    children: [
+                                                        SizedBox(
+                                                            width: 524,
+                                                            height: 50,
+                                                            child: Text(
+                                                                'Title',
+                                                                style: TextStyle(
+                                                                    color: Colors.black /* Labels-Primary */,
+                                                                    fontSize: 17,
+                                                                    fontFamily: 'SF Pro',
+                                                                    fontWeight: FontWeight.w400,
+                                                                    height: 1.29,
+                                                                    letterSpacing: -0.43,
+                                                                ),
+                                                            ),
+                                                        ),
+                                                        Container(
+                                                            height: double.infinity,
+                                                            child: Row(
+                                                                mainAxisSize: MainAxisSize.min,
+                                                                mainAxisAlignment: MainAxisAlignment.end,
+                                                                crossAxisAlignment: CrossAxisAlignment.center,
+                                                                children: [
+                                                                    Row(
+                                                                        mainAxisSize: MainAxisSize.min,
+                                                                        mainAxisAlignment: MainAxisAlignment.end,
+                                                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                                                        children: [
+                                                                            Container(
+                                                                                width: 92,
+                                                                                height: 32,
+                                                                                child: Stack(
+                                                                                    children: [
+                                                                                        Positioned(
+                                                                                            left: 45.50,
+                                                                                            top: 4,
+                                                                                            child: Container(
+                                                                                                width: 1,
+                                                                                                height: 24,
+                                                                                                decoration: ShapeDecoration(
+                                                                                                    color: const Color(0x4C3C3C43) /* Labels-Tertiary */,
+                                                                                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                                                                                ),
+                                                                                            ),
+                                                                                        ),
+                                                                                        Positioned(
+                                                                                            left: 0,
+                                                                                            top: 0,
+                                                                                            child: Container(
+                                                                                                width: 46,
+                                                                                                height: 32,
+                                                                                                decoration: ShapeDecoration(
+                                                                                                    color: const Color(0x14747480) /* Fills-Quaternary */,
+                                                                                                    shape: RoundedRectangleBorder(
+                                                                                                        borderRadius: BorderRadius.only(
+                                                                                                            topLeft: Radius.circular(100),
+                                                                                                            bottomLeft: Radius.circular(100),
+                                                                                                        ),
+                                                                                                    ),
+                                                                                                ),
+                                                                                                child: Stack(
+                                                                                                    children: [
+                                                                                                        Positioned(
+                                                                                                            left: 0,
+                                                                                                            top: 5,
+                                                                                                            child: SizedBox(
+                                                                                                                width: 46,
+                                                                                                                child: Text(
+                                                                                                                    '􀅽',
+                                                                                                                    textAlign: TextAlign.center,
+                                                                                                                    style: TextStyle(
+                                                                                                                        color: Colors.black /* Labels-Primary */,
+                                                                                                                        fontSize: 17,
+                                                                                                                        fontFamily: 'SF Pro',
+                                                                                                                        fontWeight: FontWeight.w590,
+                                                                                                                        height: 1.29,
+                                                                                                                        letterSpacing: -0.43,
+                                                                                                                    ),
+                                                                                                                ),
+                                                                                                            ),
+                                                                                                        ),
+                                                                                                    ],
+                                                                                                ),
+                                                                                            ),
+                                                                                        ),
+                                                                                        Positioned(
+                                                                                            left: 46,
+                                                                                            top: 0,
+                                                                                            child: Container(
+                                                                                                width: 46,
+                                                                                                height: 32,
+                                                                                                decoration: ShapeDecoration(
+                                                                                                    color: const Color(0x14747480) /* Fills-Quaternary */,
+                                                                                                    shape: RoundedRectangleBorder(
+                                                                                                        borderRadius: BorderRadius.only(
+                                                                                                            topRight: Radius.circular(100),
+                                                                                                            bottomRight: Radius.circular(100),
+                                                                                                        ),
+                                                                                                    ),
+                                                                                                ),
+                                                                                                child: Stack(
+                                                                                                    children: [
+                                                                                                        Positioned(
+                                                                                                            left: 0,
+                                                                                                            top: 5,
+                                                                                                            child: SizedBox(
+                                                                                                                width: 46,
+                                                                                                                child: Text(
+                                                                                                                    '􀅼',
+                                                                                                                    textAlign: TextAlign.center,
+                                                                                                                    style: TextStyle(
+                                                                                                                        color: Colors.black /* Labels-Primary */,
+                                                                                                                        fontSize: 17,
+                                                                                                                        fontFamily: 'SF Pro',
+                                                                                                                        fontWeight: FontWeight.w590,
+                                                                                                                        height: 1.29,
+                                                                                                                        letterSpacing: -0.43,
+                                                                                                                    ),
+                                                                                                                ),
+                                                                                                            ),
+                                                                                                        ),
+                                                                                                    ],
+                                                                                                ),
+                                                                                            ),
+                                                                                        ),
+                                                                                    ],
+                                                                                ),
+                                                                            ),
+                                                                        ],
+                                                                    ),
+                                                                ],
+                                                            ),
+                                                        ),
+                                                    ],
+                                                ),
+                                            ),
+                                        ),
+                                    ],
+                                ),
+                            ),
+                        ),
+                    ],
+                ),
+            ),
+            Container(
+                width: double.infinity,
+                height: 52,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                        Expanded(
+                            child: Container(
+                                height: double.infinity,
+                                padding: const EdgeInsets.only(bottom: 1),
+                                child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                        Container(
+                                            width: double.infinity,
+                                            height: 1,
+                                            decoration: ShapeDecoration(
+                                                shape: RoundedRectangleBorder(
+                                                    side: BorderSide(
+                                                        width: 1,
+                                                        strokeAlign: BorderSide.strokeAlignOutside,
+                                                        color: const Color(0xFFE6E6E6) /* Separators-Vibrant */,
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                        Expanded(
+                                            child: Container(
+                                                width: double.infinity,
+                                                child: Row(
+                                                    mainAxisSize: MainAxisSize.min,
+                                                    mainAxisAlignment: MainAxisAlignment.start,
+                                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                                    children: [
+                                                        SizedBox(
+                                                            width: 552,
+                                                            height: 50,
+                                                            child: Text(
+                                                                'Title',
+                                                                style: TextStyle(
+                                                                    color: Colors.black /* Labels-Primary */,
+                                                                    fontSize: 17,
+                                                                    fontFamily: 'SF Pro',
+                                                                    fontWeight: FontWeight.w400,
+                                                                    height: 1.29,
+                                                                    letterSpacing: -0.43,
+                                                                ),
+                                                            ),
+                                                        ),
+                                                        Container(
+                                                            height: double.infinity,
+                                                            child: Row(
+                                                                mainAxisSize: MainAxisSize.min,
+                                                                mainAxisAlignment: MainAxisAlignment.end,
+                                                                crossAxisAlignment: CrossAxisAlignment.center,
+                                                                children: [
+                                                                    Row(
+                                                                        mainAxisSize: MainAxisSize.min,
+                                                                        mainAxisAlignment: MainAxisAlignment.end,
+                                                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                                                        children: [
+                                                                            Container(
+                                                                                width: 64,
+                                                                                padding: const EdgeInsets.all(2),
+                                                                                clipBehavior: Clip.antiAlias,
+                                                                                decoration: ShapeDecoration(
+                                                                                    color: const Color(0xFF34C759) /* Accents-Green */,
+                                                                                    shape: RoundedRectangleBorder(
+                                                                                        borderRadius: BorderRadius.circular(100),
+                                                                                    ),
+                                                                                ),
+                                                                                child: Row(
+                                                                                    mainAxisSize: MainAxisSize.min,
+                                                                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                                                                    spacing: 11,
+                                                                                    children: [
+                                                                                        Expanded(
+                                                                                            child: Row(
+                                                                                                mainAxisSize: MainAxisSize.min,
+                                                                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                                                                crossAxisAlignment: CrossAxisAlignment.center,
+                                                                                                spacing: 10,
+                                                                                                children: [
+                                                                                                    Container(
+                                                                                                        width: 1,
+                                                                                                        height: 10,
+                                                                                                        decoration: BoxDecoration(color: Colors.white),
+                                                                                                    ),
+                                                                                                ],
+                                                                                            ),
+                                                                                        ),
+                                                                                        Container(
+                                                                                            width: 39,
+                                                                                            height: 24,
+                                                                                            decoration: ShapeDecoration(
+                                                                                                color: Colors.white,
+                                                                                                shape: RoundedRectangleBorder(
+                                                                                                    borderRadius: BorderRadius.circular(100),
+                                                                                                ),
+                                                                                            ),
+                                                                                        ),
+                                                                                    ],
+                                                                                ),
+                                                                            ),
+                                                                        ],
+                                                                    ),
+                                                                ],
+                                                            ),
+                                                        ),
+                                                    ],
+                                                ),
+                                            ),
+                                        ),
+                                    ],
+                                ),
+                            ),
+                        ),
+                    ],
+                ),
+            ),
+            Container(
+                width: double.infinity,
+                height: 52,
+                padding: const EdgeInsets.only(left: 16, right: 16, bottom: 1),
+                child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                        Container(
+                            width: double.infinity,
+                            height: 1,
+                            decoration: ShapeDecoration(
+                                shape: RoundedRectangleBorder(
+                                    side: BorderSide(
+                                        width: 1,
+                                        strokeAlign: BorderSide.strokeAlignOutside,
+                                        color: const Color(0xFFE6E6E6) /* Separators-Vibrant */,
+                                    ),
+                                ),
+                            ),
+                        ),
+                        SizedBox(
+                            width: 616,
+                            height: 50,
+                            child: Text(
+                                'Action',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                    color: const Color(0xFF0088FF) /* Accents-Blue */,
+                                    fontSize: 17,
+                                    fontFamily: 'SF Pro',
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.29,
+                                    letterSpacing: -0.43,
+                                ),
+                            ),
+                        ),
+                    ],
+                ),
+            ),
+        ],
+    ),
+)
