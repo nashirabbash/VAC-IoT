@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:vac_dashboard_app/component/button.dart';
 import 'package:vac_dashboard_app/component/text.dart';
 import 'package:vac_dashboard_app/component/header.dart';
-import 'package:vac_dashboard_app/component/menu.dart';
 import 'package:vac_dashboard_app/screens/welcomeScreens.dart';
 import 'package:vac_dashboard_app/screens/scanScreens.dart';
+import 'package:vac_dashboard_app/screens/deviceScreens.dart';
 import 'package:vac_dashboard_app/screens/settingsScreen.dart';
 import 'package:vac_dashboard_app/asset/color_tokens.dart';
+import 'package:vac_dashboard_app/repositories/auth_repository.dart';
+import 'package:vac_dashboard_app/component/menu.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -17,6 +19,33 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey _avatarKey = GlobalKey();
+  bool _hasBoundDevice = false;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkDeviceBinding();
+  }
+
+  Future<void> _checkDeviceBinding() async {
+    try {
+      final data = await AuthRepository().getDecodedToken();
+      if (data != null && data['deviceId'] != null) {
+        setState(() {
+          _hasBoundDevice = true;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error decoding token: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
 
   void _showAvatarMenu(BuildContext context) async {
     final RenderBox renderBox =
@@ -145,32 +174,43 @@ class _HomeScreenState extends State<HomeScreen> {
               const PulsingScanner(size: 160),
               const SizedBox(height: 24),
 
-              // Text label
-              const AppText(
-                'Connect to device',
-                type: AppTextType.headline,
-                color: AppTextColor.secondary,
-                fontWeight: FontWeight.w600,
-                textAlign: TextAlign.center,
-              ),
-              const Spacer(),
-
-              // Scan Button
-              SizedBox(
-                width: double.infinity,
-                child: AppButton(
-                  label: 'Scan',
-                  size: ButtonSize.large,
-                  variant: ButtonVariant.primary,
-                  onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => const ScanScreen(),
-                      ),
-                    );
-                  },
+              if (_isLoading)
+                const CircularProgressIndicator()
+              else ...[
+                AppText(
+                  _hasBoundDevice ? 'Device is bound' : 'Connect to device',
+                  type: AppTextType.headline,
+                  color: AppTextColor.secondary,
+                  fontWeight: FontWeight.w600,
+                  textAlign: TextAlign.center,
                 ),
-              ),
+                const Spacer(),
+
+                // Scan Button
+                SizedBox(
+                  width: double.infinity,
+                  child: AppButton(
+                    label: _hasBoundDevice ? 'View Device' : 'Scan',
+                    size: ButtonSize.large,
+                    variant: ButtonVariant.primary,
+                    onPressed: () {
+                      if (_hasBoundDevice) {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => const DeviceScreen(),
+                          ),
+                        );
+                      } else {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => const ScanScreen(),
+                          ),
+                        );
+                      }
+                    },
+                  ),
+                ),
+              ],
             ],
           ),
         ),

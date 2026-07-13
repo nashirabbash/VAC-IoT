@@ -1,11 +1,12 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:camera/camera.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:vac_dashboard_app/component/button.dart';
 import 'package:vac_dashboard_app/component/text.dart';
 import 'package:vac_dashboard_app/component/header.dart';
 import 'package:vac_dashboard_app/screens/deviceScreens.dart';
 import 'package:vac_dashboard_app/asset/color_tokens.dart';
+import 'package:vac_dashboard_app/services/api_service.dart';
 
 class ScanScreen extends StatefulWidget {
   const ScanScreen({super.key});
@@ -16,11 +17,9 @@ class ScanScreen extends StatefulWidget {
 
 class _ScanScreenState extends State<ScanScreen>
     with SingleTickerProviderStateMixin {
-  CameraController? _cameraController;
-  List<CameraDescription> _cameras = [];
-  bool _isCameraInitialized = false;
+  final MobileScannerController _scannerController = MobileScannerController();
   bool _isScanning = true;
-  Timer? _autoConnectTimer;
+  bool _isProcessing = false;
 
   // Animation controller for the sweeping laser line inside the viewfinder box
   late AnimationController _laserController;
@@ -29,8 +28,6 @@ class _ScanScreenState extends State<ScanScreen>
   @override
   void initState() {
     super.initState();
-    _initializeCamera();
-    _startSimulatedScan();
 
     // Set up laser sweep animation
     _laserController = AnimationController(
@@ -43,63 +40,27 @@ class _ScanScreenState extends State<ScanScreen>
     );
   }
 
-  Future<void> _initializeCamera() async {
-    try {
-      _cameras = await availableCameras();
-      if (_cameras.isNotEmpty) {
-        _cameraController = CameraController(
-          _cameras.first,
-          ResolutionPreset.medium,
-          enableAudio: false,
-        );
-
-        await _cameraController!.initialize();
-        if (mounted) {
-          setState(() {
-            _isCameraInitialized = true;
-          });
-        }
-      }
-    } catch (e) {
-      debugPrint('Camera initialization failed: $e');
-      if (mounted) {
-        setState(() {
-          _isCameraInitialized = false;
-        });
-      }
-    }
-  }
-
-  void _startSimulatedScan() {
-    setState(() {
-      _isScanning = true;
-    });
-
-    _autoConnectTimer?.cancel();
-    // Simulate auto-detecting a device within the viewfinder area after 3 seconds
-    _autoConnectTimer = Timer(const Duration(seconds: 3), () {
-      if (mounted && _isScanning) {
-        _connectToDevice('VAC Device #3098');
-      }
-    });
-  }
-
   void _toggleScan() {
     if (_isScanning) {
-      _autoConnectTimer?.cancel();
+      _scannerController.stop();
       setState(() {
         _isScanning = false;
       });
     } else {
-      _startSimulatedScan();
+      _scannerController.start();
+      setState(() {
+        _isScanning = true;
+      });
     }
   }
 
-  void _connectToDevice(String deviceName) {
-    _autoConnectTimer?.cancel();
+  Future<void> _bindDevice(String qrKey) async {
+    if (_isProcessing) return;
     setState(() {
+      _isProcessing = true;
       _isScanning = false;
     });
+    _scannerController.stop();
 
     // Show connecting loading dialog
     showDialog(
@@ -122,8 +83,8 @@ class _ScanScreenState extends State<ScanScreen>
                   ),
                 ),
                 const SizedBox(height: 16),
-                AppText(
-                  'Connecting to $deviceName...',
+                const AppText(
+                  'Binding Device...',
                   type: AppTextType.subheadline,
                   fontWeight: FontWeight.w600,
                   customColor: Colors.white,
@@ -135,21 +96,32 @@ class _ScanScreenState extends State<ScanScreen>
       },
     );
 
-    // Simulate successful connection and route to history
-    Future.delayed(const Duration(seconds: 2), () {
+    try {
+      await apiService.bindDevice(qrKey);
       if (mounted) {
         Navigator.of(context).pop(); // Dismiss connecting dialog
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (context) => const DeviceScreen()),
         );
       }
-    });
+    } catch (e) {
+      if (mounted) {
+        Navigator.of(context).pop(); // Dismiss dialog
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))),
+        );
+        setState(() {
+          _isProcessing = false;
+          _isScanning = true;
+        });
+        _scannerController.start();
+      }
+    }
   }
 
   @override
   void dispose() {
-    _cameraController?.dispose();
-    _autoConnectTimer?.cancel();
+    _scannerController.dispose();
     _laserController.dispose();
     super.dispose();
   }
@@ -161,9 +133,23 @@ class _ScanScreenState extends State<ScanScreen>
       body: Stack(
         children: [
           // 1. REAL CAMERA FEED OR FALLBACK
-          Positioned.fill(child: _buildCameraBackground()),
+          Positioned.fill(
+            child: MobileScanner(
+              controller: _scannerController,
+              onDetect: (BarcodeCapture capture) {
+                if (!_isScanning || _isProcessing) return;
+                final List<Barcode> barcodes = capture.barcodes;
+                for (final barcode in barcodes) {
+                  if (barcode.rawValue != null) {
+                    _bindDevice(barcode.rawValue!);
+                    break;
+                  }
+                }
+              },
+            ),
+          ),
 
-          // 2. MAIN LAYOUT STRUCTURE (matching scanScreen.txt)
+          // 2. MAIN LAYOUT STRUCTURE
           SafeArea(
             child: Container(
               width: double.infinity,
@@ -192,7 +178,7 @@ class _ScanScreenState extends State<ScanScreen>
                     ),
                   ),
 
-                  // EXPANDED: Center Scanner view with 182x182 viewfinder box
+                  // Center Scanner view with 182x182 viewfinder box
                   Expanded(
                     child: SizedBox(
                       width: double.infinity,
@@ -210,7 +196,7 @@ class _ScanScreenState extends State<ScanScreen>
                                 child: const SizedBox(width: 182, height: 182),
                               ),
                               // Laser Sweep Animation restricted to inside the box
-                              if (_isScanning)
+                              if (_isScanning && !_isProcessing)
                                 AnimatedBuilder(
                                   animation: _laserAnimation,
                                   builder: (context, child) {
@@ -272,49 +258,6 @@ class _ScanScreenState extends State<ScanScreen>
       ),
     );
   }
-
-  Widget _buildCameraBackground() {
-    if (_isCameraInitialized && _cameraController != null) {
-      return FittedBox(
-        fit: BoxFit.cover,
-        child: SizedBox(
-          width: _cameraController!.value.previewSize!.height,
-          height: _cameraController!.value.previewSize!.width,
-          child: CameraPreview(_cameraController!),
-        ),
-      );
-    }
-
-    // Modern fallback gradient when camera is unavailable
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
-        ),
-      ),
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.camera_alt_outlined,
-              size: 48,
-              color: Colors.white.withValues(alpha: 0.3),
-            ),
-            const SizedBox(height: 12),
-            AppText(
-              'Real Camera Preview',
-              type: AppTextType.subheadline,
-              fontWeight: FontWeight.w500,
-              customColor: Colors.white.withValues(alpha: 0.5),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 }
 
 class ViewfinderPainter extends CustomPainter {
@@ -327,11 +270,9 @@ class ViewfinderPainter extends CustomPainter {
 
     const cornerLength = 24.0;
 
-    // Top-Left Corner
     canvas.drawLine(Offset.zero, const Offset(cornerLength, 0), paint);
     canvas.drawLine(Offset.zero, const Offset(0, cornerLength), paint);
 
-    // Top-Right Corner
     canvas.drawLine(
       Offset(size.width, 0),
       Offset(size.width - cornerLength, 0),
@@ -343,7 +284,6 @@ class ViewfinderPainter extends CustomPainter {
       paint,
     );
 
-    // Bottom-Left Corner
     canvas.drawLine(
       Offset(0, size.height),
       Offset(cornerLength, size.height),
@@ -355,7 +295,6 @@ class ViewfinderPainter extends CustomPainter {
       paint,
     );
 
-    // Bottom-Right Corner
     canvas.drawLine(
       Offset(size.width, size.height),
       Offset(size.width - cornerLength, size.height),
