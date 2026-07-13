@@ -144,7 +144,7 @@ class DeviceScreen extends StatelessWidget {
                     title: 'Change Device',
                     showChevron: true,
                     onTap: () {
-                      Navigator.of(context).pushReplacement(
+                      Navigator.of(context).push(
                         MaterialPageRoute(
                           builder: (context) => const ScanScreen(),
                         ),

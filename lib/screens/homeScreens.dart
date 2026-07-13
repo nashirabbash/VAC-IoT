@@ -2,14 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:vac_dashboard_app/component/button.dart';
 import 'package:vac_dashboard_app/component/text.dart';
 import 'package:vac_dashboard_app/component/header.dart';
-import 'package:vac_dashboard_app/component/menu.dart';
 import 'package:vac_dashboard_app/screens/welcomeScreens.dart';
 import 'package:vac_dashboard_app/screens/scanScreens.dart';
 import 'package:vac_dashboard_app/screens/deviceScreens.dart';
 import 'package:vac_dashboard_app/screens/settingsScreen.dart';
-import 'dart:convert';
 import 'package:vac_dashboard_app/asset/color_tokens.dart';
 import 'package:vac_dashboard_app/repositories/auth_repository.dart';
+import 'package:vac_dashboard_app/component/menu.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -31,23 +30,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _checkDeviceBinding() async {
     try {
-      final token = await AuthRepository().getToken();
-      if (token != null) {
-        final parts = token.split('.');
-        if (parts.length == 3) {
-          final payload = parts[1];
-          final normalized = base64Url.normalize(payload);
-          final decoded = utf8.decode(base64Url.decode(normalized));
-          final data = jsonDecode(decoded) as Map<String, dynamic>;
-          if (data['deviceId'] != null) {
-            setState(() {
-              _hasBoundDevice = true;
-            });
-          }
-        }
+      final data = await AuthRepository().getDecodedToken();
+      if (data != null && data['deviceId'] != null) {
+        setState(() {
+          _hasBoundDevice = true;
+        });
       }
     } catch (e) {
-      debugPrint('Error parsing token: $e');
+      debugPrint('Error decoding token: $e');
     } finally {
       if (mounted) {
         setState(() {
