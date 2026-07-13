@@ -9,16 +9,22 @@ import 'package:vac_dashboard_app/component/alert_dialog.dart';
 import 'package:vac_dashboard_app/component/stepper.dart';
 import 'package:vac_dashboard_app/component/grouped_list.dart';
 import 'package:vac_dashboard_app/screens/welcomeScreens.dart';
+import 'package:vac_dashboard_app/screens/homeScreens.dart';
+import 'package:vac_dashboard_app/repositories/auth_repository.dart';
 
 final ValueNotifier<ThemeMode> appThemeMode = ValueNotifier(ThemeMode.light);
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const MainApp());
+  final authRepo = AuthRepository();
+  final token = await authRepo.getToken();
+  runApp(MainApp(initialToken: token));
 }
 
 class MainApp extends StatelessWidget {
-  const MainApp({super.key});
+  final String? initialToken;
+
+  const MainApp({super.key, this.initialToken});
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +50,9 @@ class MainApp extends StatelessWidget {
               brightness: Brightness.dark,
             ),
           ),
-          home: const WelcomeScreens(),
+          home: initialToken != null
+              ? const HomeScreen()
+              : const WelcomeScreens(),
         );
       },
     );
