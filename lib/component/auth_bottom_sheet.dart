@@ -6,6 +6,8 @@ import 'package:vac_dashboard_app/component/text.dart';
 import 'package:vac_dashboard_app/component/grouped_list.dart';
 import 'package:vac_dashboard_app/component/bottom_sheet_header.dart';
 import 'package:vac_dashboard_app/screens/homeScreens.dart';
+import 'package:vac_dashboard_app/services/api_service.dart';
+import 'package:vac_dashboard_app/repositories/auth_repository.dart';
 
 enum AuthMode { login, signUp, forgotPassword }
 
@@ -46,6 +48,7 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
   bool _rememberMe = false;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -369,32 +372,109 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
                   // Primary Action Button
                   SizedBox(
                     width: double.infinity,
-                    child: AppButton(
-                      label: isForgotPassword
-                          ? 'Reset Password'
-                          : isLogin
-                          ? 'Login'
-                          : 'Register',
-                      size: ButtonSize.large,
-                      variant: ButtonVariant.primary,
-                      onPressed: () {
-                        if (isForgotPassword) {
-                          setState(() {
-                            _mode = AuthMode.login;
-                            _passwordController.clear();
-                            _confirmPasswordController.clear();
-                          });
-                        } else {
-                          // Navigate to dashboard/history screen as simulated auth completion
-                          Navigator.of(context).pop(); // Dismiss bottom sheet
-                          Navigator.of(context).pushReplacement(
-                            MaterialPageRoute(
-                              builder: (context) => const HomeScreen(),
-                            ),
-                          );
-                        }
-                      },
-                    ),
+                    height: 50,
+                    child: _isLoading
+                        ? const Center(child: CircularProgressIndicator())
+                        : AppButton(
+                            label: isForgotPassword
+                                ? 'Reset Password'
+                                : isLogin
+                                ? 'Login'
+                                : 'Register',
+                            size: ButtonSize.large,
+                            variant: ButtonVariant.primary,
+                            onPressed: () async {
+                              if (isForgotPassword) {
+                                setState(() {
+                                  _mode = AuthMode.login;
+                                  _passwordController.clear();
+                                  _confirmPasswordController.clear();
+                                });
+                              } else if (isLogin) {
+                                setState(() => _isLoading = true);
+                                try {
+                                  final token = await apiService.login(
+                                    _usernameController.text,
+                                    _passwordController.text,
+                                  );
+                                  final authRepo = AuthRepository();
+                                  await authRepo.saveToken(token);
+                                  if (!context.mounted) return;
+                                  Navigator.of(
+                                    context,
+                                  ).pop(); // Dismiss bottom sheet
+                                  Navigator.of(context).pushReplacement(
+                                    MaterialPageRoute(
+                                      builder: (context) => const HomeScreen(),
+                                    ),
+                                  );
+                                } catch (e) {
+                                  if (!context.mounted) return;
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        e.toString().replaceAll(
+                                          'Exception: ',
+                                          '',
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                } finally {
+                                  if (mounted) {
+                                    setState(() => _isLoading = false);
+                                  }
+                                }
+                              } else {
+                                if (_passwordController.text !=
+                                    _confirmPasswordController.text) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Passwords do not match'),
+                                    ),
+                                  );
+                                  return;
+                                }
+                                setState(() => _isLoading = true);
+                                try {
+                                  await apiService.register(
+                                    _usernameController.text,
+                                    _passwordController.text,
+                                    _hospitalController.text,
+                                  );
+                                  if (!context.mounted) return;
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                        'Registration successful. Please login.',
+                                      ),
+                                    ),
+                                  );
+                                  setState(() {
+                                    _mode = AuthMode.login;
+                                    _passwordController.clear();
+                                    _confirmPasswordController.clear();
+                                  });
+                                } catch (e) {
+                                  if (!context.mounted) return;
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        e.toString().replaceAll(
+                                          'Exception: ',
+                                          '',
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                } finally {
+                                  if (mounted) {
+                                    setState(() => _isLoading = false);
+                                  }
+                                }
+                              }
+                            },
+                          ),
                   ),
                   const SizedBox(height: 16),
 
