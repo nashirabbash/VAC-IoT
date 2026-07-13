@@ -3,6 +3,7 @@ import 'package:vac_dashboard_app/component/menu.dart';
 import 'package:vac_dashboard_app/asset/color_tokens.dart';
 
 enum SplitButtonSize { xsmall, small, medium, large, xlarge }
+
 enum SplitButtonVariant { primary, secondary, outline, elevated }
 
 class SplitButton extends StatefulWidget {
@@ -124,12 +125,16 @@ class _SplitButtonState extends State<SplitButton> {
     if (widget.variant == SplitButtonVariant.elevated) {
       return [
         BoxShadow(
-          color: const Color(0x4C000000).withValues(alpha: Theme.of(context).brightness == Brightness.dark ? 0.3 : 0.15),
+          color: const Color(0x4C000000).withValues(
+            alpha: Theme.of(context).brightness == Brightness.dark ? 0.3 : 0.15,
+          ),
           blurRadius: 3,
           offset: const Offset(0, 1),
         ),
         BoxShadow(
-          color: const Color(0x26000000).withValues(alpha: Theme.of(context).brightness == Brightness.dark ? 0.2 : 0.08),
+          color: const Color(0x26000000).withValues(
+            alpha: Theme.of(context).brightness == Brightness.dark ? 0.2 : 0.08,
+          ),
           blurRadius: 8,
           offset: const Offset(0, 4),
           spreadRadius: 3,
@@ -140,7 +145,8 @@ class _SplitButtonState extends State<SplitButton> {
   }
 
   void _showDropdownMenu() {
-    final RenderBox renderBox = _dropdownKey.currentContext!.findRenderObject() as RenderBox;
+    final RenderBox renderBox =
+        _dropdownKey.currentContext!.findRenderObject() as RenderBox;
     final size = renderBox.size;
     final offset = renderBox.localToGlobal(Offset.zero);
 
@@ -160,13 +166,13 @@ class _SplitButtonState extends State<SplitButton> {
             // Menu aligned below the split button (aligning dropdown part)
             Positioned(
               top: offset.dy + size.height + 8, // Directly below the dropdown
-              left: offset.dx + size.width - 180, // Right-aligned with the dropdown
+              left:
+                  offset.dx +
+                  size.width -
+                  180, // Right-aligned with the dropdown
               child: Material(
                 color: Colors.transparent,
-                child: AppContextMenu(
-                  width: 180,
-                  children: widget.menuItems,
-                ),
+                child: AppContextMenu(width: 180, children: widget.menuItems),
               ),
             ),
           ],
@@ -180,7 +186,7 @@ class _SplitButtonState extends State<SplitButton> {
     final height = _height;
     final radiusOuter = height / 2;
     const radiusInner = 4.0;
-    
+
     final Color bgColor = _backgroundColor(context);
     final Color fgColor = _foregroundColor(context);
     final BoxBorder? bdr = _border(context);

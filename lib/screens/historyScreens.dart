@@ -8,6 +8,8 @@ import 'package:vac_dashboard_app/services/therapy_receiver.dart';
 import 'package:vac_dashboard_app/component/menu.dart';
 import 'package:vac_dashboard_app/component/splitButton.dart';
 import 'package:vac_dashboard_app/asset/color_tokens.dart';
+import 'package:vac_dashboard_app/network/api_interceptor.dart';
+import 'package:vac_dashboard_app/screens/welcomeScreens.dart';
 
 class HistoryScreens extends StatefulWidget {
   const HistoryScreens({super.key});
@@ -36,8 +38,16 @@ class _HistoryScreensState extends State<HistoryScreens> {
     'September',
     'Oktober',
     'November',
-    'Desember'
+    'Desember',
   ];
+
+  void _handleAuthException() {
+    if (!mounted) return;
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const WelcomeScreens()),
+      (route) => false,
+    );
+  }
 
   @override
   void initState() {
@@ -45,36 +55,43 @@ class _HistoryScreensState extends State<HistoryScreens> {
     _loadFromBackend();
     _ble.startScan();
     _ble.onTherapy.listen((payload) async {
-      await TherapyReceiver.save(payload);
-      _loadFromBackend();
+      try {
+        await TherapyReceiver.save(payload);
+        _loadFromBackend();
+      } on AuthException {
+        _handleAuthException();
+      } catch (e) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Gagal menyimpan data: $e')));
+      }
     });
   }
 
   Future<void> _loadFromBackend() async {
     try {
       final all = await apiService.getSessions();
-      final years = all
-              .map((s) => s.sessionDate.substring(0, 4))
-              .toSet()
-              .toList()
+      final years =
+          all.map((s) => s.sessionDate.substring(0, 4)).toSet().toList()
             ..sort((a, b) => b.compareTo(a));
       if (!mounted) return;
       setState(() {
         _sessions = all;
         _selectedYear ??= years.isNotEmpty ? years.first : null;
       });
+    } on AuthException {
+      _handleAuthException();
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Gagal memuat data: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Gagal memuat data: $e')));
     }
   }
 
-  List<String> get _years => _sessions
-          .map((s) => s.sessionDate.substring(0, 4))
-          .toSet()
-          .toList()
+  List<String> get _years =>
+      _sessions.map((s) => s.sessionDate.substring(0, 4)).toSet().toList()
         ..sort((a, b) => b.compareTo(a));
 
   List<Map<String, dynamic>> get _sections {
@@ -94,25 +111,29 @@ class _HistoryScreensState extends State<HistoryScreens> {
       final parts = k.split('-');
       final label = '${_monthNames[int.parse(parts[1])]} ${parts[0]}';
       final items = byMonth[k]!
-          .map((s) => {
-                'title': s.title,
-                'date': s.date,
-                'mode': s.mode,
-                'duration': s.duration
-              })
+          .map(
+            (s) => {
+              'title': s.title,
+              'date': s.date,
+              'mode': s.mode,
+              'duration': s.duration,
+            },
+          )
           .toList();
       return {'date': label, 'therapies': items};
     }).toList();
   }
 
   List<Widget> get _yearMenuItems => _years
-      .map((y) => AppMenuItem(
-            label: y,
-            onPressed: () {
-              setState(() => _selectedYear = y);
-              Navigator.of(context).pop();
-            },
-          ))
+      .map(
+        (y) => AppMenuItem(
+          label: y,
+          onPressed: () {
+            setState(() => _selectedYear = y);
+            Navigator.of(context).pop();
+          },
+        ),
+      )
       .toList();
 
   @override
@@ -138,7 +159,10 @@ class _HistoryScreensState extends State<HistoryScreens> {
             ),
           ),
           child: IconButton(
-            icon: Icon(Icons.chevron_left_rounded, color: context.colors.labelsPrimary),
+            icon: Icon(
+              Icons.chevron_left_rounded,
+              color: context.colors.labelsPrimary,
+            ),
             onPressed: () => Navigator.of(context).pop(),
           ),
         ),

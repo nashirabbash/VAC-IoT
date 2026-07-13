@@ -15,13 +15,12 @@ class TherapySession {
     required this.duration,
   });
 
-  factory TherapySession.fromJson(Map<String, dynamic> json) =>
-      TherapySession(
-        id: json['id'] as int?,
-        sessionDate: json['sessionDate'] as String,
-        title: json['title'] as String,
-        date: json['date'] as String,
-        mode: json['mode'] as String,
-        duration: json['duration'] as String,
-      );
+  factory TherapySession.fromJson(Map<String, dynamic> json) => TherapySession(
+    id: json['id'] as int?,
+    sessionDate: json['sessionDate'] as String,
+    title: json['title'] as String,
+    date: json['date'] as String,
+    mode: json['mode'] as String,
+    duration: json['duration'] as String,
+  );
 }

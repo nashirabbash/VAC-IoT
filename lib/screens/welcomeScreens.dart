@@ -26,7 +26,9 @@ class WelcomeScreens extends StatelessWidget {
           filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
           child: Container(
             color: context.colors.backgroundsPrimary.withValues(
-              alpha: Theme.of(context).brightness == Brightness.dark ? 0.5 : 0.2,
+              alpha: Theme.of(context).brightness == Brightness.dark
+                  ? 0.5
+                  : 0.2,
             ), // Dynamic overlay tint for readability
             child: SafeArea(
               child: Column(
@@ -132,7 +134,9 @@ class WelcomeScreens extends StatelessWidget {
                             AppText(
                               'Already have an account? ',
                               type: AppTextType.subheadline,
-                              customColor: context.colors.labelsSecondary, // Sits on light blurred overlay
+                              customColor: context
+                                  .colors
+                                  .labelsSecondary, // Sits on light blurred overlay
                             ),
                             GestureDetector(
                               onTap: () {

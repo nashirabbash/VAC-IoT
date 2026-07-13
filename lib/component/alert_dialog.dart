@@ -46,11 +46,15 @@ class AppAlertDialog extends StatelessWidget {
             ),
             shadows: [
               BoxShadow(
-                color: const Color(0x1E000000).withValues(alpha: Theme.of(context).brightness == Brightness.dark ? 0.5 : 0.12),
+                color: const Color(0x1E000000).withValues(
+                  alpha: Theme.of(context).brightness == Brightness.dark
+                      ? 0.5
+                      : 0.12,
+                ),
                 blurRadius: 40,
                 offset: const Offset(0, 8),
                 spreadRadius: 0,
-              )
+              ),
             ],
           ),
           child: BackdropFilter(
@@ -66,7 +70,12 @@ class AppAlertDialog extends StatelessWidget {
                 children: [
                   // Title & Description Area
                   Padding(
-                    padding: const EdgeInsets.only(top: 8, left: 8, right: 8, bottom: 24),
+                    padding: const EdgeInsets.only(
+                      top: 8,
+                      left: 8,
+                      right: 8,
+                      bottom: 24,
+                    ),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -138,7 +147,8 @@ class AppAlertDialog extends StatelessWidget {
       );
     }
 
-    if (buttonLayout == AppAlertDialogButtonLayout.horizontal && secondaryBtn != null) {
+    if (buttonLayout == AppAlertDialogButtonLayout.horizontal &&
+        secondaryBtn != null) {
       return Row(
         children: [
           Expanded(child: secondaryBtn),
@@ -153,10 +163,7 @@ class AppAlertDialog extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         primaryBtn,
-        if (secondaryBtn != null) ...[
-          const SizedBox(height: 10),
-          secondaryBtn,
-        ],
+        if (secondaryBtn != null) ...[const SizedBox(height: 10), secondaryBtn],
       ],
     );
   }
@@ -165,10 +172,7 @@ class AppAlertDialog extends StatelessWidget {
 class AppAlertContentList extends StatelessWidget {
   final List<String> items;
 
-  const AppAlertContentList({
-    super.key,
-    required this.items,
-  });
+  const AppAlertContentList({super.key, required this.items});
 
   @override
   Widget build(BuildContext context) {
@@ -178,9 +182,7 @@ class AppAlertContentList extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       decoration: ShapeDecoration(
         color: context.colors.fillsSecondary,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(26),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(26)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -194,10 +196,7 @@ class AppAlertContentList extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 if (!isFirst)
-                  Container(
-                    height: 1,
-                    color: context.colors.separatorsVibrant,
-                  ),
+                  Container(height: 1, color: context.colors.separatorsVibrant),
                 Expanded(
                   child: Align(
                     alignment: Alignment.centerLeft,
@@ -233,7 +232,8 @@ Future<T?> showAppAlertDialog<T>(
   required VoidCallback onPrimaryPressed,
   String? secondaryButtonLabel,
   VoidCallback? onSecondaryPressed,
-  AppAlertDialogButtonLayout buttonLayout = AppAlertDialogButtonLayout.horizontal,
+  AppAlertDialogButtonLayout buttonLayout =
+      AppAlertDialogButtonLayout.horizontal,
   ButtonVariant primaryButtonVariant = ButtonVariant.primary,
   bool barrierDismissible = true,
 }) {

@@ -23,7 +23,9 @@ class AppGroupedList extends StatelessWidget {
       if (i > 0) {
         dividedChildren.add(
           Padding(
-            padding: const EdgeInsets.only(left: 16.0), // iOS-style divider indent
+            padding: const EdgeInsets.only(
+              left: 16.0,
+            ), // iOS-style divider indent
             child: Container(
               height: 1,
               color: context.colors.separatorsVibrant, // Separators-Vibrant
@@ -38,7 +40,7 @@ class AppGroupedList extends StatelessWidget {
       width: double.infinity,
       clipBehavior: Clip.antiAlias,
       decoration: ShapeDecoration(
-        color: backgroundColor == Colors.white 
+        color: backgroundColor == Colors.white
             ? context.colors.backgroundsGroupedSecondary
             : backgroundColor,
         shape: RoundedRectangleBorder(
@@ -87,7 +89,7 @@ class AppGroupedListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool effectiveShowChevron = showChevron ?? (onTap != null);
-    
+
     // Determine min height: default to 68 if subtitle is present, otherwise 52
     final double minHeight = height ?? (subtitle != null ? 68.0 : 52.0);
 
@@ -102,10 +104,7 @@ class AppGroupedListTile extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               // Leading Widget
-              if (leading != null) ...[
-                leading!,
-                const SizedBox(width: 12),
-              ],
+              if (leading != null) ...[leading!, const SizedBox(width: 12)],
 
               // Title and Subtitle Column
               Expanded(
@@ -121,7 +120,9 @@ class AppGroupedListTile extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       textAlign: textAlign,
                       style: TextStyle(
-                        color: isDestructive ? context.colors.accentsRed : context.colors.labelsPrimary,
+                        color: isDestructive
+                            ? context.colors.accentsRed
+                            : context.colors.labelsPrimary,
                         fontSize: 17,
                         fontFamily: 'SF Pro',
                         fontWeight: FontWeight.w400,
@@ -170,12 +171,15 @@ class AppGroupedListTile extends StatelessWidget {
                           letterSpacing: -0.43,
                         ),
                       ),
-                    
+
                     // Badge (e.g. date badge)
                     if (badgeLabel != null) ...[
                       if (detail != null) const SizedBox(width: 8),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 11,
+                          vertical: 6,
+                        ),
                         decoration: ShapeDecoration(
                           color: context.colors.fillsTertiary,
                           shape: RoundedRectangleBorder(
@@ -198,7 +202,8 @@ class AppGroupedListTile extends StatelessWidget {
 
                     // Blue Checkmark Icon
                     if (showCheckmark) ...[
-                      if (detail != null || badgeLabel != null) const SizedBox(width: 8),
+                      if (detail != null || badgeLabel != null)
+                        const SizedBox(width: 8),
                       Icon(
                         Icons.check,
                         color: context.colors.accentsBlue,
