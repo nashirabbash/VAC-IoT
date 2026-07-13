@@ -117,7 +117,9 @@ class _ScanScreenState extends State<ScanScreen>
               mainAxisSize: MainAxisSize.min,
               children: [
                 CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(context.colors.accentsBlue),
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    context.colors.accentsBlue,
+                  ),
                 ),
                 const SizedBox(height: 16),
                 AppText(

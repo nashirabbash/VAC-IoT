@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:vac_dashboard_app/component/header.dart';
 import 'package:vac_dashboard_app/component/grouped_list.dart';
-import 'package:vac_dashboard_app/main.dart'; 
+import 'package:vac_dashboard_app/main.dart';
 import 'package:vac_dashboard_app/asset/color_tokens.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -36,7 +36,9 @@ class SettingsScreen extends StatelessWidget {
                         value: currentMode == ThemeMode.dark,
                         activeColor: context.colors.accentsBlue,
                         onChanged: (isDark) {
-                          appThemeMode.value = isDark ? ThemeMode.dark : ThemeMode.light;
+                          appThemeMode.value = isDark
+                              ? ThemeMode.dark
+                              : ThemeMode.light;
                         },
                       ),
                     );

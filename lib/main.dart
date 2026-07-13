@@ -11,7 +11,6 @@ import 'package:vac_dashboard_app/component/grouped_list.dart';
 import 'package:vac_dashboard_app/screens/welcomeScreens.dart';
 
 final ValueNotifier<ThemeMode> appThemeMode = ValueNotifier(ThemeMode.light);
-final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,11 +28,12 @@ class MainApp extends StatelessWidget {
         return MaterialApp(
           title: 'VAC Dashboard',
           themeMode: mode,
-          navigatorKey: navigatorKey,
           theme: ThemeData(
             colorScheme: AppColors.colorScheme,
             useMaterial3: true,
-            scaffoldBackgroundColor: const Color(0xFFF2F2F7), // iOS Grouped Background Color
+            scaffoldBackgroundColor: const Color(
+              0xFFF2F2F7,
+            ), // iOS Grouped Background Color
           ),
           darkTheme: ThemeData(
             brightness: Brightness.dark,
@@ -96,17 +96,18 @@ class _ComponentSandboxPageState extends State<ComponentSandboxPage> {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        const AppText('Typography System', type: AppTextType.title2, fontWeight: FontWeight.bold),
+        const AppText(
+          'Typography System',
+          type: AppTextType.title2,
+          fontWeight: FontWeight.bold,
+        ),
         const SizedBox(height: 16),
         AppGroupedList(
           children: AppTextType.values.map((type) {
             return AppGroupedListTile(
               title: type.name.toUpperCase(),
               subtitle: 'Size details and styles',
-              trailing: AppText(
-                'Sample Text',
-                type: type,
-              ),
+              trailing: AppText('Sample Text', type: type),
             );
           }).toList(),
         ),
@@ -119,7 +120,11 @@ class _ComponentSandboxPageState extends State<ComponentSandboxPage> {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        const AppText('AppButton Showcase', type: AppTextType.title2, fontWeight: FontWeight.bold),
+        const AppText(
+          'AppButton Showcase',
+          type: AppTextType.title2,
+          fontWeight: FontWeight.bold,
+        ),
         const SizedBox(height: 12),
         ...ButtonVariant.values.map((variant) {
           return Column(
@@ -199,7 +204,11 @@ class _ComponentSandboxPageState extends State<ComponentSandboxPage> {
 
         const SizedBox(height: 32),
 
-        const AppText('SplitButton Showcase', type: AppTextType.title2, fontWeight: FontWeight.bold),
+        const AppText(
+          'SplitButton Showcase',
+          type: AppTextType.title2,
+          fontWeight: FontWeight.bold,
+        ),
         const SizedBox(height: 12),
         ...SplitButtonVariant.values.map((variant) {
           return Column(
@@ -223,8 +232,14 @@ class _ComponentSandboxPageState extends State<ComponentSandboxPage> {
                       variant: variant,
                       onPressed: () {},
                       menuItems: [
-                        AppMenuItem(label: 'Option 1', onPressed: () => Navigator.pop(context)),
-                        AppMenuItem(label: 'Option 2', onPressed: () => Navigator.pop(context)),
+                        AppMenuItem(
+                          label: 'Option 1',
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                        AppMenuItem(
+                          label: 'Option 2',
+                          onPressed: () => Navigator.pop(context),
+                        ),
                       ],
                     ),
                   ),
@@ -236,8 +251,14 @@ class _ComponentSandboxPageState extends State<ComponentSandboxPage> {
                       variant: variant,
                       onPressed: () {},
                       menuItems: [
-                        AppMenuItem(label: 'Action A', onPressed: () => Navigator.pop(context)),
-                        AppMenuItem(label: 'Action B', onPressed: () => Navigator.pop(context)),
+                        AppMenuItem(
+                          label: 'Action A',
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                        AppMenuItem(
+                          label: 'Action B',
+                          onPressed: () => Navigator.pop(context),
+                        ),
                       ],
                     ),
                   ),
@@ -249,8 +270,14 @@ class _ComponentSandboxPageState extends State<ComponentSandboxPage> {
                       variant: variant,
                       onPressed: () {},
                       menuItems: [
-                        AppMenuItem(label: 'Choice X', onPressed: () => Navigator.pop(context)),
-                        AppMenuItem(label: 'Choice Y', onPressed: () => Navigator.pop(context)),
+                        AppMenuItem(
+                          label: 'Choice X',
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                        AppMenuItem(
+                          label: 'Choice Y',
+                          onPressed: () => Navigator.pop(context),
+                        ),
                       ],
                     ),
                   ),
@@ -268,7 +295,11 @@ class _ComponentSandboxPageState extends State<ComponentSandboxPage> {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        const AppText('AppStepper Controls', type: AppTextType.title2, fontWeight: FontWeight.bold),
+        const AppText(
+          'AppStepper Controls',
+          type: AppTextType.title2,
+          fontWeight: FontWeight.bold,
+        ),
         const SizedBox(height: 12),
         AppGroupedList(
           children: [
@@ -284,27 +315,35 @@ class _ComponentSandboxPageState extends State<ComponentSandboxPage> {
               title: 'Conditional Stepper',
               subtitle: 'Min 0, Max 5: $_stepperVal2',
               trailing: AppStepper(
-                onIncrement: _stepperVal2 < 5 ? () => setState(() => _stepperVal2++) : null,
-                onDecrement: _stepperVal2 > 0 ? () => setState(() => _stepperVal2--) : null,
+                onIncrement: _stepperVal2 < 5
+                    ? () => setState(() => _stepperVal2++)
+                    : null,
+                onDecrement: _stepperVal2 > 0
+                    ? () => setState(() => _stepperVal2--)
+                    : null,
               ),
             ),
             const AppGroupedListTile(
               title: 'Fully Disabled Stepper',
               subtitle: 'Passing null callbacks',
-              trailing: AppStepper(
-                onIncrement: null,
-                onDecrement: null,
-              ),
+              trailing: AppStepper(onIncrement: null, onDecrement: null),
             ),
           ],
         ),
 
         const SizedBox(height: 24),
 
-        const AppText('AppHeader Varian Showcase', type: AppTextType.title2, fontWeight: FontWeight.bold),
+        const AppText(
+          'AppHeader Varian Showcase',
+          type: AppTextType.title2,
+          fontWeight: FontWeight.bold,
+        ),
         const SizedBox(height: 12),
 
-        const AppText('1. Compact Large Variant (Default)', type: AppTextType.headline),
+        const AppText(
+          '1. Compact Large Variant (Default)',
+          type: AppTextType.headline,
+        ),
         const SizedBox(height: 8),
         Container(
           color: Colors.white,
@@ -320,7 +359,10 @@ class _ComponentSandboxPageState extends State<ComponentSandboxPage> {
 
         const SizedBox(height: 16),
 
-        const AppText('2. Large Variant (Stacked Layout)', type: AppTextType.headline),
+        const AppText(
+          '2. Large Variant (Stacked Layout)',
+          type: AppTextType.headline,
+        ),
         const SizedBox(height: 8),
         Container(
           color: Colors.white,
@@ -340,17 +382,17 @@ class _ComponentSandboxPageState extends State<ComponentSandboxPage> {
 
         const SizedBox(height: 16),
 
-        const AppText('3. Inline Variant (Centered Small Title)', type: AppTextType.headline),
+        const AppText(
+          '3. Inline Variant (Centered Small Title)',
+          type: AppTextType.headline,
+        ),
         const SizedBox(height: 8),
         Container(
           color: Colors.white,
           child: AppHeader(
             title: 'Inline Title',
             variant: AppHeaderVariant.inline,
-            leading: IconButton(
-              icon: const Icon(Icons.menu),
-              onPressed: () {},
-            ),
+            leading: IconButton(icon: const Icon(Icons.menu), onPressed: () {}),
             trailing: IconButton(
               icon: const Icon(Icons.search),
               onPressed: () {},
@@ -366,7 +408,11 @@ class _ComponentSandboxPageState extends State<ComponentSandboxPage> {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        const AppText('AppGroupedList Form Types', type: AppTextType.title2, fontWeight: FontWeight.bold),
+        const AppText(
+          'AppGroupedList Form Types',
+          type: AppTextType.title2,
+          fontWeight: FontWeight.bold,
+        ),
         const SizedBox(height: 12),
         AppGroupedList(
           children: [
@@ -407,17 +453,18 @@ class _ComponentSandboxPageState extends State<ComponentSandboxPage> {
             ),
             AppGroupedListTile(
               title: 'System Auto-sync',
-              trailing: Switch(
-                value: true,
-                onChanged: (val) {},
-              ),
+              trailing: Switch(value: true, onChanged: (val) {}),
             ),
           ],
         ),
 
         const SizedBox(height: 24),
 
-        const AppText('AppAlertDialog Showcases', type: AppTextType.title2, fontWeight: FontWeight.bold),
+        const AppText(
+          'AppAlertDialog Showcases',
+          type: AppTextType.title2,
+          fontWeight: FontWeight.bold,
+        ),
         const SizedBox(height: 12),
         AppGroupedList(
           children: [
@@ -429,7 +476,8 @@ class _ComponentSandboxPageState extends State<ComponentSandboxPage> {
                 showAppAlertDialog(
                   context,
                   title: 'Discard Changes?',
-                  description: 'If you leave this screen, your unsaved progress will be permanently lost.',
+                  description:
+                      'If you leave this screen, your unsaved progress will be permanently lost.',
                   primaryButtonLabel: 'Discard',
                   onPrimaryPressed: () => Navigator.pop(context),
                   secondaryButtonLabel: 'Cancel',
@@ -446,7 +494,8 @@ class _ComponentSandboxPageState extends State<ComponentSandboxPage> {
                 showAppAlertDialog(
                   context,
                   title: 'Account Verification',
-                  description: 'Please confirm your identity by picking one of the options below.',
+                  description:
+                      'Please confirm your identity by picking one of the options below.',
                   primaryButtonLabel: 'Verify ID',
                   onPrimaryPressed: () => Navigator.pop(context),
                   secondaryButtonLabel: 'Cancel',
@@ -465,7 +514,11 @@ class _ComponentSandboxPageState extends State<ComponentSandboxPage> {
                   title: 'Select Items',
                   description: 'The following records will be generated:',
                   content: const AppAlertContentList(
-                    items: ['Therapy Record 12', 'Therapy Record 13', 'Therapy Record 14'],
+                    items: [
+                      'Therapy Record 12',
+                      'Therapy Record 13',
+                      'Therapy Record 14',
+                    ],
                   ),
                   primaryButtonLabel: 'Accept All',
                   onPrimaryPressed: () => Navigator.pop(context),

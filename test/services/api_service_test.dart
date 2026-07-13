@@ -4,7 +4,6 @@ import 'package:http/http.dart' as http;
 import 'package:mocktail/mocktail.dart';
 import 'package:vac_dashboard_app/services/api_service.dart';
 
-
 class MockHttpClient extends Mock implements http.Client {}
 
 class FakeUri extends Fake implements Uri {}
@@ -62,10 +61,8 @@ void main() {
 
     test('returns empty list when no sessions', () async {
       when(() => mockClient.get(any())).thenAnswer(
-        (_) async => http.Response(
-          jsonEncode({'status': 'ok', 'data': []}),
-          200,
-        ),
+        (_) async =>
+            http.Response(jsonEncode({'status': 'ok', 'data': []}), 200),
       );
 
       final sessions = await api.getSessions();
@@ -74,24 +71,23 @@ void main() {
     });
 
     test('throws on non-200 response', () async {
-      when(() => mockClient.get(any())).thenAnswer(
-        (_) async => http.Response('Server error', 500),
-      );
+      when(
+        () => mockClient.get(any()),
+      ).thenAnswer((_) async => http.Response('Server error', 500));
 
-      expect(
-        () => api.getSessions(),
-        throwsA(isA<Exception>()),
-      );
+      expect(() => api.getSessions(), throwsA(isA<Exception>()));
     });
   });
 
   group('ApiService.createSession', () {
     test('creates session and returns parsed result', () async {
-      when(() => mockClient.post(
-            any(),
-            headers: any(named: 'headers'),
-            body: any(named: 'body'),
-          )).thenAnswer(
+      when(
+        () => mockClient.post(
+          any(),
+          headers: any(named: 'headers'),
+          body: any(named: 'body'),
+        ),
+      ).thenAnswer(
         (_) async => http.Response(
           jsonEncode({
             'status': 'ok',
@@ -121,13 +117,13 @@ void main() {
     });
 
     test('throws on non-200 response', () async {
-      when(() => mockClient.post(
-            any(),
-            headers: any(named: 'headers'),
-            body: any(named: 'body'),
-          )).thenAnswer(
-        (_) async => http.Response('Bad request', 400),
-      );
+      when(
+        () => mockClient.post(
+          any(),
+          headers: any(named: 'headers'),
+          body: any(named: 'body'),
+        ),
+      ).thenAnswer((_) async => http.Response('Bad request', 400));
 
       expect(
         () => api.createSession({'start': 1, 'end': 2, 'mode': 1}),

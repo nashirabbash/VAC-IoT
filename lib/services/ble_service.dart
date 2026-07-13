@@ -4,18 +4,18 @@ import 'dart:convert';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
 class BleService {
-  static const _deviceName  = 'VAC-STECHOQ';
+  static const _deviceName = 'VAC-STECHOQ';
   static const _serviceUuid = '4fafc201-1fb5-459e-8fcc-c5c9c331914b';
-  static const _syncUuid    = 'beb5483e-36e1-4688-b7f5-ea07361b26a8';
+  static const _syncUuid = 'beb5483e-36e1-4688-b7f5-ea07361b26a8';
   static const _therapyUuid = '6e400003-b5a3-f393-e0a9-e50e24dcca9e';
 
   final _controller = StreamController<Map<String, dynamic>>.broadcast();
   Stream<Map<String, dynamic>> get onTherapy => _controller.stream;
 
   StreamSubscription? _scanSub;
-  BluetoothDevice?    _device;
-  bool                _connecting = false;
-  int?                _lastStart;
+  BluetoothDevice? _device;
+  bool _connecting = false;
+  int? _lastStart;
 
   Future<void> startScan() async {
     if (await FlutterBluePlus.isSupported == false) return;
@@ -24,9 +24,13 @@ class BleService {
     await FlutterBluePlus.adapterState
         .where((s) => s == BluetoothAdapterState.on)
         .first
-        .timeout(const Duration(seconds: 10), onTimeout: () => BluetoothAdapterState.off);
+        .timeout(
+          const Duration(seconds: 10),
+          onTimeout: () => BluetoothAdapterState.off,
+        );
 
-    if (await FlutterBluePlus.adapterState.first != BluetoothAdapterState.on) return;
+    if (await FlutterBluePlus.adapterState.first != BluetoothAdapterState.on)
+      return;
 
     _scanSub?.cancel();
     await FlutterBluePlus.startScan(timeout: const Duration(seconds: 15));
@@ -42,7 +46,8 @@ class BleService {
 
     // Retry scan if nothing found
     FlutterBluePlus.isScanning.where((s) => s == false).first.then((_) {
-      if (_device == null) Future.delayed(const Duration(seconds: 3), startScan);
+      if (_device == null)
+        Future.delayed(const Duration(seconds: 3), startScan);
     });
   }
 
@@ -50,7 +55,10 @@ class BleService {
     _connecting = true;
     _device = device;
     try {
-      await device.connect(autoConnect: false, timeout: const Duration(seconds: 10));
+      await device.connect(
+        autoConnect: false,
+        timeout: const Duration(seconds: 10),
+      );
     } catch (_) {
       _connecting = false;
       _device = null;
@@ -82,7 +90,8 @@ class BleService {
           char.lastValueStream.listen((bytes) {
             if (bytes.isEmpty) return;
             try {
-              final data = jsonDecode(utf8.decode(bytes)) as Map<String, dynamic>;
+              final data =
+                  jsonDecode(utf8.decode(bytes)) as Map<String, dynamic>;
               final start = data['start'] as int?;
               if (start == null) return;
               if (start == _lastStart) return;

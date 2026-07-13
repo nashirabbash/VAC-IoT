@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'text.dart'; 
+import 'text.dart';
 import 'button.dart';
 import 'package:vac_dashboard_app/asset/color_tokens.dart';
 
 enum BottomSheetHeaderVariant {
-  standard,         // 'default'
-  title2Line,       // 'title 2 line' 
-  title2LineLeft,   // 'title 2 line left'
-  largeTitle,       // 'Large title'
-  compactLarge      // 'compact large'
+  standard, // 'default'
+  title2Line, // 'title 2 line'
+  title2LineLeft, // 'title 2 line left'
+  largeTitle, // 'Large title'
+  compactLarge, // 'compact large'
 }
 
 class BottomSheetHeader extends StatelessWidget {
@@ -53,7 +53,11 @@ class BottomSheetHeader extends StatelessWidget {
     );
   }
 
-  Widget _buildAction(IconData? icon, VoidCallback? onPressed, {ButtonVariant variant = ButtonVariant.secondary}) {
+  Widget _buildAction(
+    IconData? icon,
+    VoidCallback? onPressed, {
+    ButtonVariant variant = ButtonVariant.secondary,
+  }) {
     if (icon == null) {
       // Invisible placeholder to keep center alignment balanced if needed,
       // or simply a SizedBox. We use 44x44 as the standard hit area.
@@ -75,7 +79,11 @@ class BottomSheetHeader extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             _buildAction(leadingIcon, onLeadingPressed),
-            _buildAction(trailingIcon, onTrailingPressed, variant: trailingVariant),
+            _buildAction(
+              trailingIcon,
+              onTrailingPressed,
+              variant: trailingVariant,
+            ),
           ],
         ),
         if (title.isNotEmpty)
@@ -97,7 +105,11 @@ class BottomSheetHeader extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             _buildAction(leadingIcon, onLeadingPressed),
-            _buildAction(trailingIcon, onTrailingPressed, variant: trailingVariant),
+            _buildAction(
+              trailingIcon,
+              onTrailingPressed,
+              variant: trailingVariant,
+            ),
           ],
         ),
         Column(
@@ -170,7 +182,11 @@ class BottomSheetHeader extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             _buildAction(leadingIcon, onLeadingPressed),
-            _buildAction(trailingIcon, onTrailingPressed, variant: trailingVariant),
+            _buildAction(
+              trailingIcon,
+              onTrailingPressed,
+              variant: trailingVariant,
+            ),
           ],
         ),
         const SizedBox(height: 5),

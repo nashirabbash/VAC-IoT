@@ -8,11 +8,7 @@ class AppContextMenu extends StatelessWidget {
   final List<Widget> children;
   final double width;
 
-  const AppContextMenu({
-    super.key,
-    required this.children,
-    this.width = 238.0,
-  });
+  const AppContextMenu({super.key, required this.children, this.width = 238.0});
 
   @override
   Widget build(BuildContext context) {
@@ -24,10 +20,14 @@ class AppContextMenu extends StatelessWidget {
         borderRadius: BorderRadius.circular(32),
         boxShadow: [
           BoxShadow(
-            color: const Color(0x1E000000).withValues(alpha: Theme.of(context).brightness == Brightness.dark ? 0.4 : 0.12),
+            color: const Color(0x1E000000).withValues(
+              alpha: Theme.of(context).brightness == Brightness.dark
+                  ? 0.4
+                  : 0.12,
+            ),
             blurRadius: 40,
             offset: const Offset(0, 8),
-          )
+          ),
         ],
       ),
       child: BackdropFilter(
@@ -52,10 +52,7 @@ class AppContextMenu extends StatelessWidget {
 class AppMenuActionRow extends StatelessWidget {
   final List<AppMenuHorizontalItem> items;
 
-  const AppMenuActionRow({
-    super.key,
-    required this.items,
-  });
+  const AppMenuActionRow({super.key, required this.items});
 
   @override
   Widget build(BuildContext context) {
@@ -93,7 +90,9 @@ class AppMenuHorizontalItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = isDestructive ? context.colors.accentsRed : context.colors.labelsPrimary;
+    final color = isDestructive
+        ? context.colors.accentsRed
+        : context.colors.labelsPrimary;
 
     return Material(
       color: Colors.transparent, // Background default transparan
@@ -101,7 +100,8 @@ class AppMenuHorizontalItem extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onPressed,
-        highlightColor: context.colors.fillsVibrantTertiary, // Warna saat ditekan/hover
+        highlightColor:
+            context.colors.fillsVibrantTertiary, // Warna saat ditekan/hover
         splashColor: context.colors.fillsVibrantTertiary.withValues(alpha: 0.5),
         child: Container(
           height: 56,
@@ -150,10 +150,7 @@ class AppMenuSeparator extends StatelessWidget {
 class AppMenuSectionTitle extends StatelessWidget {
   final String title;
 
-  const AppMenuSectionTitle({
-    super.key,
-    required this.title,
-  });
+  const AppMenuSectionTitle({super.key, required this.title});
 
   @override
   Widget build(BuildContext context) {
@@ -194,7 +191,8 @@ class AppMenuItem extends StatelessWidget {
   Widget build(BuildContext context) {
     // Penentuan warna berdasarkan state
     Color primaryColor = context.colors.labelsPrimary;
-    Color secondaryColor = context.colors.labelsSecondary; // Trailing text / Icon
+    Color secondaryColor =
+        context.colors.labelsSecondary; // Trailing text / Icon
 
     if (isDisabled) {
       primaryColor = context.colors.labelsVibrantTertiary;
@@ -207,25 +205,28 @@ class AppMenuItem extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: isDisabled ? null : onPressed,
-        highlightColor: context.colors.fillsVibrantTertiary.withValues(alpha: 0.5),
+        highlightColor: context.colors.fillsVibrantTertiary.withValues(
+          alpha: 0.5,
+        ),
         splashColor: context.colors.fillsVibrantTertiary.withValues(alpha: 0.5),
         child: Padding(
-          padding: const EdgeInsets.only(left: 14, right: 16, top: 10, bottom: 10),
+          padding: const EdgeInsets.only(
+            left: 14,
+            right: 16,
+            top: 10,
+            bottom: 10,
+          ),
           child: Row(
             children: [
               // Area Leading Icon (dengan ukuran tetap agar teks selalu rata kiri)
               if (leadingIcon != null) ...[
                 SizedBox(
                   width: 28,
-                  child: Icon(
-                    leadingIcon,
-                    size: 20,
-                    color: primaryColor,
-                  ),
+                  child: Icon(leadingIcon, size: 20, color: primaryColor),
                 ),
                 const SizedBox(width: 8),
               ],
-              
+
               // Area Label
               Expanded(
                 child: AppText(
@@ -254,7 +255,7 @@ class AppMenuItem extends StatelessWidget {
                         size: 20,
                         color: secondaryColor,
                       ),
-                    ]
+                    ],
                   ],
                 ),
               ],

@@ -15,12 +15,7 @@ enum AppTextType {
   caption2,
 }
 
-enum AppTextColor {
-  primary,
-  secondary,
-  tertiary,
-  quaternary,
-}
+enum AppTextColor { primary, secondary, tertiary, quaternary }
 
 class AppText extends StatelessWidget {
   final String text;
@@ -82,7 +77,8 @@ class AppText extends StatelessWidget {
         return FontWeight.w700;
       case AppTextType.title3:
       case AppTextType.headline:
-        return FontWeight.w600; // Often used as w600 in typical flutter unless custom font is used
+        return FontWeight
+            .w600; // Often used as w600 in typical flutter unless custom font is used
       case AppTextType.body:
       case AppTextType.callout:
       case AppTextType.subheadline:
@@ -164,7 +160,8 @@ class AppText extends StatelessWidget {
       maxLines: maxLines,
       overflow: overflow,
       style: TextStyle(
-        fontFamily: 'SF Pro', // Pastikan font ini sudah ditambahkan ke pubspec.yaml jika ingin tampil akurat
+        fontFamily:
+            'SF Pro', // Pastikan font ini sudah ditambahkan ke pubspec.yaml jika ingin tampil akurat
         fontSize: _fontSize,
         fontWeight: fontWeight ?? _defaultFontWeight,
         fontStyle: isItalic ? FontStyle.italic : FontStyle.normal,

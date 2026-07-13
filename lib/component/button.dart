@@ -3,11 +3,21 @@ import 'package:vac_dashboard_app/component/text.dart';
 import 'package:vac_dashboard_app/asset/color_tokens.dart';
 
 enum ButtonSize { small, medium, large, iconOnly }
-enum ButtonVariant { primary, secondary, tertiary, destructive, primaryDestructive, ghost, elevated }
+
+enum ButtonVariant {
+  primary,
+  secondary,
+  tertiary,
+  destructive,
+  primaryDestructive,
+  ghost,
+  elevated,
+}
 
 class AppButton extends StatelessWidget {
   final String? label;
-  final IconData? icon; // Digunakan sebagai leading icon atau icon utama jika iconOnly
+  final IconData?
+  icon; // Digunakan sebagai leading icon atau icon utama jika iconOnly
   final IconData? trailingIcon;
   final ButtonSize size;
   final ButtonVariant variant;
@@ -90,7 +100,9 @@ class AppButton extends StatelessWidget {
       case ButtonVariant.tertiary:
         return context.colors.fillsTertiary; // Fills-Tertiary
       case ButtonVariant.destructive:
-        return context.colors.miscellaneousButtonsBGDestructive; // Destructive Background
+        return context
+            .colors
+            .miscellaneousButtonsBGDestructive; // Destructive Background
       case ButtonVariant.primaryDestructive:
         return context.colors.accentsRed; // Accents-Red background
       case ButtonVariant.ghost:
@@ -101,12 +113,16 @@ class AppButton extends StatelessWidget {
   }
 
   Color _foregroundColor(BuildContext context) {
-    final effectiveVariant = variant == ButtonVariant.ghost ? ButtonVariant.tertiary : variant;
+    final effectiveVariant = variant == ButtonVariant.ghost
+        ? ButtonVariant.tertiary
+        : variant;
     final effectiveIsGhost = isGhost || variant == ButtonVariant.ghost;
 
     switch (effectiveVariant) {
       case ButtonVariant.primary:
-        return effectiveIsGhost ? context.colors.accentsBlue : context.colors.graysWhite;
+        return effectiveIsGhost
+            ? context.colors.accentsBlue
+            : context.colors.graysWhite;
       case ButtonVariant.secondary:
         return context.colors.labelsPrimary;
       case ButtonVariant.tertiary:
@@ -114,7 +130,9 @@ class AppButton extends StatelessWidget {
       case ButtonVariant.destructive:
         return context.colors.accentsRed; // Accents-Red
       case ButtonVariant.primaryDestructive:
-        return effectiveIsGhost ? context.colors.accentsRed : context.colors.graysWhite;
+        return effectiveIsGhost
+            ? context.colors.accentsRed
+            : context.colors.graysWhite;
       case ButtonVariant.elevated:
         return context.colors.labelsPrimary;
       case ButtonVariant.ghost:
@@ -126,15 +144,19 @@ class AppButton extends StatelessWidget {
   Widget build(BuildContext context) {
     // Memaksa jadi icon button bulat jika size == iconOnly
     // atau jika label & trailingIcon kosong.
-    final bool isIconButtonOnly = size == ButtonSize.iconOnly || (label == null && trailingIcon == null && icon != null);
+    final bool isIconButtonOnly =
+        size == ButtonSize.iconOnly ||
+        (label == null && trailingIcon == null && icon != null);
     final Color bgColor = _backgroundColor(context);
     final Color fgColor = _foregroundColor(context);
 
     final buttonContent = Material(
       color: bgColor,
-      shape: isIconButtonOnly 
-          ? const CircleBorder() 
-          : RoundedRectangleBorder(borderRadius: BorderRadius.circular(500)), // Bentuk Pill
+      shape: isIconButtonOnly
+          ? const CircleBorder()
+          : RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(500),
+            ), // Bentuk Pill
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onPressed,
@@ -143,7 +165,9 @@ class AppButton extends StatelessWidget {
         child: Container(
           height: _height,
           width: isIconButtonOnly ? _height : null,
-          padding: EdgeInsets.symmetric(horizontal: isIconButtonOnly ? 0 : _paddingHorizontal),
+          padding: EdgeInsets.symmetric(
+            horizontal: isIconButtonOnly ? 0 : _paddingHorizontal,
+          ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
@@ -154,8 +178,7 @@ class AppButton extends StatelessWidget {
                   size: customIconSize ?? _defaultIconSize,
                   color: fgColor,
                 ),
-              if (icon != null && label != null) 
-                const SizedBox(width: 8),
+              if (icon != null && label != null) const SizedBox(width: 8),
               if (label != null)
                 Flexible(
                   child: AppText(
@@ -168,7 +191,7 @@ class AppButton extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-              if (trailingIcon != null && label != null) 
+              if (trailingIcon != null && label != null)
                 const SizedBox(width: 8),
               if (trailingIcon != null)
                 Icon(
@@ -189,10 +212,14 @@ class AppButton extends StatelessWidget {
           borderRadius: isIconButtonOnly ? null : BorderRadius.circular(500),
           boxShadow: [
             BoxShadow(
-              color: const Color(0x1E000000).withValues(alpha: Theme.of(context).brightness == Brightness.dark ? 0.4 : 0.12),
+              color: const Color(0x1E000000).withValues(
+                alpha: Theme.of(context).brightness == Brightness.dark
+                    ? 0.4
+                    : 0.12,
+              ),
               blurRadius: 10,
               offset: const Offset(0, 4),
-            )
+            ),
           ],
         ),
         child: buttonContent,

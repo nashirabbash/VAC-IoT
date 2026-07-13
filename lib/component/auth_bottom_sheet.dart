@@ -105,7 +105,9 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
               BottomSheetHeader(
                 title: '',
                 showGrabber: false,
-                leadingIcon: isForgotPassword ? Icons.arrow_back_ios_new_rounded : null,
+                leadingIcon: isForgotPassword
+                    ? Icons.arrow_back_ios_new_rounded
+                    : null,
                 onLeadingPressed: isForgotPassword
                     ? () => setState(() => _mode = AuthMode.login)
                     : null,
@@ -126,8 +128,8 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
                       isForgotPassword
                           ? 'Reset Password'
                           : isLogin
-                              ? 'Welcome back'
-                              : 'Register',
+                          ? 'Welcome back'
+                          : 'Register',
                       type: AppTextType.title3,
                       fontWeight: FontWeight.w600,
                       customColor: colors.labelsPrimary,
@@ -137,8 +139,8 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
                       isForgotPassword
                           ? 'Enter your username and your new password to update your credentials.'
                           : isLogin
-                              ? 'Sign in to access your therapy history and manage connected devices.'
-                              : 'Create an account to track your sessions and sync with devices.',
+                          ? 'Sign in to access your therapy history and manage connected devices.'
+                          : 'Create an account to track your sessions and sync with devices.',
                       type: AppTextType.body,
                       customColor: colors.labelsSecondary,
                     ),
@@ -153,7 +155,8 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   AppGroupedList(
-                    backgroundColor: colors.backgroundsSecondaryElevated, // iOS Grouped background
+                    backgroundColor: colors
+                        .backgroundsSecondaryElevated, // iOS Grouped background
                     children: [
                       // Username Field
                       TextField(
@@ -188,7 +191,9 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
                           ),
                           decoration: InputDecoration(
                             labelText: 'Hospital',
-                            labelStyle: TextStyle(color: colors.labelsSecondary),
+                            labelStyle: TextStyle(
+                              color: colors.labelsSecondary,
+                            ),
                             floatingLabelStyle: TextStyle(
                               color: colors.accentsBlue,
                             ),
@@ -210,7 +215,9 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
                           color: colors.labelsPrimary,
                         ),
                         decoration: InputDecoration(
-                          labelText: isForgotPassword ? 'New Password' : 'Password',
+                          labelText: isForgotPassword
+                              ? 'New Password'
+                              : 'Password',
                           labelStyle: TextStyle(color: colors.labelsSecondary),
                           floatingLabelStyle: TextStyle(
                             color: colors.accentsBlue,
@@ -249,7 +256,9 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
                             color: colors.labelsPrimary,
                           ),
                           decoration: InputDecoration(
-                            labelText: isForgotPassword ? 'Confirm New Password' : 'Confirm Password',
+                            labelText: isForgotPassword
+                                ? 'Confirm New Password'
+                                : 'Confirm Password',
                             labelStyle: TextStyle(
                               color: colors.labelsSecondary,
                             ),
@@ -364,8 +373,8 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
                       label: isForgotPassword
                           ? 'Reset Password'
                           : isLogin
-                              ? 'Login'
-                              : 'Register',
+                          ? 'Login'
+                          : 'Register',
                       size: ButtonSize.large,
                       variant: ButtonVariant.primary,
                       onPressed: () {
@@ -392,26 +401,26 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
                   // Mode Switcher Option
                   if (!isForgotPassword)
                     GestureDetector(
-                    onTap: _toggleMode,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        AppText(
-                          isLogin
-                              ? 'Don’t have an account? '
-                              : 'Already have an account? ',
-                          type: AppTextType.subheadline,
-                          customColor: colors.labelsSecondary,
-                        ),
-                        AppText(
-                          isLogin ? 'Sign Up' : 'Sign In',
-                          type: AppTextType.subheadline,
-                          customColor: colors.accentsBlue,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ],
+                      onTap: _toggleMode,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          AppText(
+                            isLogin
+                                ? 'Don’t have an account? '
+                                : 'Already have an account? ',
+                            type: AppTextType.subheadline,
+                            customColor: colors.labelsSecondary,
+                          ),
+                          AppText(
+                            isLogin ? 'Sign Up' : 'Sign In',
+                            type: AppTextType.subheadline,
+                            customColor: colors.accentsBlue,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
                 ],
               ),
             ],
