@@ -34,6 +34,42 @@ class ApiService {
     final body = jsonDecode(res.body) as Map<String, dynamic>;
     return TherapySession.fromJson(body['data'] as Map<String, dynamic>);
   }
+
+  Future<String> login(String username, String password) async {
+    final uri = Uri.parse('$_baseUrl/auth/login');
+    final res = await _client.post(
+      uri,
+      body: jsonEncode({'username': username, 'password': password}),
+      headers: {'Content-Type': 'application/json'},
+    );
+    final body = jsonDecode(res.body) as Map<String, dynamic>;
+    if (res.statusCode != 200) {
+      throw Exception(body['message'] ?? 'Failed to login');
+    }
+    return (body['data'] != null ? body['data']['token'] : body['token'])
+        as String;
+  }
+
+  Future<void> register(
+    String username,
+    String password,
+    String hospitalName,
+  ) async {
+    final uri = Uri.parse('$_baseUrl/auth/register');
+    final res = await _client.post(
+      uri,
+      body: jsonEncode({
+        'username': username,
+        'password': password,
+        'hospitalName': hospitalName,
+      }),
+      headers: {'Content-Type': 'application/json'},
+    );
+    if (res.statusCode != 201 && res.statusCode != 200) {
+      final body = jsonDecode(res.body) as Map<String, dynamic>;
+      throw Exception(body['message'] ?? 'Failed to register');
+    }
+  }
 }
 
 final apiService = ApiService();
