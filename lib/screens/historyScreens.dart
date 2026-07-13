@@ -10,6 +10,7 @@ import 'package:vac_dashboard_app/component/splitButton.dart';
 import 'package:vac_dashboard_app/asset/color_tokens.dart';
 import 'package:vac_dashboard_app/network/api_interceptor.dart';
 import 'package:vac_dashboard_app/screens/welcomeScreens.dart';
+import 'package:vac_dashboard_app/db/database_helper.dart';
 
 class HistoryScreens extends StatefulWidget {
   const HistoryScreens({super.key});
@@ -52,12 +53,12 @@ class _HistoryScreensState extends State<HistoryScreens> {
   @override
   void initState() {
     super.initState();
-    _loadFromBackend();
+    _syncAndLoadData();
     _ble.startScan();
     _ble.onTherapy.listen((payload) async {
       try {
         await TherapyReceiver.save(payload);
-        _loadFromBackend();
+        _syncAndLoadData();
       } on AuthException {
         _handleAuthException();
       } catch (e) {
@@ -69,8 +70,38 @@ class _HistoryScreensState extends State<HistoryScreens> {
     });
   }
 
-  Future<void> _loadFromBackend() async {
+  Future<void> _syncAndLoadData() async {
     try {
+      // Load local offline data first
+      final localData = await DatabaseHelper.instance.getAll();
+      if (localData.isNotEmpty && mounted) {
+        final localSessions = localData
+            .map(
+              (e) => TherapySession(
+                id: e['id'] as int? ?? 0,
+                sessionDate: e['session_date'] as String,
+                title: e['title'] as String,
+                date: e['date'] as String,
+                mode: e['mode'] as String,
+                duration: e['duration'] as String,
+              ),
+            )
+            .toList();
+        setState(() {
+          _sessions = localSessions;
+          if (_selectedYear == null) {
+            final y =
+                localSessions
+                    .map((s) => s.sessionDate.substring(0, 4))
+                    .toSet()
+                    .toList()
+                  ..sort((a, b) => b.compareTo(a));
+            _selectedYear = y.isNotEmpty ? y.first : null;
+          }
+        });
+      }
+
+      // Sync with backend
       final all = await apiService.getSessions();
       final years =
           all.map((s) => s.sessionDate.substring(0, 4)).toSet().toList()
