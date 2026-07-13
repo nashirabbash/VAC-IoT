@@ -70,6 +70,26 @@ class ApiService {
       throw Exception(body['message'] ?? 'Failed to register');
     }
   }
+
+  Future<void> bindDevice(String qrKey) async {
+    final uri = Uri.parse('$_baseUrl/device/bind');
+    final res = await _client.post(
+      uri,
+      body: jsonEncode({'qrKey': qrKey}),
+      headers: {'Content-Type': 'application/json'},
+    );
+    final body = jsonDecode(res.body) as Map<String, dynamic>;
+    if (res.statusCode != 200 && res.statusCode != 201) {
+      throw Exception(body['message'] ?? 'Failed to bind device');
+    }
+    // API returns new token
+    final newToken = body['data'] != null
+        ? body['data']['token']
+        : body['token'];
+    if (newToken != null) {
+      await AuthRepository().saveToken(newToken as String);
+    }
+  }
 }
 
 final apiService = ApiService();
