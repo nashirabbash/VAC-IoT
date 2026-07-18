@@ -13,7 +13,8 @@ import 'package:vac_dashboard_app/component/menu.dart';
 
 class HomeScreen extends StatefulWidget {
   final AuthRepository? authRepository;
-  const HomeScreen({super.key, this.authRepository});
+  final ApiService? apiService;
+  const HomeScreen({super.key, this.authRepository, this.apiService});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -24,6 +25,7 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _hasBoundDevice = false;
   bool _isLoading = true;
   late final AuthRepository _authRepository = widget.authRepository ?? AuthRepository();
+  late final ApiService _apiService = widget.apiService ?? apiService;
 
   @override
   void initState() {
@@ -100,7 +102,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       onPressed: () async {
                         Navigator.of(context).pop(); // Dismiss menu
                         try {
-                          await _authRepository.logout();
+                          await _apiService.logout();
+                          await _authRepository.clearToken();
                           if (context.mounted) {
                             Navigator.of(context).pushReplacement(
                               MaterialPageRoute(

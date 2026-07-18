@@ -98,10 +98,7 @@ class ApiService {
       headers: {'Content-Type': 'application/json'},
     );
     if (res.statusCode != 200 && res.statusCode != 201 && res.statusCode != 204) {
-      final body = jsonDecode(res.body) as Map<String, dynamic>;
-      final errObj = body['error'] ?? body;
-      final errMsg = _parseErrorMessage(errObj['summary'] ?? errObj['message']);
-      throw Exception(errMsg ?? 'Failed to logout');
+      throw Exception('Failed to logout');
     }
   }
 }

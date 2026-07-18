@@ -1,15 +1,11 @@
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:vac_dashboard_app/services/api_service.dart';
 
 class AuthRepository {
   static const String _tokenKey = 'jwt_token';
   final _storage = const FlutterSecureStorage();
-  final ApiService _api;
   String? _cachedToken;
   bool _isInitialized = false;
-
-  AuthRepository({ApiService? api}) : _api = api ?? apiService;
 
   Future<void> _initCache() async {
     if (!_isInitialized) {
@@ -48,10 +44,5 @@ class AuthRepository {
     } catch (e) {
       return null;
     }
-  }
-
-  Future<void> logout() async {
-    await _api.logout();
-    await clearToken();
   }
 }
