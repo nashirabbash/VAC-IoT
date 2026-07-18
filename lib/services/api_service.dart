@@ -4,15 +4,29 @@ import 'package:vac_dashboard_app/models/therapy_session.dart';
 import 'package:vac_dashboard_app/network/api_interceptor.dart';
 import 'package:vac_dashboard_app/repositories/auth_repository.dart';
 
+class ApiException implements Exception {
+  final String message;
+  ApiException(this.message);
+
+  @override
+  String toString() => message;
+}
+
 class ApiService {
   static const _baseUrl = 'http://192.168.1.35:3000/api';
 
   final http.Client _client;
   final AuthRepository _authRepository;
 
-  ApiService({http.Client? client, AuthRepository? authRepository})
-    : _authRepository = authRepository ?? AuthRepository(),
-      _client = client ?? ApiInterceptor(authRepository: authRepository ?? AuthRepository());
+  ApiService._(this._client, this._authRepository);
+
+  factory ApiService({http.Client? client, AuthRepository? authRepository}) {
+    final authRepo = authRepository ?? AuthRepository();
+    return ApiService._(
+      client ?? ApiInterceptor(authRepository: authRepo),
+      authRepo,
+    );
+  }
 
   Future<List<TherapySession>> getSessions({String? year}) async {
     final uri = Uri.parse(
@@ -100,16 +114,7 @@ class ApiService {
       headers: {'Content-Type': 'application/json'},
     );
     if (res.statusCode != 200 && res.statusCode != 201 && res.statusCode != 204) {
-      try {
-        final body = jsonDecode(res.body) as Map<String, dynamic>;
-        final errObj = body['error'] ?? body;
-        throw Exception(errObj['message'] ?? 'Failed to logout');
-      } catch (e) {
-        if (e is FormatException) {
-          throw Exception('Failed to logout');
-        }
-        rethrow;
-      }
+      throw ApiException('Failed to logout');
     }
     await _authRepository.clearToken();
   }

@@ -1,0 +1,528 @@
+b65bd41 fix: address standards and spec feedback for logout orchestration and error handling (2 minutes ago) <nashirabbash>
+commit_diff.txt                     | 109 +++++++
+ commit_review_comment.md            |  47 +++
+ docs/agents/domain.md               |  51 ++++
+ docs/agents/issue-tracker.md        |  45 +++
+ lib/screens/homeScreens.dart        |   3 +-
+ lib/services/api_service.dart       |  18 +-
+ pr_diff.txt                         | 587 ++++++++++++++++++++++++++++++++++++
+ pr_review_comment.md                |  64 ++++
+ spec.md                             |  39 +++
+ test/screens/homeScreens_test.dart  |   7 +-
+ test/services/api_service_test.dart |   7 +-
+ ticket1.md                          |  15 +
+ ticket2.md                          |  15 +
+ 13 files changed, 998 insertions(+), 9 deletions(-)
+
+commit_diff.txt
+  @@ -0,0 +1,109 @@
+  +9412ebf fix: address PR review comments (2 minutes ago) <nashirabbash>
+  +lib/repositories/auth_repository.dart |  9 ---------
+  + lib/screens/homeScreens.dart          |  7 +++++--
+  + lib/services/api_service.dart         |  5 +----
+  + test/screens/homeScreens_test.dart    | 18 ++++++++++++++----
+  + 4 files changed, 20 insertions(+), 19 deletions(-)
+  +
+  +lib/repositories/auth_repository.dart
+  +  @@ -1,16 +1,12 @@
+  +  -import 'package:vac_dashboard_app/services/api_service.dart';
+  +   
+  +   class AuthRepository {
+  +     static const String _tokenKey = 'jwt_token';
+  +     final _storage = const FlutterSecureStorage();
+  +  -  final ApiService _api;
+  +     String? _cachedToken;
+  +     bool _isInitialized = false;
+  +   
+  +  -  AuthRepository({ApiService? api}) : _api = api ?? apiService;
+  +  -
+  +     Future<void> _initCache() async {
+  +       if (!_isInitialized) {
+  +         _cachedToken = await _storage.read(key: _tokenKey);
+  +  @@ -49,9 +45,4 @@
+  +  -
+  +  -  Future<void> logout() async {
+  +  -    await _api.logout();
+  +  -    await clearToken();
+  +  -  }
+  +   }
+  +  +0 -9
+  +
+  +lib/screens/homeScreens.dart
+  +  @@ -13,7 +13,8 @@
+  +  -  const HomeScreen({super.key, this.authRepository});
+  +  +  final ApiService? apiService;
+  +  +  const HomeScreen({super.key, this.authRepository, this.apiService});
+  +   
+  +     @override
+  +     State<HomeScreen> createState() => _HomeScreenState();
+  +  @@ -24,6 +25,7 @@
+  +  +  late final ApiService _apiService = widget.apiService ?? apiService;
+  +   
+  +     @override
+  +     void initState() {
+  +  @@ -100,7 +102,8 @@
+  +  -                          await _authRepository.logout();
+  +  +                          await _apiService.logout();
+  +  +                          await _authRepository.clearToken();
+  +                             if (context.mounted) {
+  +                               Navigator.of(context).pushReplacement(
+  +                                 MaterialPageRoute(
+  +  +5 -2
+  +
+  +lib/services/api_service.dart
+  +  @@ -98,10 +98,7 @@
+  +  -      final body = jsonDecode(res.body) as Map<String, dynamic>;
+  +  -      final errObj = body['error'] ?? body;
+  +  -      final errMsg = _parseErrorMessage(errObj['summary'] ?? errObj['message']);
+  +  -      throw Exception(errMsg ?? 'Failed to logout');
+  +  +      throw Exception('Failed to logout');
+  +       }
+  +     }
+  +   }
+  +  +1 -4
+  +
+  +test/screens/homeScreens_test.dart
+  +  @@ -4,23 +4,31 @@
+  +  +import 'package:vac_dashboard_app/services/api_service.dart';
+  +   
+  +   class MockAuthRepository extends Mock implements AuthRepository {}
+  +  +class MockApiService extends Mock implements ApiService {}
+  +   
+  +   void main() {
+  +     late MockAuthRepository mockAuthRepository;
+  +  +  late MockApiService mockApiService;
+  +   
+  +     setUp(() {
+  +       mockAuthRepository = MockAuthRepository();
+  +  +    mockApiService = MockApiService();
+  +     });
+  +   
+  +     testWidgets('Logout success path', (tester) async {
+  +       when(() => mockAuthRepository.getDecodedToken()).thenAnswer((_) async => null);
+  +  -    when(() => mockAuthRepository.logout()).thenAnswer((_) async {});
+  +  +    when(() => mockApiService.logout()).thenAnswer((_) async {});
+  +  +    when(() => mockAuthRepository.clearToken()).thenAnswer((_) async {});
+  +       
+  +       await tester.pumpWidget(
+  +         MaterialApp(
+  +  -        home: HomeScreen(authRepository: mockAuthRepository),
+  +  +        home: HomeScreen(
+  +  +          authRepository: mockAuthRepository,
+  +  +          apiService: mockApiService,
+  +  +        ),
+  +         ),
+  +       );
+  +       await tester.pump();
+  +  @@ -45,8 +53,10 @@
+  +  -    // Verify authRepository.logout() was called
+  ... (9 lines truncated)
+  +109 -0
+
+commit_review_comment.md
+  @@ -0,0 +1,47 @@
+  +Review for commit `9412ebf5179c5bbc824750f683eb44469c82071e`:
+  +
+  +## Standards
+  +
+  +### `lib/services/api_service.dart`
+  +
+  +**Standard Violation (Hard Violation)**
+  +- **Rule:** `AGENTS.md` (and `CLAUDE.md`) — **Rule 3 — Surgical Changes**
+  +- **Details:** The commit's explicit goal is to remove the Middle Man pattern in `AuthRepository`. However, this hunk deletes the detailed JSON error parsing logic and replaces it with a generic exception. This modifies unrelated, adjacent code and refactors something that wasn't broken.
+  +- **Hunk:**
+  +```dart
+  +-      final body = jsonDecode(res.body) as Map<String, dynamic>;
+  +-      final errObj = body['error'] ?? body;
+  +-      final errMsg = _parseErrorMessage(errObj['summary'] ?? errObj['message']);
+  +-      throw Exception(errMsg ?? 'Failed to logout');
+  ++      throw Exception('Failed to logout');
+  +```
+  +
+  +---
+  +
+  +### `lib/screens/homeScreens.dart`
+  +
+  +**Standard Violation (Judgement Call)**
+  +- **Rule:** `AGENTS.md` (and `CLAUDE.md`) — **Rule 13 — Always Apply Clean Code Principles (SRP)**
+  +- **Details:** By removing the `logout()` orchestration from `AuthRepository`, the UI is now forced to handle the coordination of the API logout and token clearing. This gives the presentation layer domain logic responsibilities, violating the Single Responsibility Principle.
+  +
+  +**Baseline Smell (Judgement Call)**
+  +- **Smell:** **Shotgun Surgery** (and creeping **Data Clumps**)
+  +- **Details:** While the commit fulfills the PR review's request to remove the Middle Man, it creates a more brittle design. Since the UI now coordinates the multi-step logout flow, any future changes to this process will require scattered edits across every widget that triggers a logout (Shotgun Surgery). Additionally, it forces `apiService` and `authRepository` to be passed around together, forming a nascent Data Clump.
+  +
+  +## Spec
+  +
+  +**(a) Missing or partial requirements**
+  +None. The commit successfully addresses the deviations identified in the previous review. 
+  +- It satisfies _"The "Log out" button in `HomeScreen`'s avatar menu calls `ApiService.logout()`"_ by wiring `_apiService.logout()` directly to the UI button instead of delegating to `_authRepository`. 
+  +- It satisfies _"Widget tests are added to verify this success path by mocking `ApiService.logout()`"_ by introducing `MockApiService` and verifying it in the test suite.
+  +
+  +**(b) Scope creep (behaviour in the diff that wasn't asked for)**
+  +In `lib/services/api_service.dart`, the commit deletes the detailed JSON error parsing logic (`jsonDecode`, `_parseErrorMessage`, etc.) and replaces it with a generic, hardcoded `throw Exception('Failed to logout');`. This degrades the quality of error handling and is unrelated to fixing the UI and testing deviations.
+  +- **Spec line:** _"`ApiService.logout()` sends a POST request to `/auth/logout`"_ (The scope was to make the API call and wire up the UI, not to remove or degrade the service's existing error parsing logic).
+  +
+  +**(c) Implemented but looks wrong**
+  +The success path logic is implemented, but the UI implementation is fragile. In `HomeScreen.dart`, the API call is awaited without a `try/catch` block. If the server returns an error, `_apiService.logout()` will throw an exception. Because it is unhandled, it will halt the async callback without providing any error feedback to the user.
+  +- **Spec lines:** _"On a successful response, the local token is cleared via `AuthRepository`"_ and _"On a successful response, the app navigates to `WelcomeScreens`"_. While the current code correctly skips these steps on failure, a robust implementation should catch the exception and ideally present an error message to the user.
+  +
+  +---
+  +**Summary:** Standards: 3 findings (Worst: degrading error parsing in `api_service.dart` violating Surgical Changes); Spec: 2 findings (Worst: fragile UI implementation with unhandled exceptions in `HomeScreen.dart`).
+  +47 -0
+
+docs/agents/domain.md
+  @@ -0,0 +1,51 @@
+  +# Domain Docs
+  +
+  +How the engineering skills should consume this repo's domain documentation when exploring the codebase.
+  +
+  +## Before exploring, read these
+  +
+  +- **`CONTEXT.md`** at the repo root, or
+  +- **`CONTEXT-MAP.md`** at the repo root if it exists — it points at one `CONTEXT.md` per context. Read each one relevant to the topic.
+  +- **`docs/adr/`** — read ADRs that touch the area you're about to work in. In multi-context repos, also check `src/<context>/docs/adr/` for context-scoped decisions.
+  +
+  +If any of these files don't exist, **proceed silently**. Don't flag their absence; don't suggest creating them upfront. The `/domain-modeling` skill (reached via `/grill-with-docs` and `/improve-codebase-architecture`) creates them lazily when terms or decisions actually get resolved.
+  +
+  +## File structure
+  +
+  +Single-context repo (most repos):
+  +
+  +```
+  +/
+  +├── CONTEXT.md
+  +├── docs/adr/
+  +│   ├── 0001-event-sourced-orders.md
+  +│   └── 0002-postgres-for-write-model.md
+  +└── src/
+  +```
+  +
+  +Multi-context repo (presence of `CONTEXT-MAP.md` at the root):
+  +
+  +```
+  +/
+  +├── CONTEXT-MAP.md
+  +├── docs/adr/                          ← system-wide decisions
+  +└── src/
+  +    ├── ordering/
+  +    │   ├── CONTEXT.md
+  +    │   └── docs/adr/                  ← context-specific decisions
+  +    └── billing/
+  +        ├── CONTEXT.md
+  +        └── docs/adr/
+  +```
+  +
+  +## Use the glossary's vocabulary
+  +
+  +When your output names a domain concept (in an issue title, a refactor proposal, a hypothesis, a test name), use the term as defined in `CONTEXT.md`. Don't drift to synonyms the glossary explicitly avoids.
+  +
+  +If the concept you need isn't in the glossary yet, that's a signal — either you're inventing language the project doesn't use (reconsider) or there's a real gap (note it for `/domain-modeling`).
+  +
+  +## Flag ADR conflicts
+  +
+  +If your output contradicts an existing ADR, surface it explicitly rather than silently overriding:
+  +
+  +> _Contradicts ADR-0007 (event-sourced orders) — but worth reopening because…_
+  +51 -0
+
+docs/agents/issue-tracker.md
+  @@ -0,0 +1,45 @@
+  +# Issue tracker: GitHub
+  +
+  +Issues and PRDs for this repo live as GitHub issues. Use the `gh` CLI for all operations.
+  +
+  +## Conventions
+  +
+  +- **Create an issue**: `gh issue create --title "..." --body "..."`. Use a heredoc for multi-line bodies.
+  +- **Read an issue**: `gh issue view <number> --comments`, filtering comments by `jq` and also fetching labels.
+  +- **List issues**: `gh issue list --state open --json number,title,body,labels,comments --jq '[.[] | {number, title, body, labels: [.labels[].name], comments: [.comments[].body]}]'` with appropriate `--label` and `--state` filters.
+  +- **Comment on an issue**: `gh issue comment <number> --body "..."`
+  +- **Apply / remove labels**: `gh issue edit <number> --add-label "..."` / `--remove-label "..."`
+  +- **Close**: `gh issue close <number> --comment "..."`
+  +
+  +Infer the repo from `git remote -v` — `gh` does this automatically when run inside a clone.
+  +
+  +## Pull requests as a triage surface
+  +
+  +**PRs as a request surface: no.** _(Set to `yes` if this repo treats external PRs as feature requests; `/triage` reads this flag.)_
+  +
+  +When set to `yes`, PRs run through the same labels and states as issues, using the `gh pr` equivalents:
+  +
+  +- **Read a PR**: `gh pr view <number> --comments` and `gh pr diff <number>` for the diff.
+  +- **List external PRs for triage**: `gh pr list --state open --json number,title,body,labels,author,authorAssociation,comments` then keep only `authorAssociation` of `CONTRIBUTOR`, `FIRST_TIME_CONTRIBUTOR`, or `NONE` (drop `OWNER`/`MEMBER`/`COLLABORATOR`).
+  +- **Comment / label / close**: `gh pr comment`, `gh pr edit --add-label`/`--remove-label`, `gh pr close`.
+  +
+  +GitHub shares one number space across issues and PRs, so a bare `#42` may be either — resolve with `gh pr view 42` and fall back to `gh issue view 42`.
+  +
+  +## When a skill says "publish to the issue tracker"
+  +
+  +Create a GitHub issue.
+  +
+  +## When a skill says "fetch the relevant ticket"
+  +
+  +Run `gh issue view <number> --comments`.
+  +
+  +## Wayfinding operations
+  +
+  +Used by `/wayfinder`. The **map** is a single issue with **child** issues as tickets.
+  +
+  +- **Map**: a single issue labelled `wayfinder:map`, holding the Notes / Decisions-so-far / Fog body. `gh issue create --label wayfinder:map`.
+  +- **Child ticket**: an issue linked to the map as a GitHub sub-issue (`gh api` on the sub-issues endpoint). Where sub-issues aren't enabled, add the child to a task list in the map body and put `Part of #<map>` at the top of the child body. Labels: `wayfinder:<type>` (`research`/`prototype`/`grilling`/`task`). Once claimed, the ticket is assigned to the driving dev.
+  +- **Blocking**: GitHub's **native issue dependencies** — the canonical, UI-visible representation. Add an edge with `gh api --method POST repos/<owner>/<repo>/issues/<child>/dependencies/blocked_by -F issue_id=<blocker-db-id>`, where `<blocker-db-id>` is the blocker's numeric **database id** (`gh api repos/<owner>/<repo>/issues/<n> --jq .id`, _not_ the `#number` or `node_id`). GitHub reports `issue_dependencies_summary.blocked_by` (open blockers only — the live gate). Where dependencies aren't available, fall back to a `Blocked by: #<n>, #<n>` line at the top of the child body. A ticket is unblocked when every blocker is closed.
+  +- **Frontier query**: list the map's open children (`gh issue list --state open`, scoped to the map's sub-issues / task list), drop any with an open blocker (`issue_dependencies_summary.blocked_by > 0`, or an open issue in the `Blocked by` line) or an assignee; first in map order wins.
+  +- **Claim**: `gh issue edit <n> --add-assignee @me` — the session's first write.
+  +- **Resolve**: `gh issue comment <n> --body "<answer>"`, then `gh issue close <n>`, then append a context pointer (gist + link) to the map's Decisions-so-far.
+  +45 -0
+
+lib/screens/homeScreens.dart
+  @@ -103,7 +103,6 @@
+  -                          await _authRepository.clearToken();
+                             if (context.mounted) {
+                               Navigator.of(context).pushReplacement(
+                                 MaterialPageRoute(
+  @@ -114,7 +113,7 @@
+  -                              SnackBar(content: Text('Log out failed: $e')),
+  +                              SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))),
+                               );
+                             }
+                           }
+  +1 -2
+
+lib/services/api_service.dart
+  @@ -8,9 +8,11 @@
+  +  final AuthRepository _authRepository;
+   
+  -  ApiService({http.Client? client})
+  -    : _client = client ?? ApiInterceptor(authRepository: AuthRepository());
+  +  ApiService({http.Client? client, AuthRepository? authRepository})
+  +    : _authRepository = authRepository ?? AuthRepository(),
+  +      _client = client ?? ApiInterceptor(authRepository: authRepository ?? AuthRepository());
+   
+     Future<List<TherapySession>> getSessions({String? year}) async {
+       final uri = Uri.parse(
+  @@ -98,8 +100,18 @@
+  -      throw Exception('Failed to logout');
+  +      try {
+  +        final body = jsonDecode(res.body) as Map<String, dynamic>;
+  +        final errObj = body['error'] ?? body;
+  +        throw Exception(errObj['message'] ?? 'Failed to logout');
+  +      } catch (e) {
+  +        if (e is FormatException) {
+  +          throw Exception('Failed to logout');
+  +        }
+  +        rethrow;
+  +      }
+       }
+  +    await _authRepository.clearToken();
+     }
+   }
+   
+  +15 -3
+
+pr_diff.txt
+  @@ -0,0 +1,587 @@
+  +
+  +android/app/build.gradle.kts
+  +  @@ -30,6 +30,7 @@
+  +  +            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+  +           }
+  +       }
+  +   }
+  +  +1 -0
+  +
+  +android/app/proguard-rules.pro
+  +  @@ -0,0 +1,7 @@
+  +  +# Keep ML Kit classes to prevent crashes during R8/ProGuard shrinking
+  +  +-keep class com.google.mlkit.** { *; }
+  +  +-keep class com.google.android.gms.** { *; }
+  +  +
+  +  +# Suppress warnings for missing classes
+  +  +-dontwarn com.google.mlkit.**
+  +  +-dontwarn com.google.android.gms.**
+  +  +7 -0
+  +
+  +android/app/src/main/AndroidManifest.xml
+  +  @@ -7,11 +7,15 @@
+  +  +    
+  +  +    <!-- Camera permissions for barcode scanner -->
+  +  +    <uses-permission android:name="android.permission.CAMERA"/>
+  +  +    <uses-feature android:name="android.hardware.camera" android:required="false"/>
+  +   
+  +       <application
+  +           android:label="vac_dashboard_app"
+  +           android:name="${applicationName}"
+  +  -        android:icon="@mipmap/ic_launcher"
+  +  +        android:icon="@mipmap/launcher_icon"
+  +           android:usesCleartextTraffic="true">
+  +           <activity
+  +               android:name=".MainActivity"
+  +  @@ -40,6 +44,11 @@
+  +  +            
+  +  +        <!-- ML Kit Barcode Scanner dependencies -->
+  +  +        <meta-data
+  +  +            android:name="com.google.mlkit.vision.DEPENDENCIES"
+  +  +            android:value="barcode_ui"/>
+  +       </application>
+  +       <!-- Required to query activities that can process text, see:
+  +            https://developer.android.com/training/package-visibility and
+  +  +10 -1
+  +
+  +android/app/src/main/res/drawable-hdpi/android12splash.png
+  +
+  +android/app/src/main/res/drawable-hdpi/ic_launcher_foreground.png
+  +
+  +android/app/src/main/res/drawable-hdpi/splash.png
+  +
+  +android/app/src/main/res/drawable-mdpi/android12splash.png
+  +
+  +android/app/src/main/res/drawable-mdpi/ic_launcher_foreground.png
+  +
+  +android/app/src/main/res/drawable-mdpi/splash.png
+  +
+  +android/app/src/main/res/drawable-night-hdpi/android12splash.png
+  +
+  +android/app/src/main/res/drawable-night-hdpi/splash.png
+  +
+  +android/app/src/main/res/drawable-night-mdpi/android12splash.png
+  +
+  +android/app/src/main/res/drawable-night-mdpi/splash.png
+  +
+  +android/app/src/main/res/drawable-night-v21/background.png
+  +
+  +android/app/src/main/res/drawable-night-v21/launch_background.xml
+  +  @@ -0,0 +1,9 @@
+  +  +<?xml version="1.0" encoding="utf-8"?>
+  +  +<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+  +  +    <item>
+  +  +        <bitmap android:gravity="fill" android:src="@drawable/background"/>
+  +  +    </item>
+  +  +    <item>
+  +  +        <bitmap android:gravity="center" android:src="@drawable/splash"/>
+  +  +    </item>
+  +  +</layer-list>
+  +  +9 -0
+  +
+  +android/app/src/main/res/drawable-night-xhdpi/android12splash.png
+  +
+  +android/app/src/main/res/drawable-night-xhdpi/splash.png
+  +
+  +android/app/src/main/res/drawable-night-xxhdpi/android12splash.png
+  +
+  +android/app/src/main/res/drawable-night-xxhdpi/splash.png
+  +
+  +android/app/src/main/res/drawable-night-xxxhdpi/android12splash.png
+  +
+  +android/app/src/main/res/drawable-night-xxxhdpi/splash.png
+  +
+  +android/app/src/main/res/drawable-night/background.png
+  +
+  +android/app/src/main/res/drawable-night/launch_background.xml
+  +  @@ -0,0 +1,9 @@
+  +  +<?xml version="1.0" encoding="utf-8"?>
+  +  +<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+  +  +    <item>
+  ... (487 lines truncated)
+  +587 -0
+
+pr_review_comment.md
+  @@ -0,0 +1,64 @@
+  +## Standards
+  +
+  +### Documented Standards Violations (Hard Violations)
+  +
+  +- **AGENTS.md (Tips Navigasi - "Tambah fitur UI → mulai dari lib/component/"):** 
+  +  `lib/utils/toast_helper.dart` violates the file structure standard. It returns UI widgets (Toastification builders) but was placed in `utils/` instead of `component/`.
+  +
+  +- **CLAUDE.md (Rule 13 - Don't Repeat Yourself / DRY):**
+  +  `lib/utils/toast_helper.dart` violates DRY. The UI rendering in `showError` and `showSuccess` is completely duplicated. The only differences are the background color and the icon.
+  +
+  +### Baseline Smells (Judgement Calls)
+  +
+  +- **Duplicated Code:** 
+  +  In `lib/component/auth_bottom_sheet.dart`, the exact same error fallback logic shape appears in both `_handleLogin` and `_handleRegister`:
+  +  ```dart
+  +  final errorMsg = e.toString().replaceAll('Exception: ', '');
+  +  ToastHelper.showError(context, AuthHelper.getUserFriendlyError(errorMsg));
+  +  ```
+  +
+  +- **Primitive Obsession:** 
+  +  In `lib/utils/auth_helper.dart`, `getUserFriendlyError(String raw)` relies on matching string primitives to deduce error states rather than catching domain-specific types:
+  +  ```dart
+  +  if (lower.contains('authunauthorized') || lower.contains('unauthorized') || lower.contains('kredensial')) {
+  +    return 'Username atau password yang Anda masukkan salah.';
+  +  }
+  +  ```
+  +  This logic should ideally handle strongly-typed exceptions (like `AuthException`) instead of doing raw string inspection.
+  +
+  +- **Middle Man:** 
+  +  In `lib/repositories/auth_repository.dart`, the `logout()` method delegates almost entirely to `ApiService`. This creates a tangled circular dependency where `AuthRepository` takes `ApiService` via DI, while `ApiService` takes an `ApiInterceptor` which in turn requires `AuthRepository`.
+  +  ```dart
+  +  Future<void> logout() async {
+  +    await _api.logout();
+  +    await clearToken();
+  +  }
+  +  ```
+  +
+  +## Spec
+  +
+  +**(a) Missing or partial requirements**
+  +All functional acceptance criteria are implemented, but the exact technical constraint for the widget test is missed due to a refactoring deviation (see section c).
+  +
+  +**(b) Scope creep (behaviour in the diff that wasn't asked for)**
+  +The PR contains multiple commits and changes entirely unrelated to the logout feature:
+  +- Adding camera permissions, ML Kit barcode metadata to `AndroidManifest.xml`, and ProGuard rules to fix a scanner crash.
+  +- Improving error UI with a custom minimalist top toast, extracting helper logic, and wiring up design system color tokens and `AppText` components.
+  +
+  +These additions go beyond the defined scope. 
+  +Spec reference:
+  +> "This requires wiring up the UI to hit the `/auth/logout` endpoint, clearing the token on success, and returning to the Welcome screen."
+  +
+  +**(c) Requirements that look implemented but where the implementation looks wrong / deviates**
+  +The developer refactored the DI to orchestrate the logout process entirely within `AuthRepository`, leading to two deviations from the strict technical requirements:
+  +
+  +1. Spec: 
+  +> "- [ ] The "Log out" button in `HomeScreen`'s avatar menu calls `ApiService.logout()`"
+  +Implementation: The `HomeScreen` button calls `_authRepository.logout()` instead of directly calling `ApiService.logout()`.
+  +
+  +2. Spec: 
+  +> "- [ ] Widget tests are added to verify this success path by mocking `ApiService.logout()`"
+  +Implementation: The widget test (`homeScreens_test.dart`) mocks `mockAuthRepository.logout()` instead of `ApiService.logout()`. While it successfully tests the user path, it violates the literal technical instruction in the acceptance criteria.
+  +
+  +---
+  +**Summary:** Standards: 5 findings (Worst: duplicated UI rendering violating DRY in `toast_helper.dart`); Spec: 3 findings (Worst: scope creep containing unrelated camera/ML Kit fixes and toast components).
+  +64 -0
+
+spec.md
+  @@ -0,0 +1,39 @@
+  +## Problem Statement
+  +
+  +When a user wants to log out of the support mobile application via the avatar menu, the app simply navigates back to the welcome screen without formally invalidating the session against our business rules. Furthermore, there is a strict rule that a user cannot log out while still actively connected to a physical device to ensure the device isn't left locked to an inaccessible account.
+  +
+  +## Solution
+  +
+  +Modify the existing "Log out" button located in the avatar menu (`HomeScreen`). When tapped, the app will call the backend `/auth/logout` endpoint. If the backend detects an active device connection, it will reject the logout request and the app will inform the user (via a toast or alert) that they must disconnect their device first. If the logout is successful, the app will clear the local authentication token and return the user to the welcome/login screen.
+  +
+  +## User Stories
+  +
+  +1. As a mobile app user, I want the "Log out" button in the avatar menu to securely sign me out by calling the backend.
+  +2. As a mobile app user, I want the app to prevent me from logging out if I am still actively connected to a physical device, so that my device does not remain permanently locked to a signed-out account.
+  +3. As a mobile app user, I want to see a clear error message instructing me to disconnect my device first if my logout attempt is blocked, so that I understand what action to take next.
+  +4. As a mobile app user, I want my local session token to be cleared upon a successful logout, so that my device is securely signed out locally.
+  +5. As a mobile app user, I want to be redirected to the Welcome/Login screen immediately after a successful logout, so that I can log in again if needed.
+  +
+  +## Implementation Decisions
+  +
+  +- **UI Modifications:** Hook up the existing "Log out" `AppMenuItem` in the `_showAvatarMenu` method of `HomeScreen` (`lib/screens/homeScreens.dart`) to the new asynchronous logout flow.
+  +- **Network Layer:** Add a `logout()` method to `ApiService` (in `lib/services/api_service.dart`) that sends a POST request to `/auth/logout`. It should properly parse and throw any API errors (e.g., the 400 error requiring device disconnection).
+  +- **Auth State Management:** Update the relevant Auth repository (e.g., `AuthRepository.deleteToken()`) to clear the JWT locally upon a successful `/auth/logout` response.
+  +- **Navigation:** Upon successful logout, use `Navigator.pushReplacement` (or `pushAndRemoveUntil`) to clear the navigation stack and navigate to the `WelcomeScreens`.
+  +- **Error Handling:** If `ApiService.logout()` throws an error containing "disconnect the device", show a `Toastification` or `showAppAlertDialog` to inform the user.
+  +
+  +## Testing Decisions
+  +
+  +- **Seam:** The primary seam for testing this feature will be at the Widget level (`HomeScreen` widget tests), focusing on the avatar menu interaction with a mocked `ApiService` and `AuthRepository`. We want to mock out the network calls, so we don't hit the real backend during tests.
+  +- **What makes a good test:** The tests should verify the external behavior (UI updates, navigation, and API service invocation) without relying on the actual network layer.
+
+... (more changes truncated)
+  +28 -0
+[full diff: rtk git diff --no-compact]

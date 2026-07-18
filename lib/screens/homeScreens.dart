@@ -113,7 +113,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         } catch (e) {
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))),
+                              SnackBar(content: Text(e is ApiException ? e.message : 'Log out failed')),
                             );
                           }
                         }

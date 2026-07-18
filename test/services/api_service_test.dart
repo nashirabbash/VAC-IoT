@@ -150,6 +150,8 @@ void main() {
 
       await expectLater(api.logout(), completes);
       
+      verify(() => mockAuthRepository.clearToken()).called(1);
+      
       verify(() => mockClient.post(
         any(that: predicate<Uri>((uri) => uri.path.endsWith('/auth/logout'))),
         headers: any(named: 'headers'),
@@ -166,7 +168,7 @@ void main() {
 
       expect(
         () => api.logout(),
-        throwsA(isA<Exception>()),
+        throwsA(isA<ApiException>()),
       );
     });
   });
