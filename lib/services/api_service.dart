@@ -106,4 +106,4 @@ class ApiService {
   }
 }
 
-ApiService apiService = ApiService();
+final apiService = ApiService();

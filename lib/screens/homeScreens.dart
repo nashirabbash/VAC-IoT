@@ -12,7 +12,8 @@ import 'package:vac_dashboard_app/services/api_service.dart';
 import 'package:vac_dashboard_app/component/menu.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final AuthRepository? authRepository;
+  const HomeScreen({super.key, this.authRepository});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -22,6 +23,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey _avatarKey = GlobalKey();
   bool _hasBoundDevice = false;
   bool _isLoading = true;
+  late final AuthRepository _authRepository = widget.authRepository ?? AuthRepository();
 
   @override
   void initState() {
@@ -31,7 +33,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _checkDeviceBinding() async {
     try {
-      final data = await AuthRepository().getDecodedToken();
+      final data = await _authRepository.getDecodedToken();
       if (data != null && data['deviceId'] != null) {
         setState(() {
           _hasBoundDevice = true;
@@ -98,8 +100,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       onPressed: () async {
                         Navigator.of(context).pop(); // Dismiss menu
                         try {
-                          await apiService.logout();
-                          await AuthRepository().clearToken();
+                          await _authRepository.logout();
                           if (context.mounted) {
                             Navigator.of(context).pushReplacement(
                               MaterialPageRoute(
