@@ -8,6 +8,7 @@ import 'package:vac_dashboard_app/screens/deviceScreens.dart';
 import 'package:vac_dashboard_app/screens/settingsScreen.dart';
 import 'package:vac_dashboard_app/asset/color_tokens.dart';
 import 'package:vac_dashboard_app/repositories/auth_repository.dart';
+import 'package:vac_dashboard_app/services/api_service.dart';
 import 'package:vac_dashboard_app/component/menu.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -94,14 +95,25 @@ class _HomeScreenState extends State<HomeScreen> {
                       label: 'Log out',
                       leadingIcon: Icons.logout_rounded,
                       isDestructive: true,
-                      onPressed: () {
+                      onPressed: () async {
                         Navigator.of(context).pop(); // Dismiss menu
-                        // Perform log out: redirect back to welcome screens
-                        Navigator.of(context).pushReplacement(
-                          MaterialPageRoute(
-                            builder: (context) => const WelcomeScreens(),
-                          ),
-                        );
+                        try {
+                          await apiService.logout();
+                          await AuthRepository().clearToken();
+                          if (context.mounted) {
+                            Navigator.of(context).pushReplacement(
+                              MaterialPageRoute(
+                                builder: (context) => const WelcomeScreens(),
+                              ),
+                            );
+                          }
+                        } catch (e) {
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Log out failed: $e')),
+                            );
+                          }
+                        }
                       },
                     ),
                   ],

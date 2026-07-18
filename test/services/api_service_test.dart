@@ -131,4 +131,38 @@ void main() {
       );
     });
   });
+
+  group('ApiService.logout', () {
+    test('sends POST to /auth/logout and succeeds on 200', () async {
+      when(
+        () => mockClient.post(
+          any(),
+          headers: any(named: 'headers'),
+        ),
+      ).thenAnswer(
+        (_) async => http.Response(jsonEncode({'status': 'ok'}), 200),
+      );
+
+      await expectLater(api.logout(), completes);
+      
+      verify(() => mockClient.post(
+        any(that: predicate<Uri>((uri) => uri.path.endsWith('/auth/logout'))),
+        headers: any(named: 'headers'),
+      )).called(1);
+    });
+
+    test('throws on non-200/201/204 response', () async {
+      when(
+        () => mockClient.post(
+          any(),
+          headers: any(named: 'headers'),
+        ),
+      ).thenAnswer((_) async => http.Response('{"error": {"message": "Unauthorized"}}', 401));
+
+      expect(
+        () => api.logout(),
+        throwsA(isA<Exception>()),
+      );
+    });
+  });
 }

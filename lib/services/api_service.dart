@@ -90,6 +90,20 @@ class ApiService {
       await AuthRepository().saveToken(newToken as String);
     }
   }
+
+  Future<void> logout() async {
+    final uri = Uri.parse('$_baseUrl/auth/logout');
+    final res = await _client.post(
+      uri,
+      headers: {'Content-Type': 'application/json'},
+    );
+    if (res.statusCode != 200 && res.statusCode != 201 && res.statusCode != 204) {
+      final body = jsonDecode(res.body) as Map<String, dynamic>;
+      final errObj = body['error'] ?? body;
+      final errMsg = _parseErrorMessage(errObj['summary'] ?? errObj['message']);
+      throw Exception(errMsg ?? 'Failed to logout');
+    }
+  }
 }
 
-final apiService = ApiService();
+ApiService apiService = ApiService();
