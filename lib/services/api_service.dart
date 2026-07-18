@@ -8,9 +8,11 @@ class ApiService {
   static const _baseUrl = 'http://192.168.1.35:3000/api';
 
   final http.Client _client;
+  final AuthRepository _authRepository;
 
-  ApiService({http.Client? client})
-    : _client = client ?? ApiInterceptor(authRepository: AuthRepository());
+  ApiService({http.Client? client, AuthRepository? authRepository})
+    : _authRepository = authRepository ?? AuthRepository(),
+      _client = client ?? ApiInterceptor(authRepository: authRepository ?? AuthRepository());
 
   Future<List<TherapySession>> getSessions({String? year}) async {
     final uri = Uri.parse(
@@ -98,8 +100,18 @@ class ApiService {
       headers: {'Content-Type': 'application/json'},
     );
     if (res.statusCode != 200 && res.statusCode != 201 && res.statusCode != 204) {
-      throw Exception('Failed to logout');
+      try {
+        final body = jsonDecode(res.body) as Map<String, dynamic>;
+        final errObj = body['error'] ?? body;
+        throw Exception(errObj['message'] ?? 'Failed to logout');
+      } catch (e) {
+        if (e is FormatException) {
+          throw Exception('Failed to logout');
+        }
+        rethrow;
+      }
     }
+    await _authRepository.clearToken();
   }
 }
 

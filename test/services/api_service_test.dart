@@ -3,13 +3,16 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:mocktail/mocktail.dart';
 import 'package:vac_dashboard_app/services/api_service.dart';
+import 'package:vac_dashboard_app/repositories/auth_repository.dart';
 
 class MockHttpClient extends Mock implements http.Client {}
+class MockAuthRepository extends Mock implements AuthRepository {}
 
 class FakeUri extends Fake implements Uri {}
 
 void main() {
   late MockHttpClient mockClient;
+  late MockAuthRepository mockAuthRepository;
   late ApiService api;
 
   setUpAll(() {
@@ -18,7 +21,8 @@ void main() {
 
   setUp(() {
     mockClient = MockHttpClient();
-    api = ApiService(client: mockClient);
+    mockAuthRepository = MockAuthRepository();
+    api = ApiService(client: mockClient, authRepository: mockAuthRepository);
   });
 
   group('ApiService.getSessions', () {
@@ -142,6 +146,7 @@ void main() {
       ).thenAnswer(
         (_) async => http.Response(jsonEncode({'status': 'ok'}), 200),
       );
+      when(() => mockAuthRepository.clearToken()).thenAnswer((_) async {});
 
       await expectLater(api.logout(), completes);
       

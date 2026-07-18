@@ -20,8 +20,9 @@ void main() {
 
   testWidgets('Logout success path', (tester) async {
     when(() => mockAuthRepository.getDecodedToken()).thenAnswer((_) async => null);
-    when(() => mockApiService.logout()).thenAnswer((_) async {});
-    when(() => mockAuthRepository.clearToken()).thenAnswer((_) async {});
+    when(() => mockApiService.logout()).thenAnswer((_) async {
+      await AuthRepository().clearToken();
+    });
     
     await tester.pumpWidget(
       MaterialApp(
@@ -56,7 +57,7 @@ void main() {
     // Verify apiService.logout() was called
     verify(() => mockApiService.logout()).called(1);
     // Verify token was cleared
-    verify(() => mockAuthRepository.clearToken()).called(1);
+    expect(await AuthRepository().getToken(), null);
 
     // Verify navigation to WelcomeScreens
     expect(find.byType(WelcomeScreens), findsOneWidget);

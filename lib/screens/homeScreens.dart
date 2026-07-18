@@ -103,7 +103,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         Navigator.of(context).pop(); // Dismiss menu
                         try {
                           await _apiService.logout();
-                          await _authRepository.clearToken();
                           if (context.mounted) {
                             Navigator.of(context).pushReplacement(
                               MaterialPageRoute(
@@ -114,7 +113,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         } catch (e) {
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Log out failed: $e')),
+                              SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))),
                             );
                           }
                         }

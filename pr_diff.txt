@@ -1,0 +1,587 @@
+
+android/app/build.gradle.kts
+  @@ -30,6 +30,7 @@
+  +            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+           }
+       }
+   }
+  +1 -0
+
+android/app/proguard-rules.pro
+  @@ -0,0 +1,7 @@
+  +# Keep ML Kit classes to prevent crashes during R8/ProGuard shrinking
+  +-keep class com.google.mlkit.** { *; }
+  +-keep class com.google.android.gms.** { *; }
+  +
+  +# Suppress warnings for missing classes
+  +-dontwarn com.google.mlkit.**
+  +-dontwarn com.google.android.gms.**
+  +7 -0
+
+android/app/src/main/AndroidManifest.xml
+  @@ -7,11 +7,15 @@
+  +    
+  +    <!-- Camera permissions for barcode scanner -->
+  +    <uses-permission android:name="android.permission.CAMERA"/>
+  +    <uses-feature android:name="android.hardware.camera" android:required="false"/>
+   
+       <application
+           android:label="vac_dashboard_app"
+           android:name="${applicationName}"
+  -        android:icon="@mipmap/ic_launcher"
+  +        android:icon="@mipmap/launcher_icon"
+           android:usesCleartextTraffic="true">
+           <activity
+               android:name=".MainActivity"
+  @@ -40,6 +44,11 @@
+  +            
+  +        <!-- ML Kit Barcode Scanner dependencies -->
+  +        <meta-data
+  +            android:name="com.google.mlkit.vision.DEPENDENCIES"
+  +            android:value="barcode_ui"/>
+       </application>
+       <!-- Required to query activities that can process text, see:
+            https://developer.android.com/training/package-visibility and
+  +10 -1
+
+android/app/src/main/res/drawable-hdpi/android12splash.png
+
+android/app/src/main/res/drawable-hdpi/ic_launcher_foreground.png
+
+android/app/src/main/res/drawable-hdpi/splash.png
+
+android/app/src/main/res/drawable-mdpi/android12splash.png
+
+android/app/src/main/res/drawable-mdpi/ic_launcher_foreground.png
+
+android/app/src/main/res/drawable-mdpi/splash.png
+
+android/app/src/main/res/drawable-night-hdpi/android12splash.png
+
+android/app/src/main/res/drawable-night-hdpi/splash.png
+
+android/app/src/main/res/drawable-night-mdpi/android12splash.png
+
+android/app/src/main/res/drawable-night-mdpi/splash.png
+
+android/app/src/main/res/drawable-night-v21/background.png
+
+android/app/src/main/res/drawable-night-v21/launch_background.xml
+  @@ -0,0 +1,9 @@
+  +<?xml version="1.0" encoding="utf-8"?>
+  +<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+  +    <item>
+  +        <bitmap android:gravity="fill" android:src="@drawable/background"/>
+  +    </item>
+  +    <item>
+  +        <bitmap android:gravity="center" android:src="@drawable/splash"/>
+  +    </item>
+  +</layer-list>
+  +9 -0
+
+android/app/src/main/res/drawable-night-xhdpi/android12splash.png
+
+android/app/src/main/res/drawable-night-xhdpi/splash.png
+
+android/app/src/main/res/drawable-night-xxhdpi/android12splash.png
+
+android/app/src/main/res/drawable-night-xxhdpi/splash.png
+
+android/app/src/main/res/drawable-night-xxxhdpi/android12splash.png
+
+android/app/src/main/res/drawable-night-xxxhdpi/splash.png
+
+android/app/src/main/res/drawable-night/background.png
+
+android/app/src/main/res/drawable-night/launch_background.xml
+  @@ -0,0 +1,9 @@
+  +<?xml version="1.0" encoding="utf-8"?>
+  +<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+  +    <item>
+  +        <bitmap android:gravity="fill" android:src="@drawable/background"/>
+  +    </item>
+  +    <item>
+  +        <bitmap android:gravity="center" android:src="@drawable/splash"/>
+  +    </item>
+  +</layer-list>
+  +9 -0
+
+android/app/src/main/res/drawable-v21/background.png
+
+android/app/src/main/res/drawable-v21/launch_background.xml
+  @@ -1,12 +1,9 @@
+  -<!-- Modify this file to customize your launch splash screen -->
+   <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+  -    <item android:drawable="?android:colorBackground" />
+  -
+  -    <!-- You can insert your own image assets here -->
+  -    <!-- <item>
+  -        <bitmap
+  -            android:gravity="center"
+  -            android:src="@mipmap/launch_image" />
+  -    </item> -->
+  +    <item>
+  +        <bitmap android:gravity="fill" android:src="@drawable/background"/>
+  +    </item>
+  +    <item>
+  +        <bitmap android:gravity="center" android:src="@drawable/splash"/>
+  +    </item>
+   </layer-list>
+  +6 -9
+
+android/app/src/main/res/drawable-xhdpi/android12splash.png
+
+android/app/src/main/res/drawable-xhdpi/ic_launcher_foreground.png
+
+android/app/src/main/res/drawable-xhdpi/splash.png
+
+android/app/src/main/res/drawable-xxhdpi/android12splash.png
+
+android/app/src/main/res/drawable-xxhdpi/ic_launcher_foreground.png
+
+android/app/src/main/res/drawable-xxhdpi/splash.png
+
+android/app/src/main/res/drawable-xxxhdpi/android12splash.png
+
+android/app/src/main/res/drawable-xxxhdpi/ic_launcher_foreground.png
+
+android/app/src/main/res/drawable-xxxhdpi/splash.png
+
+android/app/src/main/res/drawable/background.png
+
+android/app/src/main/res/drawable/launch_background.xml
+  @@ -1,12 +1,9 @@
+  -<!-- Modify this file to customize your launch splash screen -->
+   <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+  -    <item android:drawable="@android:color/white" />
+  -
+  -    <!-- You can insert your own image assets here -->
+  -    <!-- <item>
+  -        <bitmap
+  -            android:gravity="center"
+  -            android:src="@mipmap/launch_image" />
+  -    </item> -->
+  +    <item>
+  +        <bitmap android:gravity="fill" android:src="@drawable/background"/>
+  +    </item>
+  +    <item>
+  +        <bitmap android:gravity="center" android:src="@drawable/splash"/>
+  +    </item>
+   </layer-list>
+  +6 -9
+
+android/app/src/main/res/mipmap-anydpi-v26/launcher_icon.xml
+  @@ -0,0 +1,9 @@
+  +<?xml version="1.0" encoding="utf-8"?>
+  +<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+  +  <background android:drawable="@color/ic_launcher_background"/>
+  +  <foreground>
+  +      <inset
+  +          android:drawable="@drawable/ic_launcher_foreground"
+  +          android:inset="16%" />
+  +  </foreground>
+  +</adaptive-icon>
+  +9 -0
+
+android/app/src/main/res/mipmap-hdpi/launcher_icon.png
+
+android/app/src/main/res/mipmap-mdpi/launcher_icon.png
+
+android/app/src/main/res/mipmap-xhdpi/launcher_icon.png
+
+android/app/src/main/res/mipmap-xxhdpi/launcher_icon.png
+
+android/app/src/main/res/mipmap-xxxhdpi/launcher_icon.png
+
+android/app/src/main/res/values-night-v31/styles.xml
+  @@ -0,0 +1,21 @@
+  +<?xml version="1.0" encoding="utf-8"?>
+  +<resources>
+  +    <!-- Theme applied to the Android Window while the process is starting when the OS's Dark Mode setting is on -->
+  +    <style name="LaunchTheme" parent="@android:style/Theme.Black.NoTitleBar">
+  +        <item name="android:forceDarkAllowed">false</item>
+  +        <item name="android:windowFullscreen">false</item>
+  +        <item name="android:windowDrawsSystemBarBackgrounds">false</item>
+  +        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
+  +        <item name="android:windowSplashScreenBackground">#121212</item>
+  +        <item name="android:windowSplashScreenAnimatedIcon">@drawable/android12splash</item>
+  +    </style>
+  +    <!-- Theme applied to the Android Window as soon as the process has started.
+  +         This theme determines the color of the Android Window while your
+  +         Flutter UI initializes, as well as behind your Flutter UI while its
+  +         running.
+  +         
+  +         This Theme is only used starting with V2 of Flutter's Android embedding. -->
+  +    <style name="NormalTheme" parent="@android:style/Theme.Black.NoTitleBar">
+  +        <item name="android:windowBackground">?android:colorBackground</item>
+  +    </style>
+  +</resources>
+  +21 -0
+
+android/app/src/main/res/values-night/styles.xml
+  @@ -5,6 +5,10 @@
+  +        <item name="android:forceDarkAllowed">false</item>
+  +        <item name="android:windowFullscreen">false</item>
+  +        <item name="android:windowDrawsSystemBarBackgrounds">false</item>
+  +        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
+       </style>
+       <!-- Theme applied to the Android Window as soon as the process has started.
+            This theme determines the color of the Android Window while your
+  +4 -0
+
+android/app/src/main/res/values-v31/styles.xml
+  @@ -0,0 +1,21 @@
+  +<?xml version="1.0" encoding="utf-8"?>
+  +<resources>
+  +    <!-- Theme applied to the Android Window while the process is starting when the OS's Dark Mode setting is off -->
+  +    <style name="LaunchTheme" parent="@android:style/Theme.Light.NoTitleBar">
+  +        <item name="android:forceDarkAllowed">false</item>
+  +        <item name="android:windowFullscreen">false</item>
+  +        <item name="android:windowDrawsSystemBarBackgrounds">false</item>
+  +        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
+  +        <item name="android:windowSplashScreenBackground">#ffffff</item>
+  +        <item name="android:windowSplashScreenAnimatedIcon">@drawable/android12splash</item>
+  +    </style>
+  +    <!-- Theme applied to the Android Window as soon as the process has started.
+  +         This theme determines the color of the Android Window while your
+  +         Flutter UI initializes, as well as behind your Flutter UI while its
+  +         running.
+  +         
+  +         This Theme is only used starting with V2 of Flutter's Android embedding. -->
+  +    <style name="NormalTheme" parent="@android:style/Theme.Light.NoTitleBar">
+  +        <item name="android:windowBackground">?android:colorBackground</item>
+  +    </style>
+  +</resources>
+  +21 -0
+
+android/app/src/main/res/values/colors.xml
+  @@ -0,0 +1,4 @@
+  +<?xml version="1.0" encoding="utf-8"?>
+  +<resources>
+  +    <color name="ic_launcher_background">#ffffff</color>
+  +</resources>
+  +4 -0
+
+android/app/src/main/res/values/styles.xml
+  @@ -5,6 +5,10 @@
+  +        <item name="android:forceDarkAllowed">false</item>
+  +        <item name="android:windowFullscreen">false</item>
+  +        <item name="android:windowDrawsSystemBarBackgrounds">false</item>
+  +        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
+       </style>
+       <!-- Theme applied to the Android Window as soon as the process has started.
+            This theme determines the color of the Android Window while your
+  +4 -0
+
+assets/icon.png
+
+ios/Runner.xcodeproj/project.pbxproj
+  @@ -441,7 +441,7 @@
+  -				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+  +				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = AppIcon;
+   				CLANG_ANALYZER_NONNULL = YES;
+   				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+   				CLANG_CXX_LIBRARY = "libc++";
+  @@ -498,7 +498,7 @@
+  -				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+  +				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = AppIcon;
+   				CLANG_ANALYZER_NONNULL = YES;
+   				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+   				CLANG_CXX_LIBRARY = "libc++";
+  +2 -2
+
+ios/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json
+  @@ -1,122 +1 @@
+  -{
+  -  "images" : [
+  -    {
+  -      "size" : "20x20",
+  -      "idiom" : "iphone",
+  -      "filename" : "Icon-App-20x20@2x.png",
+  -      "scale" : "2x"
+  -    },
+  -    {
+  -      "size" : "20x20",
+  -      "idiom" : "iphone",
+  -      "filename" : "Icon-App-20x20@3x.png",
+  -      "scale" : "3x"
+  -    },
+  -    {
+  -      "size" : "29x29",
+  -      "idiom" : "iphone",
+  -      "filename" : "Icon-App-29x29@1x.png",
+  -      "scale" : "1x"
+  -    },
+  -    {
+  -      "size" : "29x29",
+  -      "idiom" : "iphone",
+  -      "filename" : "Icon-App-29x29@2x.png",
+  -      "scale" : "2x"
+  -    },
+  -    {
+  -      "size" : "29x29",
+  -      "idiom" : "iphone",
+  -      "filename" : "Icon-App-29x29@3x.png",
+  -      "scale" : "3x"
+  -    },
+  -    {
+  -      "size" : "40x40",
+  -      "idiom" : "iphone",
+  -      "filename" : "Icon-App-40x40@2x.png",
+  -      "scale" : "2x"
+  -    },
+  -    {
+  -      "size" : "40x40",
+  -      "idiom" : "iphone",
+  -      "filename" : "Icon-App-40x40@3x.png",
+  -      "scale" : "3x"
+  -    },
+  -    {
+  -      "size" : "60x60",
+  -      "idiom" : "iphone",
+  -      "filename" : "Icon-App-60x60@2x.png",
+  -      "scale" : "2x"
+  -    },
+  -    {
+  -      "size" : "60x60",
+  -      "idiom" : "iphone",
+  -      "filename" : "Icon-App-60x60@3x.png",
+  -      "scale" : "3x"
+  -    },
+  -    {
+  -      "size" : "20x20",
+  -      "idiom" : "ipad",
+  -      "filename" : "Icon-App-20x20@1x.png",
+  -      "scale" : "1x"
+  -    },
+  -    {
+  -      "size" : "20x20",
+  -      "idiom" : "ipad",
+  -      "filename" : "Icon-App-20x20@2x.png",
+  -      "scale" : "2x"
+  -    },
+  -    {
+  -      "size" : "29x29",
+  -      "idiom" : "ipad",
+  -      "filename" : "Icon-App-29x29@1x.png",
+  -      "scale" : "1x"
+  -    },
+  -    {
+  -      "size" : "29x29",
+  -      "idiom" : "ipad",
+  -      "filename" : "Icon-App-29x29@2x.png",
+  -      "scale" : "2x"
+  -    },
+  -    {
+  -      "size" : "40x40",
+  -      "idiom" : "ipad",
+  -      "filename" : "Icon-App-40x40@1x.png",
+  -      "scale" : "1x"
+  -    },
+  -    {
+  -      "size" : "40x40",
+  -      "idiom" : "ipad",
+  -      "filename" : "Icon-App-40x40@2x.png",
+  -      "scale" : "2x"
+  -    },
+  -    {
+  -      "size" : "76x76",
+  -      "idiom" : "ipad",
+  -      "filename" : "Icon-App-76x76@1x.png",
+  -      "scale" : "1x"
+  -    },
+  -    {
+  -      "size" : "76x76",
+  ... (23 lines truncated)
+  +1 -122
+
+ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-1024x1024@1x.png
+
+ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@1x.png
+
+ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png
+
+ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@3x.png
+
+ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@1x.png
+
+ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@2x.png
+
+ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@3x.png
+
+ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@1x.png
+
+ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@2x.png
+
+ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@3x.png
+
+ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-50x50@1x.png
+
+ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-50x50@2x.png
+
+ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-57x57@1x.png
+
+ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-57x57@2x.png
+
+ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-60x60@2x.png
+
+ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-60x60@3x.png
+
+ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-72x72@1x.png
+
+ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-72x72@2x.png
+
+ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-76x76@1x.png
+
+ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-76x76@2x.png
+
+ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-83.5x83.5@2x.png
+
+ios/Runner/Assets.xcassets/LaunchBackground.imageset/Contents.json
+  @@ -0,0 +1,22 @@
+  +{
+  +  "images" : [
+  +    {
+  +      "filename" : "background.png",
+  +      "idiom" : "universal"
+  +    },
+  +    {
+  +      "appearances" : [
+  +        {
+  +          "appearance" : "luminosity",
+  +          "value" : "dark"
+  +        }
+  +      ],
+  +      "filename" : "darkbackground.png",
+  +      "idiom" : "universal"
+  +    }
+  +  ],
+  +  "info" : {
+  +    "author" : "xcode",
+  +    "version" : 1
+  +  }
+  +}
+  +22 -0
+
+ios/Runner/Assets.xcassets/LaunchBackground.imageset/background.png
+
+ios/Runner/Assets.xcassets/LaunchBackground.imageset/darkbackground.png
+
+ios/Runner/Assets.xcassets/LaunchImage.imageset/Contents.json
+  @@ -1,23 +1,56 @@
+  -      "idiom" : "universal",
+         "filename" : "LaunchImage.png",
+  +      "idiom" : "universal",
+         "scale" : "1x"
+       },
+       {
+  +      "appearances" : [
+  +        {
+  +          "appearance" : "luminosity",
+  +          "value" : "dark"
+  +        }
+  +      ],
+  +      "filename" : "LaunchImageDark.png",
+         "idiom" : "universal",
+  +      "scale" : "1x"
+  +    },
+  +    {
+         "filename" : "LaunchImage@2x.png",
+  +      "idiom" : "universal",
+         "scale" : "2x"
+       },
+       {
+  +      "appearances" : [
+  +        {
+  +          "appearance" : "luminosity",
+  +          "value" : "dark"
+  +        }
+  +      ],
+  +      "filename" : "LaunchImageDark@2x.png",
+         "idiom" : "universal",
+  +      "scale" : "2x"
+  +    },
+  +    {
+         "filename" : "LaunchImage@3x.png",
+  +      "idiom" : "universal",
+  +      "scale" : "3x"
+  +    },
+  +    {
+  +      "appearances" : [
+  +        {
+  +          "appearance" : "luminosity",
+  +          "value" : "dark"
+  +        }
+  +      ],
+  +      "filename" : "LaunchImageDark@3x.png",
+  +      "idiom" : "universal",
+         "scale" : "3x"
+       }
+     ],
+     "info" : {
+  -    "version" : 1,
+  -    "author" : "xcode"
+  +    "author" : "xcode",
+  +    "version" : 1
+     }
+   }
+  +36 -3
+
+ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage.png
+
+ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage@2x.png
+
+ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage@3x.png
+
+ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImageDark.png
+
+ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImageDark@2x.png
+
+ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImageDark@3x.png
+
+ios/Runner/Base.lproj/LaunchScreen.storyboard
+  @@ -16,13 +16,19 @@
+  -                            <imageView opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" image="LaunchImage" translatesAutoresizingMaskIntoConstraints="NO" id="YRO-k0-Ey4">
+  -                            </imageView>
+  +                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" image="LaunchBackground" translatesAutoresizingMaskIntoConstraints="NO" id="tWc-Dq-wcI"/>
+  +                            <imageView opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" image="LaunchImage" translatesAutoresizingMaskIntoConstraints="NO" id="YRO-k0-Ey4"></imageView>
+                           </subviews>
+                           <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                           <constraints>
+  -                            <constraint firstItem="YRO-k0-Ey4" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="1a2-6s-vTC"/>
+  -                            <constraint firstItem="YRO-k0-Ey4" firstAttribute="centerY" secondItem="Ze5-6b-2t3" secondAttribute="centerY" id="4X2-HB-R7a"/>
+  +                            <constraint firstItem="YRO-k0-Ey4" firstAttribute="leading" secondItem="Ze5-6b-2t3" secondAttribute="leading" id="3T2-ad-Qdv"/>
+  +                            <constraint firstItem="tWc-Dq-wcI" firstAttribute="bottom" secondItem="Ze5-6b-2t3" secondAttribute="bottom" id="RPx-PI-7Xg"/>
+  +                            <constraint firstItem="tWc-Dq-wcI" firstAttribute="top" secondItem="Ze5-6b-2t3" secondAttribute="top" id="SdS-ul-q2q"/>
+  +                            <constraint firstAttribute="trailing" secondItem="tWc-Dq-wcI" secondAttribute="trailing" id="Swv-Gf-Rwn"/>
+  +                            <constraint firstAttribute="trailing" secondItem="YRO-k0-Ey4" secondAttribute="trailing" id="TQA-XW-tRk"/>
+  +                            <constraint firstItem="YRO-k0-Ey4" firstAttribute="bottom" secondItem="Ze5-6b-2t3" secondAttribute="bottom" id="duK-uY-Gun"/>
+  +                            <constraint firstItem="tWc-Dq-wcI" firstAttribute="leading" secondItem="Ze5-6b-2t3" secondAttribute="leading" id="kV7-tw-vXt"/>
+  +                            <constraint firstItem="YRO-k0-Ey4" firstAttribute="top" secondItem="Ze5-6b-2t3" secondAttribute="top" id="xPn-NY-SIU"/>
+                           </constraints>
+                       </view>
+                   </viewController>
+  @@ -32,6 +38,7 @@
+  -        <image name="LaunchImage" width="168" height="185"/>
+  +        <image name="LaunchImage" width="1024" height="1024"/>
+  +        <image name="LaunchBackground" width="1" height="1"/>
+       </resources>
+   </document>
+  +12 -5
+
+ios/Runner/Info.plist
+  @@ -1,79 +1,81 @@
+  -<dict>
+  -	<key>CADisableMinimumFrameDurationOnPhone</key>
+  -	<true/>
+  -	<key>CFBundleDevelopmentRegion</key>
+  -	<string>$(DEVELOPMENT_LANGUAGE)</string>
+  -	<key>NSAppTransportSecurity</key>
+   	<dict>
+  -		<key>NSAllowsLocalNetworking</key>
+  +		<key>CADisableMinimumFrameDurationOnPhone</key>
+   		<true/>
+
+... (more changes truncated)
+  +1 -7
+[full diff: rtk git diff --no-compact]
