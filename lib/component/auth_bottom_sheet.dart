@@ -7,6 +7,8 @@ import 'package:vac_dashboard_app/component/button.dart';
 import 'package:vac_dashboard_app/component/text.dart';
 import 'package:vac_dashboard_app/screens/homeScreens.dart';
 import 'package:vac_dashboard_app/screens/deviceScreens.dart';
+import 'package:vac_dashboard_app/screens/scanScreens.dart';
+import 'package:vac_dashboard_app/component/header.dart';
 import 'package:vac_dashboard_app/services/api_service.dart';
 import 'package:vac_dashboard_app/models/auth_form_data.dart';
 import 'package:vac_dashboard_app/models/register_dto.dart';
@@ -43,7 +45,7 @@ class AuthBottomSheet extends StatefulWidget {
   State<AuthBottomSheet> createState() => _AuthBottomSheetState();
 }
 
-class _AuthBottomSheetState extends State<AuthBottomSheet> {
+class _AuthBottomSheetState extends State<AuthBottomSheet> with TickerProviderStateMixin {
   late AuthMode _mode;
   final LoginFormData _loginData = LoginFormData();
   final RegisterFormData _registerData = RegisterFormData();
@@ -52,11 +54,23 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
   bool _isLoading = false;
   bool _showScanner = false;
   final MobileScannerController _scannerController = MobileScannerController();
+  
+  late AnimationController _laserController;
+  late Animation<double> _laserAnimation;
 
   @override
   void initState() {
     super.initState();
     _mode = widget.initialMode;
+    
+    _laserController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+    )..repeat(reverse: true);
+
+    _laserAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _laserController, curve: Curves.easeInOut),
+    );
   }
 
   @override
@@ -65,6 +79,7 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
     _registerData.dispose();
     _forgotPasswordData.dispose();
     _scannerController.dispose();
+    _laserController.dispose();
     super.dispose();
   }
 
@@ -186,21 +201,29 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
       ),
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-        child: AnimatedContainer(
+        child: AnimatedSize(
           duration: const Duration(milliseconds: 400),
           curve: Curves.easeInOut,
-          height: _showScanner ? screenHeight : null,
-          width: double.infinity,
-          decoration: BoxDecoration(
-            color: colors.backgroundsPrimaryElevated,
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(34),
-              topRight: Radius.circular(34),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 400),
+            curve: Curves.easeInOut,
+            decoration: BoxDecoration(
+              color: _showScanner ? Colors.black : colors.backgroundsPrimaryElevated,
+              borderRadius: _showScanner
+                  ? BorderRadius.zero
+                  : const BorderRadius.only(
+                      topLeft: Radius.circular(34),
+                      topRight: Radius.circular(34),
+                    ),
             ),
-          ),
-          child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 300),
-            child: _buildForm(colors),
+            child: SizedBox(
+              width: double.infinity,
+              height: _showScanner ? screenHeight : null,
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                child: _buildForm(colors),
+              ),
+            ),
           ),
         ),
       ),
@@ -244,70 +267,122 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
   }
 
   Widget _buildScanner(AppColorTokenSet colors) {
-    return SafeArea(
-      child: Column(
-        key: const ValueKey('scanner'),
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(left: 20, right: 20, top: 8),
-            child: BottomSheetHeader(
-              title: 'Scan QR to Bind',
-              showGrabber: false,
-              leadingIcon: Icons.arrow_back_ios_new_rounded,
-              onLeadingPressed: () {
-                setState(() {
-                  _showScanner = false;
-                });
-                _scannerController.stop();
-              },
-              trailingIcon: Icons.close_rounded,
-              trailingVariant: ButtonVariant.tertiary,
-              onTrailingPressed: () => Navigator.of(context).pop(),
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: MobileScanner(
+            controller: _scannerController,
+            onDetect: (BarcodeCapture capture) {
+              if (_isLoading) return;
+              final List<Barcode> barcodes = capture.barcodes;
+              for (final barcode in barcodes) {
+                if (barcode.rawValue != null) {
+                  _handleQRScan(barcode.rawValue!);
+                  break;
+                }
+              }
+            },
+          ),
+        ),
+        if (_isLoading)
+          Container(
+            color: Colors.black54,
+            child: Center(
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(colors.accentsBlue),
+              ),
             ),
           ),
-          const SizedBox(height: 16),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: AppText(
-              'Scan the QR code on your device to complete registration.',
-              type: AppTextType.body,
-              customColor: colors.labelsSecondary,
-              textAlign: TextAlign.center,
-            ),
-          ),
-          const SizedBox(height: 32),
-          Expanded(
-            child: Stack(
+        SafeArea(
+          child: Container(
+            width: double.infinity,
+            height: double.infinity,
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                MobileScanner(
-                  controller: _scannerController,
-                  onDetect: (BarcodeCapture capture) {
-                    if (_isLoading) return;
-                    final List<Barcode> barcodes = capture.barcodes;
-                    for (final barcode in barcodes) {
-                      if (barcode.rawValue != null) {
-                        _handleQRScan(barcode.rawValue!);
-                        break;
-                      }
-                    }
-                  },
+                AppHeader(
+                  title: 'Scan QR to Bind',
+                  variant: AppHeaderVariant.inline,
+                  backgroundColor: Colors.transparent,
+                  titleColor: Colors.white,
+                  leading: IconButton(
+                    icon: const Icon(
+                      Icons.chevron_left_rounded,
+                      color: Colors.white,
+                      size: 32,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _showScanner = false;
+                      });
+                      _scannerController.stop();
+                    },
+                  ),
                 ),
-                if (_isLoading)
-                  Container(
-                    color: Colors.black54,
-                    child: Center(
-                      child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          colors.accentsBlue,
+                const SizedBox(height: 16),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20),
+                  child: AppText(
+                    'Scan the QR code on your device to complete registration.',
+                    type: AppTextType.body,
+                    customColor: Colors.white70,
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                Expanded(
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            CustomPaint(
+                              painter: ViewfinderPainter(),
+                              child: const SizedBox(width: 182, height: 182),
+                            ),
+                            if (!_isLoading)
+                              AnimatedBuilder(
+                                animation: _laserAnimation,
+                                builder: (context, child) {
+                                  return Positioned(
+                                    top: 6 + (_laserAnimation.value * 170),
+                                    left: 6,
+                                    right: 6,
+                                    child: Container(
+                                      height: 3,
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFF0088FF),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: const Color(0xFF0088FF).withValues(alpha: 0.8),
+                                            blurRadius: 8,
+                                            spreadRadius: 1,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                          ],
                         ),
-                      ),
+                      ],
                     ),
                   ),
+                ),
+                const SizedBox(height: 40),
               ],
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
