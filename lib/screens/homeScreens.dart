@@ -52,6 +52,11 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  Future<void> _navigateAndRefresh(Widget screen) async {
+    await Navigator.of(context).push(MaterialPageRoute(builder: (context) => screen));
+    _checkDeviceBinding();
+  }
+
   void _showAvatarMenu(BuildContext context) async {
     final RenderBox renderBox =
         _avatarKey.currentContext!.findRenderObject() as RenderBox;
@@ -89,12 +94,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         leadingIcon: Icons.qr_code_scanner_rounded,
                         onPressed: () async {
                           Navigator.of(context).pop(); // Dismiss menu
-                          await Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => const ScanScreen(),
-                            ),
-                          );
-                          _checkDeviceBinding();
+                          await _navigateAndRefresh(const ScanScreen());
                         },
                       ),
                     AppMenuItem(
@@ -106,7 +106,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           MaterialPageRoute(
                             builder: (context) => const SettingsScreen(),
                           ),
-                        ).then((_) => _checkDeviceBinding());
+                        );
                       },
                     ),
                     AppMenuItem(
@@ -224,17 +224,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     variant: ButtonVariant.primary,
                     onPressed: () {
                       if (_hasBoundDevice) {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => const DeviceScreen(),
-                          ),
-                        ).then((_) => _checkDeviceBinding());
+                        _navigateAndRefresh(const DeviceScreen());
                       } else {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => const ScanScreen(),
-                          ),
-                        ).then((_) => _checkDeviceBinding());
+                        _navigateAndRefresh(const ScanScreen());
                       }
                     },
                   ),
