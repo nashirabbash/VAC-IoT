@@ -28,33 +28,51 @@ class RegisterForm extends StatefulWidget {
 }
 
 class _RegisterFormState extends State<RegisterForm> {
-  bool _obscurePassword = true;
-  bool _obscureConfirmPassword = true;
-  bool _hasSubmitted = false;
+  bool _forceShowErrors = false;
+  bool _usernameTouched = false;
+  bool _hospitalTouched = false;
+  bool _passwordTouched = false;
+  bool _confirmPasswordTouched = false;
 
   @override
   void initState() {
     super.initState();
-    widget.formData.usernameController.addListener(_rebuild);
-    widget.formData.hospitalController.addListener(_rebuild);
-    widget.formData.passwordController.addListener(_rebuild);
-    widget.formData.confirmPasswordController.addListener(_rebuild);
-  }
-
-  void _rebuild() {
-    if (mounted && _hasSubmitted) {
-      setState(() {
-        widget.formData.validateAll();
-      });
-    }
+    widget.formData.usernameController.addListener(() {
+      if (mounted) {
+        setState(() {
+          _usernameTouched = true;
+          widget.formData.validateAll();
+        });
+      }
+    });
+    widget.formData.hospitalController.addListener(() {
+      if (mounted) {
+        setState(() {
+          _hospitalTouched = true;
+          widget.formData.validateAll();
+        });
+      }
+    });
+    widget.formData.passwordController.addListener(() {
+      if (mounted) {
+        setState(() {
+          _passwordTouched = true;
+          widget.formData.validateAll();
+        });
+      }
+    });
+    widget.formData.confirmPasswordController.addListener(() {
+      if (mounted) {
+        setState(() {
+          _confirmPasswordTouched = true;
+          widget.formData.validateAll();
+        });
+      }
+    });
   }
 
   @override
   void dispose() {
-    widget.formData.usernameController.removeListener(_rebuild);
-    widget.formData.hospitalController.removeListener(_rebuild);
-    widget.formData.passwordController.removeListener(_rebuild);
-    widget.formData.confirmPasswordController.removeListener(_rebuild);
     super.dispose();
   }
 
@@ -108,50 +126,28 @@ class _RegisterFormState extends State<RegisterForm> {
                   AuthInputField(
                     controller: widget.formData.usernameController,
                     labelText: 'Username',
-                    errorText: widget.formData.usernameError,
+                    errorText: (_usernameTouched || _forceShowErrors) ? widget.formData.usernameError : null,
                     colors: colors,
                   ),
                   AuthInputField(
                     controller: widget.formData.hospitalController,
                     labelText: 'Hospital',
-                    errorText: widget.formData.hospitalError,
+                    errorText: (_hospitalTouched || _forceShowErrors) ? widget.formData.hospitalError : null,
                     colors: colors,
                   ),
                   AuthInputField(
                     controller: widget.formData.passwordController,
                     labelText: 'Password',
-                    errorText: widget.formData.passwordError,
-                    obscureText: _obscurePassword,
+                    errorText: (_passwordTouched || _forceShowErrors) ? widget.formData.passwordError : null,
+                    isPassword: true,
                     colors: colors,
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                        color: _obscurePassword ? colors.labelsTertiary : colors.accentsBlue,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _obscurePassword = !_obscurePassword;
-                        });
-                      },
-                    ),
                   ),
                   AuthInputField(
                     controller: widget.formData.confirmPasswordController,
                     labelText: 'Confirm Password',
-                    errorText: widget.formData.confirmPasswordError,
-                    obscureText: _obscureConfirmPassword,
+                    errorText: (_confirmPasswordTouched || _forceShowErrors) ? widget.formData.confirmPasswordError : null,
+                    isPassword: true,
                     colors: colors,
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscureConfirmPassword ? Icons.visibility_off : Icons.visibility,
-                        color: _obscureConfirmPassword ? colors.labelsTertiary : colors.accentsBlue,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _obscureConfirmPassword = !_obscureConfirmPassword;
-                        });
-                      },
-                    ),
                   ),
                 ],
               ),
@@ -174,7 +170,7 @@ class _RegisterFormState extends State<RegisterForm> {
                         variant: ButtonVariant.primary,
                         onPressed: () {
                           setState(() {
-                            _hasSubmitted = true;
+                            _forceShowErrors = true;
                             widget.formData.validateAll();
                           });
                           if (widget.formData.isValid) {

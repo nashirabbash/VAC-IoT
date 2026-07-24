@@ -11,6 +11,7 @@ import 'package:vac_dashboard_app/models/auth_form_data.dart';
 import 'package:vac_dashboard_app/models/register_dto.dart';
 import 'package:vac_dashboard_app/component/login_form.dart';
 import 'package:vac_dashboard_app/component/register_form.dart';
+import 'package:vac_dashboard_app/component/forgot_password_form.dart';
 
 enum AuthMode { login, signUp, forgotPassword }
 
@@ -193,39 +194,47 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
           ),
           child: AnimatedSwitcher(
             duration: const Duration(milliseconds: 300),
-            child: _showScanner
-                ? _buildScanner(colors)
-                : (_mode == AuthMode.login
-                    ? LoginForm(
-                        formData: _loginData,
-                        isLoading: _isLoading,
-                        onLogin: _handleLogin,
-                        onToggleMode: _toggleMode,
-                        onClose: () => Navigator.of(context).pop(),
-                        onForgotPassword: () => setState(() => _mode = AuthMode.forgotPassword),
-                      )
-                    : (_mode == AuthMode.signUp
-                        ? RegisterForm(
-                            formData: _registerData,
-                            isLoading: _isLoading,
-                            onNext: _handleRegisterNext,
-                            onToggleMode: _toggleMode,
-                            onClose: () => Navigator.of(context).pop(),
-                          )
-                        : ForgotPasswordForm(
-                            formData: _forgotPasswordData,
-                            isLoading: _isLoading,
-                            onResetPassword: () {
-                              // Optional: handle forgot password
-                              setState(() => _mode = AuthMode.login);
-                            },
-                            onBackToLogin: () => setState(() => _mode = AuthMode.login),
-                            onClose: () => Navigator.of(context).pop(),
-                          ))),
+            child: _buildForm(colors),
           ),
         ),
       ),
     );
+  }
+
+  Widget _buildForm(AppColorTokenSet colors) {
+    if (_showScanner) {
+      return _buildScanner(colors);
+    }
+    switch (_mode) {
+      case AuthMode.login:
+        return LoginForm(
+          formData: _loginData,
+          isLoading: _isLoading,
+          onLogin: _handleLogin,
+          onToggleMode: _toggleMode,
+          onClose: () => Navigator.of(context).pop(),
+          onForgotPassword: () => setState(() => _mode = AuthMode.forgotPassword),
+        );
+      case AuthMode.signUp:
+        return RegisterForm(
+          formData: _registerData,
+          isLoading: _isLoading,
+          onNext: _handleRegisterNext,
+          onToggleMode: _toggleMode,
+          onClose: () => Navigator.of(context).pop(),
+        );
+      case AuthMode.forgotPassword:
+        return ForgotPasswordForm(
+          formData: _forgotPasswordData,
+          isLoading: _isLoading,
+          onResetPassword: () {
+            // Optional: handle forgot password
+            setState(() => _mode = AuthMode.login);
+          },
+          onBackToLogin: () => setState(() => _mode = AuthMode.login),
+          onClose: () => Navigator.of(context).pop(),
+        );
+    }
   }
 
   Widget _buildScanner(AppColorTokenSet colors) {
