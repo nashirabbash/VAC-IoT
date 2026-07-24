@@ -1,11 +1,12 @@
-.scratch/diff_for_subagents.diff | 555 +++------------------------------------
- lib/screens/homeScreens.dart     |  26 +-
- 2 files changed, 56 insertions(+), 525 deletions(-)
+.scratch/diff_for_subagents.diff     | 646 ++++++++---------------------------
+ lib/component/auth_bottom_sheet.dart |   6 +
+ lib/screens/homeScreens.dart         |  21 +-
+ 3 files changed, 165 insertions(+), 508 deletions(-)
 
 --- Changes ---
 
 .scratch/diff_for_subagents.diff
-  @@ -1,519 +1,44 @@
+  @@ -1,519 +1,153 @@
   -.scratch/diff_for_subagents.diff        | 961 ++++++++++++++++----------------
   - lib/component/auth_bottom_sheet.dart    |  67 ++-
   - lib/component/auth_input_field.dart     |  49 +-
@@ -13,12 +14,13 @@
   - lib/component/login_form.dart           | 155 +-----
   - lib/component/register_form.dart        |  92 ++-
   - 6 files changed, 726 insertions(+), 723 deletions(-)
-  +lib/screens/homeScreens.dart | 20 +++++++++++++++++---
-  + 1 file changed, 17 insertions(+), 3 deletions(-)
+  +.scratch/diff_for_subagents.diff | 555 +++------------------------------------
+  + lib/screens/homeScreens.dart     |  26 +-
+  + 2 files changed, 56 insertions(+), 525 deletions(-)
    
    --- Changes ---
    
-  -.scratch/diff_for_subagents.diff
+   .scratch/diff_for_subagents.diff
   -  @@ -1,519 +1,522 @@
   -  -.scratch/diff_for_subagents.diff     | 553 +++++++++++++++++++++++++++++++++++
   -  - lib/component/auth_bottom_sheet.dart | 481 +++++-------------------------
@@ -41,10 +43,20 @@
   -  + lib/screens/homeScreens.dart         |    2 +-
   -  + lib/screens/scanScreens.dart         |    7 +-
   -  + 10 files changed, 1411 insertions(+), 576 deletions(-)
-  -   
-  -   --- Changes ---
-  -   
-  -  -.scratch/diff_for_subagents.diff
+  +  @@ -1,519 +1,44 @@
+  +  -.scratch/diff_for_subagents.diff        | 961 ++++++++++++++++----------------
+  +  - lib/component/auth_bottom_sheet.dart    |  67 ++-
+  +  - lib/component/auth_input_field.dart     |  49 +-
+  +  - lib/component/forgot_password_form.dart | 125 +++++
+  +  - lib/component/login_form.dart           | 155 +-----
+  +  - lib/component/register_form.dart        |  92 ++-
+  +  - 6 files changed, 726 insertions(+), 723 deletions(-)
+  +  +lib/screens/homeScreens.dart | 20 +++++++++++++++++---
+  +  + 1 file changed, 17 insertions(+), 3 deletions(-)
+      
+      --- Changes ---
+      
+     -.scratch/diff_for_subagents.diff
   -  -  @@ -0,0 +1,553 @@
   -  -  +.../issues/10_flutter_ble_handshake_connect.md     |   18 +
   -  -  + .../issues/11_backend_registration_bind.md         |   13 +
@@ -95,59 +107,63 @@
   -     +
   -  -  +.scratch/qr_ota_feature/issues/10_flutter_ble_handshake_connect.md
   -  -  +  @@ -0,0 +1,18 @@
-  -  -  +  +# 10 — Flutter BLE Auto-Connect & Auth Handshake
-  -  -  +  +
-  -  -  +  +**What to build:**
-  -  -  +  +Implement the Bluetooth auto-connect sequence driven by the scanned QR parameters. The Flutter application must scan for the specific device name, establish a connection, write the AUTH_KEY to authenticate, and subscribe to update notifications.
-  -  -  +  +
-  -  -  +  +**Blocked by:**
-  -  -  +  +- [9_flutter_qr_scanner_utility.md](file:///home/broo/Documents/apps/vac_dashboard_app/.scratch/qr_ota_feature/issues/9_flutter_qr_scanner_utility.md)
-  -  -  +  +
-  -  -  +  +**Status:** ready-for-agent
-  -  -  +  +
-  -  -  +  +- [ ] Implement background scan using `flutter_blue_plus` filtering for the specific `DEVICE_NAME` parsed from the QR code.
-  ... (458 lines truncated)
-  +40 -515
+  ... (554 lines truncated)
+  +140 -506
+
+lib/component/auth_bottom_sheet.dart
+  @@ -6,6 +6,7 @@
+  +import 'package:vac_dashboard_app/screens/deviceScreens.dart';
+   import 'package:vac_dashboard_app/services/api_service.dart';
+   import 'package:vac_dashboard_app/models/auth_form_data.dart';
+   import 'package:vac_dashboard_app/models/register_dto.dart';
+  @@ -149,9 +150,14 @@
+  +      
+  +      // Navigate to HomeScreen as the base, then push DeviceScreen on top
+         nav.pushReplacement(
+           MaterialPageRoute(builder: (context) => const HomeScreen()),
+         );
+  +      nav.push(
+  +        MaterialPageRoute(builder: (context) => const DeviceScreen()),
+  +      );
+       } catch (e) {
+         if (!mounted) return;
+         final snackBar = scaffoldMsg.showSnackBar(
+  +6 -0
 
 lib/screens/homeScreens.dart
-  @@ -52,6 +52,11 @@
-  +  Future<void> _navigateAndRefresh(Widget screen) async {
-  +    await Navigator.of(context).push(MaterialPageRoute(builder: (context) => screen));
-  +    _checkDeviceBinding();
-  +  }
-  +
-     void _showAvatarMenu(BuildContext context) async {
-       final RenderBox renderBox =
-           _avatarKey.currentContext!.findRenderObject() as RenderBox;
-  @@ -83,6 +88,15 @@
+  @@ -83,6 +83,21 @@
   +                    if (_hasBoundDevice)
   +                      AppMenuItem(
   +                        label: 'Change Device',
   +                        leadingIcon: Icons.qr_code_scanner_rounded,
   +                        onPressed: () async {
   +                          Navigator.of(context).pop(); // Dismiss menu
-  +                          await _navigateAndRefresh(const ScanScreen());
+  +                          await Navigator.push(
+  +                            context,
+  +                            MaterialPageRoute(
+  +                              builder: (context) => const ScanScreen(),
+  +                            ),
+  +                          );
+  +                          _checkDeviceBinding();
   +                        },
   +                      ),
                        AppMenuItem(
                          label: 'Settings',
                          leadingIcon: Icons.settings_rounded,
-  @@ -210,17 +224,9 @@
+  @@ -210,13 +225,15 @@
   -                        Navigator.of(context).push(
-  -                          MaterialPageRoute(
-  -                            builder: (context) => const DeviceScreen(),
-  -                          ),
-  -                        );
-  +                        _navigateAndRefresh(const DeviceScreen());
+  +                        Navigator.push(
+  +                          context,
+                             MaterialPageRoute(
+                               builder: (context) => const DeviceScreen(),
+                             ),
+                           );
                          } else {
   -                        Navigator.of(context).push(
-  -                          MaterialPageRoute(
-  -                            builder: (context) => const ScanScreen(),
-  -                          ),
-  -                        );
-  +                        _navigateAndRefresh(const ScanScreen());
-                         }
-                       },
-                     ),
-  +16 -10
+  +                        Navigator.push(
+  +                          context,
+                             MaterialPageRoute(
+                               builder: (context) => const ScanScreen(),
+                             ),
+  +19 -2
 [full diff: rtk git diff --no-compact]

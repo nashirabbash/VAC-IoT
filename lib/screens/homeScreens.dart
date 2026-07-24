@@ -225,15 +225,13 @@ class _HomeScreenState extends State<HomeScreen> {
                     variant: ButtonVariant.primary,
                     onPressed: () {
                       if (_hasBoundDevice) {
-                        Navigator.push(
-                          context,
+                        Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (context) => const DeviceScreen(),
                           ),
                         );
                       } else {
-                        Navigator.push(
-                          context,
+                        Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (context) => const ScanScreen(),
                           ),
