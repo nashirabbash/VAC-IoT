@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:vac_dashboard_app/models/therapy_session.dart';
+import 'package:vac_dashboard_app/models/register_dto.dart';
 import 'package:vac_dashboard_app/network/api_interceptor.dart';
 import 'package:vac_dashboard_app/repositories/auth_repository.dart';
 
@@ -51,7 +52,7 @@ class ApiService {
     return TherapySession.fromJson(body['data'] as Map<String, dynamic>);
   }
 
-  Future<String> login(String username, String password) async {
+  Future<void> login(String username, String password) async {
     final uri = Uri.parse('$_baseUrl/auth/login');
     final res = await _client.post(
       uri,
@@ -62,28 +63,15 @@ class ApiService {
     if (res.statusCode != 200) {
       throw Exception(body['message'] ?? 'Failed to login');
     }
-    return (body['data'] != null ? body['data']['token'] : body['token'])
-        as String;
+    final token = (body['data'] != null ? body['data']['token'] : body['token']) as String;
+    await _authRepository.saveToken(token);
   }
 
-  Future<void> register(
-    String username,
-    String password,
-    String hospitalName, [
-    String? qrKey,
-  ]) async {
+  Future<void> register(RegisterDto dto) async {
     final uri = Uri.parse('$_baseUrl/auth/register');
-    final Map<String, dynamic> payload = {
-      'username': username,
-      'password': password,
-      'hospitalName': hospitalName,
-    };
-    if (qrKey != null) {
-      payload['qrKey'] = qrKey;
-    }
     final res = await _client.post(
       uri,
-      body: jsonEncode(payload),
+      body: jsonEncode(dto.toJson()),
       headers: {'Content-Type': 'application/json'},
     );
     final body = jsonDecode(res.body) as Map<String, dynamic>;
@@ -92,7 +80,7 @@ class ApiService {
     }
     final token = body['data'] != null ? body['data']['token'] : body['token'];
     if (token != null) {
-      await AuthRepository().saveToken(token as String);
+      await _authRepository.saveToken(token as String);
     }
   }
 
@@ -112,7 +100,7 @@ class ApiService {
         ? body['data']['token']
         : body['token'];
     if (newToken != null) {
-      await AuthRepository().saveToken(newToken as String);
+      await _authRepository.saveToken(newToken as String);
     }
   }
 

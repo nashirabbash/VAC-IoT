@@ -1,0 +1,553 @@
+.../issues/10_flutter_ble_handshake_connect.md     |   18 +
+ .../issues/11_backend_registration_bind.md         |   13 +
+ .../issues/12_flutter_register_qr_bottomsheet.md   |   14 +
+ .../issues/13_flutter_home_change_device.md        |   13 +
+ .../issues/14_flutter_ble_auto_reconnect.md        |   14 +
+ .scratch/qr_ota_feature/issues/1_web_ota_api.md    |   15 +
+ .scratch/qr_ota_feature/issues/2_esp32_self_ota.md |   17 +
+ .../qr_ota_feature/issues/3_safe_update_lock.md    |   16 +
+ .../qr_ota_feature/issues/4_web_targeted_ota.md    |   15 +
+ .../qr_ota_feature/issues/5_esp32_avr_isp_ota.md   |   16 +
+ .../issues/6_esp32_nextion_tft_ota.md              |   16 +
+ .../issues/7_esp32_ble_wifi_provisioning.md        |   17 +
+ .../issues/8_flutter_wifi_provisioning_ui.md       |   16 +
+ .../issues/9_flutter_qr_scanner_utility.md         |   15 +
+ .scratch/qr_ota_feature/spec.md                    |   52 +
+ clean_commit2_diff.txt                             |   97 -
+ commit2_diff.txt                                   |  528 ----
+ commit2_review_comment.md                          |   57 -
+ commit_diff.txt                                    |  109 -
+ commit_review_comment.md                           |   47 -
+ diff_output.txt                                    | 2515 --------------------
+ lib/component/auth_bottom_sheet.dart               |  770 +++---
+ lib/services/api_service.dart                      |   25 +-
+ pr_diff.txt                                        |  587 -----
+ pr_review_comment.md                               |   64 -
+ ss/RemoteQR.png                                    |  Bin 0 -> 23012 bytes
+ ss/bluetoothQr.png                                 |  Bin 0 -> 23067 bytes
+ ticket1.md                                         |   15 -
+ ticket2.md                                         |   15 -
+ 29 files changed, 734 insertions(+), 4362 deletions(-)
+
+--- Changes ---
+
+.scratch/qr_ota_feature/issues/10_flutter_ble_handshake_connect.md
+  @@ -0,0 +1,18 @@
+  +# 10 — Flutter BLE Auto-Connect & Auth Handshake
+  +
+  +**What to build:**
+  +Implement the Bluetooth auto-connect sequence driven by the scanned QR parameters. The Flutter application must scan for the specific device name, establish a connection, write the AUTH_KEY to authenticate, and subscribe to update notifications.
+  +
+  +**Blocked by:**
+  +- [9_flutter_qr_scanner_utility.md](file:///home/broo/Documents/apps/vac_dashboard_app/.scratch/qr_ota_feature/issues/9_flutter_qr_scanner_utility.md)
+  +
+  +**Status:** ready-for-agent
+  +
+  +- [ ] Implement background scan using `flutter_blue_plus` filtering for the specific `DEVICE_NAME` parsed from the QR code.
+  +- [ ] Implement auto-connect behavior: once the matching device name is found, automatically stop scanning and initiate the BLE connection.
+  +- [ ] Implement connection timeout security handshake: Write the parsed `AUTH_KEY` to the ESP32 security characteristic immediately upon connecting (must be completed within 5 seconds to prevent the ESP32 from dropping the connection).
+  +- [ ] **Auto-Reconnect (Hilang Jarak):** Jika koneksi BLE terputus karena jarak jauh, simpan status Device ID lokal dan buat aplikasi otomatis mencari dan terkoneksi ulang saat mesin kembali ke dalam jangkauan tanpa perlu scan QR.
+  +- [ ] **Ganti Mesin (Unbind):** Sediakan tombol "Ganti Mesin" di layar Home UI untuk menghapus pengikatan alat lama, membuka kamera, dan men-scan QR alat baru.
+  +- [ ] Subscribe to the `UPDATE_PENDING` characteristic to listen for firmware update notifications.
+  +- [ ] Show user feedback in the UI for connecting, authenticating, and connection success/failure.
+  +- [ ] Unit/Integration tests mock `flutter_blue_plus` connection states to verify the handshake flow.
+  +18 -0
+
+.scratch/qr_ota_feature/issues/11_backend_registration_bind.md
+  @@ -0,0 +1,13 @@
+  +# 11 — Backend API Registration & Binding Integration
+  +
+  +**What to build:**
+  +Modify the `POST /api/auth/register` endpoint in the backend (`be_vac`) to accept a `qrKey` parameter. When called, the backend must execute a transaction that creates a new User and immediately creates an active `TrDeviceUser` binding for the scanned device. It should return a JWT token in the response so the user is instantly logged in. Verify that `POST /api/device/bind` properly unbinds the old device and returns a new token for the Change Device feature.
+  +
+  +**Blocked by:** None — can start immediately.
+  +
+  +**Status:** ready-for-agent
+  +
+  +- [ ] `POST /api/auth/register` accepts `qrKey`.
+  +- [ ] Validates `qrKey` against the `Device` table; returns 400 Bad Request if invalid.
+  +- [ ] Database transaction ensures `User` and `TrDeviceUser` records are created together.
+  +- [ ] Endpoint returns 201 Created containing the JWT Token and `deviceId`.
+  +13 -0
+
+.scratch/qr_ota_feature/issues/12_flutter_register_qr_bottomsheet.md
+  @@ -0,0 +1,14 @@
+  +# 12 — Flutter UI Register: Real-time Form, Snap Fullscreen & Scanner Transition
+  +
+  +**What to build:**
+  +Enhance the Flutter Registration UI. First, implement real-time validation on the registration form fields (errors appear as the user types, not just on submit). Second, change the submit button to "Next". When clicked, the bottom sheet automatically snaps to 100% fullscreen and elegantly transitions (e.g., cross-fade) to the Camera Scanner view. If the user scans an invalid QR code, display a Toast/Snackbar message immediately. If valid, combine the QR data with the form data, hit `/api/auth/register`, and navigate to the Home screen on success.
+  +
+  +**Blocked by:** 11 — Backend API Registration & Binding Integration
+  +
+  +**Status:** ready-for-agent
+  +
+  +- [ ] Registration text fields show error validation in real-time as the user types.
+  +- [ ] "Next" button validates the form and snaps the bottom sheet to fullscreen (100%).
+  +- [ ] Fullscreen sheet animates/transitions smoothly into the QR Scanner view.
+  +- [ ] Scanning an invalid QR code shows a Toast/Snackbar warning.
+  +- [ ] Successful scan posts data to `/api/auth/register` and routes to Home on 201 response.
+  +14 -0
+
+.scratch/qr_ota_feature/issues/13_flutter_home_change_device.md
+  @@ -0,0 +1,13 @@
+  +# 13 — Flutter Home Screen "Change Device" Menu
+  +
+  +**What to build:**
+  +Update the Avatar Context Menu on the `HomeScreen` (`homeScreens.dart`) to include a "Change Device" button. This option should only be visible if the user currently has a bound device. Clicking it opens a QR scanner. Scanning a new machine triggers the `/api/device/bind` backend endpoint. Upon a successful response, the app updates the local device identity and refreshes the Home screen state to reflect the new machine.
+  +
+  +**Blocked by:** 11 — Backend API Registration & Binding Integration
+  +
+  +**Status:** ready-for-agent
+  +
+  +- [ ] "Change Device" menu item conditionally appears in the Avatar menu.
+  +- [ ] Clicking the menu opens the QR scanner screen.
+  +- [ ] Scanned data hits `POST /api/device/bind` to swap the active device.
+  +- [ ] The new JWT token and `deviceId` are saved locally and the UI state refreshes.
+  +13 -0
+
+.scratch/qr_ota_feature/issues/14_flutter_ble_auto_reconnect.md
+  @@ -0,0 +1,14 @@
+  +# 14 — Flutter BLE 5-Second Handshake & Auto-Reconnect Logic
+  +
+  +**What to build:**
+  +Implement the core Bluetooth connectivity engine using `flutter_blue_plus`. The app should continuously scan in the background for the saved `DEVICE_ID`. When found, it auto-connects and writes the hidden `AUTH_PIN` to the ESP32 to satisfy the 5-second security window. If the phone loses connection because it moved out of range, the app automatically falls back to scanning mode and reconnects silently once the user walks back in range.
+  +
+  +**Blocked by:** 12, 13
+  +
+  +**Status:** ready-for-agent
+  +
+  +- [ ] App retrieves stored `DEVICE_ID` and `AUTH_PIN` from local storage.
+  +- [ ] `flutter_blue_plus` filters background scan specifically for the `DEVICE_ID` name.
+  +- [ ] On connection, the app writes `AUTH_PIN` to the correct BLE characteristic within 5 seconds.
+  +- [ ] The app listens to connection state drops and safely re-enters the scanning loop (Auto-Reconnect).
+  +- [ ] **Home Screen UI State:** The Home screen observes the BLE state. It displays a "Mencoba Connect..." (Trying to connect) UI with a loading/pulsing animation while scanning. If it fails or drops, it updates to a "Gagal Connect" (Failed/Searching) UI.
+  +14 -0
+
+.scratch/qr_ota_feature/issues/1_web_ota_api.md
+  @@ -0,0 +1,15 @@
+  +## What to build
+  +
+  +Implement the basic `/api/ota` GET route handler in the Vercel web app. This route serves the firmware update manifest to the devices.
+  +
+  +## Acceptance criteria
+  +
+  +- [ ] Route `GET /api/ota` is created and functional.
+  +- [ ] Route accepts query parameters: `device_id`, `esp_v`, `atm_v`, and `nex_v`.
+  +- [ ] Returns a JSON manifest containing `update_available` (boolean).
+  +- [ ] If an update is available, the response includes: `target` (esp/atm/nex), `version` (string), `download_url` (string), and `md5_hash` (string).
+  +- [ ] Unit tests mock database queries and verify the JSON response structures.
+  +
+  +## Blocked by
+  +
+  +None - can start immediately
+  +15 -0
+
+.scratch/qr_ota_feature/issues/2_esp32_self_ota.md
+  @@ -0,0 +1,17 @@
+  +## What to build
+  +
+  +Implement the ESP32 self-updating OTA workflow. The ESP32 connects to WiFi, queries the Vercel API, downloads its own `.bin` update, verifies the MD5 checksum, and flashes its secondary OTA partition.
+  +
+  +## Acceptance criteria
+  +
+  +- [x] ESP32 successfully initiates a WiFi connection.
+  +- [x] Queries `GET /api/ota` using its current version.
+  +- [x] If `update_available` is true and target is `esp`, downloads the `.bin` file.
+  +- [x] Calculates the MD5 checksum of the downloaded file locally and compares it with the manifest's `md5_hash`.
+  +- [x] Aborts update and deletes file if MD5 checksum fails.
+  +- [x] Installs update into the alternate OTA partition using the Arduino/NimBLE OTA library.
+  +- [x] Unit tests verify MD5 calculation logic and state transitions (download, check, flash).
+  +
+  +## Blocked by
+  +
+  +- [1_web_ota_api.md](file:///home/broo/Documents/apps/vac_dashboard_app/.scratch/qr_ota_feature/issues/1_web_ota_api.md)
+  +17 -0
+
+.scratch/qr_ota_feature/issues/3_safe_update_lock.md
+  @@ -0,0 +1,16 @@
+  +## What to build
+  +
+  +Implement safety mechanisms in the ESP32 OTA process, including running OTA asynchronously on Core 0, locking updates during active therapy, and watchdog rollback protection.
+  +
+  +## Acceptance criteria
+  +
+  +- [x] OTA download task is created using FreeRTOS `xTaskCreatePinnedToCore` on Core 0.
+  +- [x] Core 1 continues running the main BLE/UART communication loop completely unblocked during downloads.
+  +- [x] Safe Lock: If `isTherapyActive == true`, setting partition swaps or ESP restarts is blocked; sets `update_pending = true` instead.
+  +- [x] Applies pending update once the device state changes to `STATE_IDLE` or on next boot.
+  +- [x] Rollback Watchdog: Bootloader checks RTC memory boot crash count. If count > 3, triggers automatic rollback to the previous stable partition.
+  +- [x] Unit tests verify that updates are deferred during active therapy state.
+  +
+  +## Blocked by
+  +
+  +- [2_esp32_self_ota.md](file:///home/broo/Documents/apps/vac_dashboard_app/.scratch/qr_ota_feature/issues/2_esp32_self_ota.md)
+  +16 -0
+
+.scratch/qr_ota_feature/issues/4_web_targeted_ota.md
+  @@ -0,0 +1,15 @@
+  +## What to build
+  +
+  +Build the targeted device OTA release portal. Integrate a web UI to upload firmware binaries, link it to cloud storage, and write database logic to serve specific versions to selected device IDs.
+  +
+  +## Acceptance criteria
+  +
+  +- [x] Web page allows selecting a `.bin`, `.hex`, or `.tft` file and entering a version string.
+  +- [x] Uploaded files are successfully stored in Supabase or Firebase Storage.
+  +- [x] Database stores device registries and active deployments.
+  +- [x] Provides options to release an update globally or to target specific device IDs.
+  +- [x] API endpoint `/api/ota` verifies the requesting `device_id` against active targeted releases first, falling back to global releases.
+  +
+  +## Blocked by
+  +
+  +- [1_web_ota_api.md](file:///home/broo/Documents/apps/vac_dashboard_app/.scratch/qr_ota_feature/issues/1_web_ota_api.md)
+  +15 -0
+
+.scratch/qr_ota_feature/issues/5_esp32_avr_isp_ota.md
+  @@ -0,0 +1,16 @@
+  +## What to build
+  +
+  +Implement the AVR ISP OTA bridge for flashing the ATmega chip. The ESP32 downloads the ATmega `.hex` program into its internal LittleFS/SPIFFS file storage and flashes it over the SPI ISP pins using the STK500v1 protocol.
+  +
+  +## Acceptance criteria
+  +
+  +- [ ] ESP32 downloads the `.hex` file from the Vercel API and saves it locally in SPIFFS/LittleFS.
+  +- [ ] MD5 checksum is calculated and verified against the manifest before flashing.
+  +- [ ] ESP32 executes the ISP bit-bang flashing sequence (`runIspMode` functions in `isp.h`) using the saved `.hex` file as the source.
+  +- [ ] If flashing is interrupted (e.g. power loss), the ESP32 retains the `.hex` file and re-flashes the ATmega automatically on next boot.
+  +- [ ] Unit tests verify SPIFFS storage operations and mock the STK500v1 flashing state machine.
+  +
+  +## Blocked by
+  +
+  +- [3_safe_update_lock.md](file:///home/broo/Documents/apps/vac_dashboard_app/.scratch/qr_ota_feature/issues/3_safe_update_lock.md)
+  +- [4_web_targeted_ota.md](file:///home/broo/Documents/apps/vac_dashboard_app/.scratch/qr_ota_feature/issues/4_web_targeted_ota.md)
+  +16 -0
+
+.scratch/qr_ota_feature/issues/6_esp32_nextion_tft_ota.md
+  @@ -0,0 +1,16 @@
+  +## What to build
+  +
+  +Implement the Nextion HMI TFT OTA bridge. The ESP32 downloads the `.tft` update to its internal storage, commands the ATmega to switch to UART pass-through bridge mode, and uploads the TFT file over serial to the Nextion display.
+  +
+  +## Acceptance criteria
+  +
+  +- [ ] ESP32 downloads the Nextion `.tft` file to SPIFFS/LittleFS (or falls back to direct streaming if space is insufficient).
+  +- [ ] ESP32 sends a pass-through trigger command over UART to the ATmega.
+  +- [ ] ATmega halts its main loop and enters serial pass-through mode, forwarding all bytes between ESP32 and Nextion.
+  +- [ ] ESP32 executes the Nextion upload protocol over serial (commands: `whmi-wri` and streaming data chunks).
+  +- [ ] If upload fails mid-way, the ESP32 alerts the user and retries flashing on next boot.
+  +- [ ] Unit tests verify serial command exchanges and pass-through states.
+  +
+  +## Blocked by
+  +
+  +- [5_esp32_avr_isp_ota.md](file:///home/broo/Documents/apps/vac_dashboard_app/.scratch/qr_ota_feature/issues/5_esp32_avr_isp_ota.md)
+  +16 -0
+
+.scratch/qr_ota_feature/issues/7_esp32_ble_wifi_provisioning.md
+  @@ -0,0 +1,17 @@
+  +# 7 — ESP32 BLE WiFi Provisioning & Admin Authentication
+  +
+  +**What to build:**
+  +Implement new BLE characteristics on the ESP32 to allow WiFi provisioning. The characteristics must enforce authorization by verifying an Admin Auth Key before writing new credentials to NVS and attempting to connect.
+  +
+  +**Blocked by:**
+  +- [5_esp32_avr_isp_ota.md](file:///home/broo/Documents/apps/vac_dashboard_app/.scratch/qr_ota_feature/issues/5_esp32_avr_isp_ota.md)
+  +
+  +**Status:** completed
+  +
+  +- [x] Define `WIFI_CONFIG_UUID` (Write) and `WIFI_STATUS_UUID` (Read/Notify) BLE Characteristics.
+  +- [x] Implement write callback for `WIFI_CONFIG_UUID` that checks for a payload format containing `{ssid, password, admin_key}`.
+  +- [x] Authorize writes by verifying `admin_key` matches the configured secret organization credential on the ESP32.
+  +- [x] If unauthorized, reject the write and return a failure status to `WIFI_STATUS_UUID`.
+  +- [x] If authorized, write the SSID and password to NVS using `NvsHelper`, update `WIFI_STATUS_UUID` to "CONNECTING", and initiate connection in background.
+  +- [x] Update `WIFI_STATUS_UUID` to "CONNECTED" or "FAILED" depending on the outcome.
+  +- [x] Native unit tests verify parser validation and NVS writes.
+  +17 -0
+
+.scratch/qr_ota_feature/issues/8_flutter_wifi_provisioning_ui.md
+  @@ -0,0 +1,16 @@
+  +# 8 — Flutter Admin WiFi Setup UI
+  +
+  +**What to build:**
+  +Implement the WiFi Provisioning wizard on the Flutter app. Access to this wizard is restricted to Admin or Maintenance users, either by role verification or by scanning a technician-specific QR code. It will connect to the ESP32 via BLE and transmit target WiFi credentials.
+  +
+  +**Blocked by:**
+  +- [7_esp32_ble_wifi_provisioning.md](file:///home/broo/Documents/apps/vac_dashboard_app/.scratch/qr_ota_feature/issues/7_esp32_ble_wifi_provisioning.md)
+  +
+  +**Status:** ready-for-agent
+  +
+  +- [ ] Add authorization UI guard (hiding WiFi setup button except for users with `admin` metadata or scanning signed technician QR).
+  +- [ ] Implement local WiFi scan in Flutter (or allow manual entry) for SSID and Password.
+  +- [ ] Connect to ESP32 BLE GATT Server and identify the WiFi config characteristics.
+  +- [ ] Format and send the encrypted/hashed payload `{ssid, password, admin_key}` over the BLE write characteristic.
+  +- [ ] Subscribe to the status characteristic to display progress feedback (e.g. "Connecting...", "Success!", "Invalid Password").
+  +- [ ] Persist connectivity status feedback dynamically in the UI.
+  +16 -0
+
+.scratch/qr_ota_feature/issues/9_flutter_qr_scanner_utility.md
+  @@ -0,0 +1,15 @@
+  +# 9 — Flutter QR Code Scanner & Parser Utility
+  +
+  +**What to build:**
+  +Implement the QR Code scanner interface and parsing utility in the Flutter application. It must scan a QR code, parse the pipe-separated string format, and validate the HMAC checksum.
+  +
+  +**Blocked by:**
+  +- None (Can start immediately)
+  +
+  +**Status:** ready-for-agent
+  +
+  +- [ ] Integrate a QR code scanner library (e.g. `mobile_scanner` or similar package) into a new page in the Flutter app.
+  +- [ ] Create a parser utility class `QrPayloadParser` that handles strings formatted as `PREFIX|MAC_ADDRESS|SECURITY_STRING|DEVICE_NAME|AUTH_KEY|HMAC`.
+  +- [ ] Implement string validation checking for correct prefix and non-empty parameters.
+  +- [ ] Verify the HMAC checksum of the QR payload to prevent tampering.
+  +- [ ] Write unit tests verifying successful parsing of valid strings, and error handling for empty, wrong prefix, or corrupted HMAC strings.
+  +15 -0
+
+.scratch/qr_ota_feature/spec.md
+  @@ -0,0 +1,52 @@
+  +# Specification: VAC QR-BLE Integration and Flow Architecture
+  +
+  +**Triage:** `ready-for-agent`
+  +
+  +## Problem Statement
+  +
+  +The user is facing fragmented and insecure connectivity when pairing the VAC Dashboard application with the physical VAC machine. Without an explicit binding flow, users have to manually pair via Bluetooth settings which is error-prone. Additionally, registering an account without physically associating it with a machine risks unauthorized access. Furthermore, once connected, if a therapist leaves Bluetooth range, the connection drops and currently requires a manual re-connection process. Finally, changing between machines requires a clear UI interaction that does not exist in the current dashboard.
+  +
+  +## Solution
+  +
+  +A robust, localized Bluetooth binding architecture backed by cloud authentication. 
+  +The system separates the "Account Phase" (connecting the user to the Backend via internet) from the "Machine Phase" (connecting the phone to the ESP32 via BLE without internet).
+  +During registration, the user provides a `qrKey` via a QR Scanner bottom sheet, binding their account directly to a specific machine. The app stores the Machine's ID locally. When in range, the app automatically connects to the machine via BLE without needing re-scanning. If the connection drops due to distance, the app automatically reconnects when the user returns. To change machines, the user can explicitly trigger a "Change Device" flow from the Avatar Menu.
+  +
+  +## User Stories
+  +
+  +1. As a therapist, I want to fill in my registration details and immediately scan the machine's QR code, so that my account is instantly verified and bound to that specific machine on the backend.
+  +2. As a hospital administrator, I want the backend to reject registrations that provide an invalid `qrKey`, so that unauthorized users cannot create accounts to access medical data.
+  +3. As a returning therapist, I want the app to auto-login using a saved JWT token (valid for 2 weeks), so that I can bypass the registration and login screens daily.
+  +4. As a therapist, I want the app to automatically connect to my bound machine via BLE, so that I do not have to scan a QR code every time I open the app.
+  +5. As a therapist, I want the app to automatically reconnect to the machine if the Bluetooth signal drops due to distance, so that I can walk in and out of the patient's room seamlessly.
+  +6. As a therapist covering multiple rooms, I want to click "Change Device" in my Avatar Menu, so that I can scan a new machine's QR code and shift my active binding to the new machine.
+  +7. As a backend database, I want to maintain a `TrDeviceUser` 1-to-Many relational table, so that multiple nurses on different shifts can securely bind to the same machine by modifying their `isActive` status.
+  +8. As a security administrator, I want the QR code to encode a hidden `AUTH_PIN` along with the `DEVICE_ID`, so that the Flutter app can send this PIN over BLE during the initial handshake, preventing unauthorized BLE scanners from holding a connection.
+  +9. As a patient, I want the ESP32 to forcefully disconnect any Bluetooth connection that fails to provide the correct PIN within 5 seconds, ensuring my therapy cannot be tampered with.
+  +
+  +## Implementation Decisions
+  +
+  +- **QR Code Format:** The QR string will be formatted to contain the device identity and security PIN (e.g., `B002U|9A2F`). The first part (`B002U`) is the `DEVICE_ID` used for the backend validation and the BLE advertisement name. The second part (`9A2F`) is the `AUTH_PIN` used for the BLE security handshake.
+  +- **Backend - Registration:** The `/api/auth/register` endpoint has been modified to accept `qrKey`. It performs a database transaction: creates the User, binds the User to the Device in `TrDeviceUser`, and returns the login JWT token directly.
+  +- **Backend - Change Device:** The `/api/device/bind` endpoint accepts a new `qrKey`. It sets `isActive = false` on the old binding and creates a new active binding, returning a fresh JWT token.
+  +- **Flutter UI - Registration Bottom Sheet:** The Registration screen uses a "Next" button instead of "Submit". Clicking it reveals a modal bottom sheet containing the QR Scanner.
+  +- **Flutter UI - Home Screen Avatar Menu:** Added a conditionally rendered "Change Device" (`Icons.qr_code_scanner_rounded`) button in the Avatar Menu (`homeScreens.dart`). It only appears if the user has a bound device. Clicking it opens the `ScanScreen()`.
+  +- **Flutter Auto-Reconnect:** The Flutter app stores `DEVICE_ID` and `AUTH_PIN` in local storage. The `flutter_blue_plus` package is configured to continuously scan for the `DEVICE_ID` filter. Upon detection, it connects automatically.
+  +
+  +## Testing Decisions
+  +
+  +Tests will verify external behaviors rather than internal implementation details:
+  +
+  +- **Frontend-Backend API Seam (HTTP Mocking):** Test the UI transitions by mocking the HTTP client. Simulating `201 Created` during registration should navigate the user to the Home Screen. Simulating `400 Bad Request` should show an error snackbar and keep the user on the scanner.
+  +- **Flutter-BLE Seam (Bluetooth Mocking):** Mock the `flutter_blue_plus` state machines. Simulate finding a device, connecting, writing the `AUTH_PIN` characteristic, and simulating a distance-induced disconnect to ensure the Auto-Reconnect loop triggers.
+  +- **Backend Database Seam:** On the backend repository, test the Prisma database transactions to verify that registering with a valid `qrKey` correctly inserts records into both `User` and `TrDeviceUser` simultaneously.
+  +
+  +## Out of Scope
+  +
+  +- ESP32 Over-The-Air (OTA) updates are covered in a separate specification.
+  +- Managing user profiles (e.g., changing names, resetting passwords) is not included.
+  +- Automated hardware-level physical testing (requires manual bench testing).
+  +
+  +## Further Notes
+  +
+  +- The 2-week token expiry is managed by the backend JWT configuration. The Flutter app intercepts `401 Unauthorized` responses and forces a manual logout/re-login.
+  +52 -0
+
+clean_commit2_diff.txt
+  @@ -1,97 +0,0 @@
+  -b65bd41 fix: address standards and spec feedback for logout orchestration and error handling (3 minutes ago) <nashirabbash>
+  -lib/screens/homeScreens.dart        |  3 +--
+  - lib/services/api_service.dart       | 18 +++++++++++++++---
+  - test/screens/homeScreens_test.dart  |  7 ++++---
+  - test/services/api_service_test.dart |  7 ++++++-
+  - 4 files changed, 26 insertions(+), 9 deletions(-)
+  -
+  -lib/screens/homeScreens.dart
+  -  @@ -103,7 +103,6 @@
+  -  -                          await _authRepository.clearToken();
+  -                             if (context.mounted) {
+  -                               Navigator.of(context).pushReplacement(
+  -                                 MaterialPageRoute(
+  -  @@ -114,7 +113,7 @@
+  -  -                              SnackBar(content: Text('Log out failed: $e')),
+  -  +                              SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))),
+  -                               );
+  -                             }
+  -                           }
+  -  +1 -2
+  -
+  -lib/services/api_service.dart
+  -  @@ -8,9 +8,11 @@
+  -  +  final AuthRepository _authRepository;
+  -   
+  -  -  ApiService({http.Client? client})
+  -  -    : _client = client ?? ApiInterceptor(authRepository: AuthRepository());
+  -  +  ApiService({http.Client? client, AuthRepository? authRepository})
+  -  +    : _authRepository = authRepository ?? AuthRepository(),
+  -  +      _client = client ?? ApiInterceptor(authRepository: authRepository ?? AuthRepository());
+  -   
+  -     Future<List<TherapySession>> getSessions({String? year}) async {
+  -       final uri = Uri.parse(
+  -  @@ -98,8 +100,18 @@
+  -  -      throw Exception('Failed to logout');
+  -  +      try {
+  -  +        final body = jsonDecode(res.body) as Map<String, dynamic>;
+  -  +        final errObj = body['error'] ?? body;
+  -  +        throw Exception(errObj['message'] ?? 'Failed to logout');
+  -  +      } catch (e) {
+  -  +        if (e is FormatException) {
+  -  +          throw Exception('Failed to logout');
+  -  +        }
+  -  +        rethrow;
+  -  +      }
+  -       }
+  -  +    await _authRepository.clearToken();
+  -     }
+  -   }
+  -   
+  -  +15 -3
+  -
+  -test/screens/homeScreens_test.dart
+  -  @@ -20,8 +20,9 @@
+  -  -    when(() => mockApiService.logout()).thenAnswer((_) async {});
+  -  -    when(() => mockAuthRepository.clearToken()).thenAnswer((_) async {});
+  -  +    when(() => mockApiService.logout()).thenAnswer((_) async {
+  -  +      await AuthRepository().clearToken();
+  -  +    });
+  -       
+  -       await tester.pumpWidget(
+  -         MaterialApp(
+  -  @@ -56,7 +57,7 @@
+  -  -    verify(() => mockAuthRepository.clearToken()).called(1);
+  -  +    expect(await AuthRepository().getToken(), null);
+  -   
+  -       // Verify navigation to WelcomeScreens
+  -       expect(find.byType(WelcomeScreens), findsOneWidget);
+  -  +4 -3
+  -
+  -test/services/api_service_test.dart
+  -  @@ -3,13 +3,16 @@
+  -  +import 'package:vac_dashboard_app/repositories/auth_repository.dart';
+  -   
+  -   class MockHttpClient extends Mock implements http.Client {}
+  -  +class MockAuthRepository extends Mock implements AuthRepository {}
+  -   
+  -   class FakeUri extends Fake implements Uri {}
+  -   
+  -   void main() {
+  -     late MockHttpClient mockClient;
+  -  +  late MockAuthRepository mockAuthRepository;
+  -     late ApiService api;
+  -   
+  -     setUpAll(() {
+  -  @@ -18,7 +21,8 @@
+  -  -    api = ApiService(client: mockClient);
+  -  +    mockAuthRepository = MockAuthRepository();
+  -  +    api = ApiService(client: mockClient, authRepository: mockAuthRepository);
+  -     });
+  -   
+  -     group('ApiService.getSessions', () {
+  -  @@ -142,6 +146,7 @@
+  -  +      when(() => mockAuthRepository.clearToken()).thenAnswer((_) async {});
+  -   
+  -         await expectLater(api.logout(), completes);
+  -  +6 -1
+  +0 -97
+
+commit2_diff.txt
+  @@ -1,528 +0,0 @@
+  -b65bd41 fix: address standards and spec feedback for logout orchestration and error handling (2 minutes ago) <nashirabbash>
+  -commit_diff.txt                     | 109 +++++++
+  - commit_review_comment.md            |  47 +++
+  - docs/agents/domain.md               |  51 ++++
+  - docs/agents/issue-tracker.md        |  45 +++
+  - lib/screens/homeScreens.dart        |   3 +-
+  - lib/services/api_service.dart       |  18 +-
+  - pr_diff.txt                         | 587 ++++++++++++++++++++++++++++++++++++
+  - pr_review_comment.md                |  64 ++++
+  - spec.md                             |  39 +++
+  - test/screens/homeScreens_test.dart  |   7 +-
+  - test/services/api_service_test.dart |   7 +-
+  - ticket1.md                          |  15 +
+  - ticket2.md                          |  15 +
+  - 13 files changed, 998 insertions(+), 9 deletions(-)
+  -
+  -commit_diff.txt
+  -  @@ -0,0 +1,109 @@
+  -  +9412ebf fix: address PR review comments (2 minutes ago) <nashirabbash>
+  -  +lib/repositories/auth_repository.dart |  9 ---------
+  -  + lib/screens/homeScreens.dart          |  7 +++++--
+  -  + lib/services/api_service.dart         |  5 +----
+  -  + test/screens/homeScreens_test.dart    | 18 ++++++++++++++----
+  -  + 4 files changed, 20 insertions(+), 19 deletions(-)
+  -  +
+  -  +lib/repositories/auth_repository.dart
+  -  +  @@ -1,16 +1,12 @@
+  -  +  -import 'package:vac_dashboard_app/services/api_service.dart';
+  -  +   
+  -  +   class AuthRepository {
+  -  +     static const String _tokenKey = 'jwt_token';
+  -  +     final _storage = const FlutterSecureStorage();
+  -  +  -  final ApiService _api;
+  -  +     String? _cachedToken;
+  -  +     bool _isInitialized = false;
+  -  +   
+  -  +  -  AuthRepository({ApiService? api}) : _api = api ?? apiService;
+  -  +  -
+  -  +     Future<void> _initCache() async {
+  -  +       if (!_isInitialized) {
+  -  +         _cachedToken = await _storage.read(key: _tokenKey);
+  -  +  @@ -49,9 +45,4 @@
+  -  +  -
+  -  +  -  Future<void> logout() async {
+  -  +  -    await _api.logout();
+  -  +  -    await clearToken();
+  -  +  -  }
+  -  +   }
+  -  +  +0 -9
+  -  +
+  -  +lib/screens/homeScreens.dart
+  -  +  @@ -13,7 +13,8 @@
+  -  +  -  const HomeScreen({super.key, this.authRepository});
+  -  +  +  final ApiService? apiService;
+  -  +  +  const HomeScreen({super.key, this.authRepository, this.apiService});
+  -  +   
+  -  +     @override
+  -  +     State<HomeScreen> createState() => _HomeScreenState();
+  -  +  @@ -24,6 +25,7 @@
+  -  +  +  late final ApiService _apiService = widget.apiService ?? apiService;
+  -  +   
+  -  +     @override
+  -  +     void initState() {
+  -  +  @@ -100,7 +102,8 @@
+  -  +  -                          await _authRepository.logout();
+  -  +  +                          await _apiService.logout();
+  -  +  +                          await _authRepository.clearToken();
+  -  +                             if (context.mounted) {
+  -  +                               Navigator.of(context).pushReplacement(
+  -  +                                 MaterialPageRoute(
+  -  +  +5 -2
+  -  +
+  -  +lib/services/api_service.dart
+  -  +  @@ -98,10 +98,7 @@
+  -  +  -      final body = jsonDecode(res.body) as Map<String, dynamic>;
+  -  +  -      final errObj = body['error'] ?? body;
+  -  +  -      final errMsg = _parseErrorMessage(errObj['summary'] ?? errObj['message']);
+  -  +  -      throw Exception(errMsg ?? 'Failed to logout');
+  -  +  +      throw Exception('Failed to logout');
+  -  +       }
+  -  +     }
+  -  +   }
+  -  +  +1 -4
+  -  +
+  -  +test/screens/homeScreens_test.dart
+  -  +  @@ -4,23 +4,31 @@
+
+... (more changes truncated)
+  +0 -86
+[full diff: rtk git diff --no-compact]
