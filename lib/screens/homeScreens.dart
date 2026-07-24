@@ -52,11 +52,6 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  Future<void> _navigateAndRefresh(Widget screen) async {
-    await Navigator.of(context).push(MaterialPageRoute(builder: (context) => screen));
-    _checkDeviceBinding();
-  }
-
   void _showAvatarMenu(BuildContext context) async {
     final RenderBox renderBox =
         _avatarKey.currentContext!.findRenderObject() as RenderBox;
@@ -94,7 +89,13 @@ class _HomeScreenState extends State<HomeScreen> {
                         leadingIcon: Icons.qr_code_scanner_rounded,
                         onPressed: () async {
                           Navigator.of(context).pop(); // Dismiss menu
-                          await _navigateAndRefresh(const ScanScreen());
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const ScanScreen(),
+                            ),
+                          );
+                          _checkDeviceBinding();
                         },
                       ),
                     AppMenuItem(
@@ -224,9 +225,19 @@ class _HomeScreenState extends State<HomeScreen> {
                     variant: ButtonVariant.primary,
                     onPressed: () {
                       if (_hasBoundDevice) {
-                        _navigateAndRefresh(const DeviceScreen());
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const DeviceScreen(),
+                          ),
+                        );
                       } else {
-                        _navigateAndRefresh(const ScanScreen());
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const ScanScreen(),
+                          ),
+                        );
                       }
                     },
                   ),
