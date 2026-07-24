@@ -83,6 +83,20 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: AppContextMenu(
                   width: 238,
                   children: [
+                    if (_hasBoundDevice)
+                      AppMenuItem(
+                        label: 'Change Device',
+                        leadingIcon: Icons.qr_code_scanner_rounded,
+                        onPressed: () async {
+                          Navigator.of(context).pop(); // Dismiss menu
+                          await Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => const ScanScreen(),
+                            ),
+                          );
+                          _checkDeviceBinding();
+                        },
+                      ),
                     AppMenuItem(
                       label: 'Settings',
                       leadingIcon: Icons.settings_rounded,
@@ -92,7 +106,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           MaterialPageRoute(
                             builder: (context) => const SettingsScreen(),
                           ),
-                        );
+                        ).then((_) => _checkDeviceBinding());
                       },
                     ),
                     AppMenuItem(
@@ -214,13 +228,13 @@ class _HomeScreenState extends State<HomeScreen> {
                           MaterialPageRoute(
                             builder: (context) => const DeviceScreen(),
                           ),
-                        );
+                        ).then((_) => _checkDeviceBinding());
                       } else {
                         Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (context) => const ScanScreen(),
                           ),
-                        );
+                        ).then((_) => _checkDeviceBinding());
                       }
                     },
                   ),
