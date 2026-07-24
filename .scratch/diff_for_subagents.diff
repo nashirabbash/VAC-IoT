@@ -1,44 +1,153 @@
-lib/screens/homeScreens.dart | 20 +++++++++++++++++---
- 1 file changed, 17 insertions(+), 3 deletions(-)
+.scratch/diff_for_subagents.diff | 555 +++------------------------------------
+ lib/screens/homeScreens.dart     |  26 +-
+ 2 files changed, 56 insertions(+), 525 deletions(-)
 
 --- Changes ---
 
+.scratch/diff_for_subagents.diff
+  @@ -1,519 +1,44 @@
+  -.scratch/diff_for_subagents.diff        | 961 ++++++++++++++++----------------
+  - lib/component/auth_bottom_sheet.dart    |  67 ++-
+  - lib/component/auth_input_field.dart     |  49 +-
+  - lib/component/forgot_password_form.dart | 125 +++++
+  - lib/component/login_form.dart           | 155 +-----
+  - lib/component/register_form.dart        |  92 ++-
+  - 6 files changed, 726 insertions(+), 723 deletions(-)
+  +lib/screens/homeScreens.dart | 20 +++++++++++++++++---
+  + 1 file changed, 17 insertions(+), 3 deletions(-)
+   
+   --- Changes ---
+   
+  -.scratch/diff_for_subagents.diff
+  -  @@ -1,519 +1,522 @@
+  -  -.scratch/diff_for_subagents.diff     | 553 +++++++++++++++++++++++++++++++++++
+  -  - lib/component/auth_bottom_sheet.dart | 481 +++++-------------------------
+  -  - lib/component/auth_input_field.dart  |  46 +++
+  -  - lib/component/login_form.dart        | 150 ++++++++++
+  -  - lib/component/register_form.dart     | 203 +++++++++++++
+  -  - lib/models/auth_form_data.dart       |  62 ++++
+  -  - lib/models/register_dto.dart         |  25 ++
+  -  - lib/screens/scanScreens.dart         |  30 +-
+  -  - lib/services/api_service.dart        |  28 +-
+  -  - 9 files changed, 1139 insertions(+), 439 deletions(-)
+  -  +.scratch/auth_bottom_sheet_old.dart  |  632 ++++++++++++++++++++
+  -  + .scratch/diff_for_subagents.diff     | 1048 ++++++++++++++++------------------
+  -  + lib/component/auth_bottom_sheet.dart |   57 +-
+  -  + lib/component/login_form.dart        |  201 ++++++-
+  -  + lib/component/register_form.dart     |   17 +-
+  -  + lib/models/auth_form_data.dart       |   14 +
+  -  + lib/screens/deviceScreens.dart       |    4 +-
+  -  + lib/screens/historyScreens.dart      |    5 +-
+  -  + lib/screens/homeScreens.dart         |    2 +-
+  -  + lib/screens/scanScreens.dart         |    7 +-
+  -  + 10 files changed, 1411 insertions(+), 576 deletions(-)
+  -   
+  -   --- Changes ---
+  -   
+  -  -.scratch/diff_for_subagents.diff
+  -  -  @@ -0,0 +1,553 @@
+  -  -  +.../issues/10_flutter_ble_handshake_connect.md     |   18 +
+  -  -  + .../issues/11_backend_registration_bind.md         |   13 +
+  -  -  + .../issues/12_flutter_register_qr_bottomsheet.md   |   14 +
+  -  -  + .../issues/13_flutter_home_change_device.md        |   13 +
+  -  -  + .../issues/14_flutter_ble_auto_reconnect.md        |   14 +
+  -  -  + .scratch/qr_ota_feature/issues/1_web_ota_api.md    |   15 +
+  -  -  + .scratch/qr_ota_feature/issues/2_esp32_self_ota.md |   17 +
+  -  -  + .../qr_ota_feature/issues/3_safe_update_lock.md    |   16 +
+  -  -  + .../qr_ota_feature/issues/4_web_targeted_ota.md    |   15 +
+  -  -  + .../qr_ota_feature/issues/5_esp32_avr_isp_ota.md   |   16 +
+  -  -  + .../issues/6_esp32_nextion_tft_ota.md              |   16 +
+  -  -  + .../issues/7_esp32_ble_wifi_provisioning.md        |   17 +
+  -  -  + .../issues/8_flutter_wifi_provisioning_ui.md       |   16 +
+  -  -  + .../issues/9_flutter_qr_scanner_utility.md         |   15 +
+  -  -  + .scratch/qr_ota_feature/spec.md                    |   52 +
+  -  -  + clean_commit2_diff.txt                             |   97 -
+  -  -  + commit2_diff.txt                                   |  528 ----
+  -  -  + commit2_review_comment.md                          |   57 -
+  -  -  + commit_diff.txt                                    |  109 -
+  -  -  + commit_review_comment.md                           |   47 -
+  -  -  + diff_output.txt                                    | 2515 --------------------
+  -  -  + lib/component/auth_bottom_sheet.dart               |  770 +++---
+  -  -  + lib/services/api_service.dart                      |   25 +-
+  -  -  + pr_diff.txt                                        |  587 -----
+  -  -  + pr_review_comment.md                               |   64 -
+  -  -  + ss/RemoteQR.png                                    |  Bin 0 -> 23012 bytes
+  -  -  + ss/bluetoothQr.png                                 |  Bin 0 -> 23067 bytes
+  -  -  + ticket1.md                                         |   15 -
+  -  -  + ticket2.md                                         |   15 -
+  -  -  + 29 files changed, 734 insertions(+), 4362 deletions(-)
+  -  +.scratch/auth_bottom_sheet_old.dart
+  -  +  @@ -0,0 +1,632 @@
+  -  +  +import 'dart:ui';
+  -  +  +import 'package:flutter/material.dart';
+  -  +  +import 'package:mobile_scanner/mobile_scanner.dart';
+  -  +  +import 'package:vac_dashboard_app/asset/color_tokens.dart';
+  -  +  +import 'package:vac_dashboard_app/component/button.dart';
+  -  +  +import 'package:vac_dashboard_app/component/text.dart';
+  -  +  +import 'package:vac_dashboard_app/component/grouped_list.dart';
+  -  +  +import 'package:vac_dashboard_app/component/bottom_sheet_header.dart';
+  -  +  +import 'package:vac_dashboard_app/screens/homeScreens.dart';
+  -  +  +import 'package:vac_dashboard_app/services/api_service.dart';
+  -  +  +import 'package:vac_dashboard_app/repositories/auth_repository.dart';
+  -     +
+  -  -  +--- Changes ---
+  -  +  +enum AuthMode { login, signUp, forgotPassword }
+  -     +
+  -  -  +.scratch/qr_ota_feature/issues/10_flutter_ble_handshake_connect.md
+  -  -  +  @@ -0,0 +1,18 @@
+  -  -  +  +# 10 — Flutter BLE Auto-Connect & Auth Handshake
+  -  -  +  +
+  -  -  +  +**What to build:**
+  -  -  +  +Implement the Bluetooth auto-connect sequence driven by the scanned QR parameters. The Flutter application must scan for the specific device name, establish a connection, write the AUTH_KEY to authenticate, and subscribe to update notifications.
+  -  -  +  +
+  -  -  +  +**Blocked by:**
+  -  -  +  +- [9_flutter_qr_scanner_utility.md](file:///home/broo/Documents/apps/vac_dashboard_app/.scratch/qr_ota_feature/issues/9_flutter_qr_scanner_utility.md)
+  -  -  +  +
+  -  -  +  +**Status:** ready-for-agent
+  -  -  +  +
+  -  -  +  +- [ ] Implement background scan using `flutter_blue_plus` filtering for the specific `DEVICE_NAME` parsed from the QR code.
+  ... (458 lines truncated)
+  +40 -515
+
 lib/screens/homeScreens.dart
-  @@ -83,6 +83,20 @@
+  @@ -52,6 +52,11 @@
+  +  Future<void> _navigateAndRefresh(Widget screen) async {
+  +    await Navigator.of(context).push(MaterialPageRoute(builder: (context) => screen));
+  +    _checkDeviceBinding();
+  +  }
+  +
+     void _showAvatarMenu(BuildContext context) async {
+       final RenderBox renderBox =
+           _avatarKey.currentContext!.findRenderObject() as RenderBox;
+  @@ -83,6 +88,15 @@
   +                    if (_hasBoundDevice)
   +                      AppMenuItem(
   +                        label: 'Change Device',
   +                        leadingIcon: Icons.qr_code_scanner_rounded,
   +                        onPressed: () async {
   +                          Navigator.of(context).pop(); // Dismiss menu
-  +                          await Navigator.of(context).push(
-  +                            MaterialPageRoute(
-  +                              builder: (context) => const ScanScreen(),
-  +                            ),
-  +                          );
-  +                          _checkDeviceBinding();
+  +                          await _navigateAndRefresh(const ScanScreen());
   +                        },
   +                      ),
                        AppMenuItem(
                          label: 'Settings',
                          leadingIcon: Icons.settings_rounded,
-  @@ -92,7 +106,7 @@
+  @@ -210,17 +224,9 @@
+  -                        Navigator.of(context).push(
+  -                          MaterialPageRoute(
+  -                            builder: (context) => const DeviceScreen(),
+  -                          ),
   -                        );
-  +                        ).then((_) => _checkDeviceBinding());
-                         },
-                       ),
-                       AppMenuItem(
-  @@ -214,13 +228,13 @@
-  -                        );
-  +                        ).then((_) => _checkDeviceBinding());
+  +                        _navigateAndRefresh(const DeviceScreen());
                          } else {
-                           Navigator.of(context).push(
-                             MaterialPageRoute(
-                               builder: (context) => const ScanScreen(),
-                             ),
+  -                        Navigator.of(context).push(
+  -                          MaterialPageRoute(
+  -                            builder: (context) => const ScanScreen(),
+  -                          ),
   -                        );
-  +                        ).then((_) => _checkDeviceBinding());
+  +                        _navigateAndRefresh(const ScanScreen());
                          }
                        },
                      ),
-  +17 -3
+  +16 -10
+[full diff: rtk git diff --no-compact]

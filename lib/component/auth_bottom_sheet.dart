@@ -6,6 +6,7 @@ import 'package:vac_dashboard_app/component/bottom_sheet_header.dart';
 import 'package:vac_dashboard_app/component/button.dart';
 import 'package:vac_dashboard_app/component/text.dart';
 import 'package:vac_dashboard_app/screens/homeScreens.dart';
+import 'package:vac_dashboard_app/screens/deviceScreens.dart';
 import 'package:vac_dashboard_app/services/api_service.dart';
 import 'package:vac_dashboard_app/models/auth_form_data.dart';
 import 'package:vac_dashboard_app/models/register_dto.dart';
@@ -149,8 +150,13 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
       );
       final nav = Navigator.of(context);
       nav.pop(); // Dismiss bottom sheet
+      
+      // Navigate to HomeScreen as the base, then push DeviceScreen on top
       nav.pushReplacement(
         MaterialPageRoute(builder: (context) => const HomeScreen()),
+      );
+      nav.push(
+        MaterialPageRoute(builder: (context) => const DeviceScreen()),
       );
     } catch (e) {
       if (!mounted) return;
