@@ -170,6 +170,7 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> with TickerProviderSt
     try {
       final dto = RegisterDto(
         username: _registerData.usernameController.text,
+        name: _registerData.nameController.text,
         password: _registerData.passwordController.text,
         hospitalName: _registerData.hospitalController.text,
         qrKey: qrKey,

@@ -25,17 +25,20 @@ class ForgotPasswordFormData {
 }
 
 class RegisterFormData {
+  final TextEditingController nameController = TextEditingController();
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController hospitalController = TextEditingController();
   final TextEditingController confirmPasswordController = TextEditingController();
 
+  String? nameError;
   String? usernameError;
   String? hospitalError;
   String? passwordError;
   String? confirmPasswordError;
 
   void dispose() {
+    nameController.dispose();
     usernameController.dispose();
     passwordController.dispose();
     hospitalController.dispose();
@@ -43,6 +46,12 @@ class RegisterFormData {
   }
 
   void validateAll() {
+    if (nameController.text.isEmpty) {
+      nameError = 'Full name is required';
+    } else {
+      nameError = null;
+    }
+
     if (usernameController.text.isEmpty) {
       usernameError = 'Username is required';
     } else {
@@ -69,6 +78,7 @@ class RegisterFormData {
   }
 
   bool get isValid => 
+      nameError == null && 
       usernameError == null && 
       hospitalError == null && 
       passwordError == null && 

@@ -1,11 +1,13 @@
 class RegisterDto {
   final String username;
+  final String name;
   final String password;
   final String hospitalName;
   final String? qrKey;
 
   RegisterDto({
     required this.username,
+    required this.name,
     required this.password,
     required this.hospitalName,
     this.qrKey,
@@ -14,7 +16,7 @@ class RegisterDto {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> payload = {
       'username': username,
-      'name': username, // Backend validation requires a 'name' field
+      'name': name,
       'password': password,
       'hospitalName': hospitalName,
     };

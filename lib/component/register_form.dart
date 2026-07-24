@@ -29,6 +29,7 @@ class RegisterForm extends StatefulWidget {
 
 class _RegisterFormState extends State<RegisterForm> {
   bool _forceShowErrors = false;
+  bool _nameTouched = false;
   bool _usernameTouched = false;
   bool _hospitalTouched = false;
   bool _passwordTouched = false;
@@ -37,6 +38,14 @@ class _RegisterFormState extends State<RegisterForm> {
   @override
   void initState() {
     super.initState();
+    widget.formData.nameController.addListener(() {
+      if (mounted) {
+        setState(() {
+          _nameTouched = true;
+          widget.formData.validateAll();
+        });
+      }
+    });
     widget.formData.usernameController.addListener(() {
       if (mounted) {
         setState(() {
@@ -123,6 +132,12 @@ class _RegisterFormState extends State<RegisterForm> {
               AppGroupedList(
                 backgroundColor: colors.backgroundsSecondaryElevated,
                 children: [
+                  AuthInputField(
+                    controller: widget.formData.nameController,
+                    labelText: 'Full Name',
+                    errorText: (_nameTouched || _forceShowErrors) ? widget.formData.nameError : null,
+                    colors: colors,
+                  ),
                   AuthInputField(
                     controller: widget.formData.usernameController,
                     labelText: 'Username',
