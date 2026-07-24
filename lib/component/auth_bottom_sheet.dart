@@ -53,7 +53,7 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> with TickerProviderSt
   
   bool _isLoading = false;
   bool _showScanner = false;
-  final MobileScannerController _scannerController = MobileScannerController();
+  MobileScannerController? _scannerController;
   
   late AnimationController _laserController;
   late Animation<double> _laserAnimation;
@@ -78,7 +78,7 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> with TickerProviderSt
     _loginData.dispose();
     _registerData.dispose();
     _forgotPasswordData.dispose();
-    _scannerController.dispose();
+    _scannerController?.dispose();
     _laserController.dispose();
     super.dispose();
   }
@@ -125,6 +125,7 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> with TickerProviderSt
     // Snap to scanner view
     FocusScope.of(context).unfocus(); // Dismiss the keyboard to prevent RenderFlex overflow
     setState(() {
+      _scannerController = MobileScannerController();
       _showScanner = true;
     });
   }
@@ -135,20 +136,20 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> with TickerProviderSt
     final scaffoldMsg = ScaffoldMessenger.of(context);
     
     if (qrKey.trim().isEmpty || !qrKey.contains('|')) {
-      _scannerController.stop();
+      _scannerController?.stop();
       // DO NOT collapse the scanner view
       final snackBar = scaffoldMsg.showSnackBar(
         SnackBar(content: AppText('Invalid QR Code format')),
       );
       await snackBar.closed;
       if (mounted) {
-        _scannerController.start();
+        _scannerController?.start();
       }
       return;
     }
 
     setState(() => _isLoading = true);
-    _scannerController.stop();
+    _scannerController?.stop();
     try {
       final dto = RegisterDto(
         username: _registerData.usernameController.text,
@@ -183,7 +184,7 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> with TickerProviderSt
           _isLoading = false;
           _showScanner = true;
         });
-        _scannerController.start();
+        _scannerController?.start();
       }
     }
   }
@@ -317,7 +318,8 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> with TickerProviderSt
                       setState(() {
                         _showScanner = false;
                       });
-                      _scannerController.stop();
+                      _scannerController?.dispose();
+                      _scannerController = null;
                     },
                   ),
                 ),
