@@ -127,7 +127,6 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> with TickerProviderSt
     setState(() {
       _showScanner = true;
     });
-    _scannerController.start();
   }
 
   Future<void> _handleQRScan(String qrKey) async {
