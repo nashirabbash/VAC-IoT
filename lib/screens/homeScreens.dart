@@ -8,10 +8,13 @@ import 'package:vac_dashboard_app/screens/deviceScreens.dart';
 import 'package:vac_dashboard_app/screens/settingsScreen.dart';
 import 'package:vac_dashboard_app/asset/color_tokens.dart';
 import 'package:vac_dashboard_app/repositories/auth_repository.dart';
+import 'package:vac_dashboard_app/services/api_service.dart';
 import 'package:vac_dashboard_app/component/menu.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final AuthRepository? authRepository;
+  final ApiService? apiService;
+  const HomeScreen({super.key, this.authRepository, this.apiService});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -21,6 +24,8 @@ class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey _avatarKey = GlobalKey();
   bool _hasBoundDevice = false;
   bool _isLoading = true;
+  late final AuthRepository _authRepository = widget.authRepository ?? AuthRepository();
+  late final ApiService _apiService = widget.apiService ?? apiService;
 
   @override
   void initState() {
@@ -30,7 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _checkDeviceBinding() async {
     try {
-      final data = await AuthRepository().getDecodedToken();
+      final data = await _authRepository.getDecodedToken();
       if (data != null && data['deviceId'] != null) {
         setState(() {
           _hasBoundDevice = true;
@@ -94,14 +99,24 @@ class _HomeScreenState extends State<HomeScreen> {
                       label: 'Log out',
                       leadingIcon: Icons.logout_rounded,
                       isDestructive: true,
-                      onPressed: () {
+                      onPressed: () async {
                         Navigator.of(context).pop(); // Dismiss menu
-                        // Perform log out: redirect back to welcome screens
-                        Navigator.of(context).pushReplacement(
-                          MaterialPageRoute(
-                            builder: (context) => const WelcomeScreens(),
-                          ),
-                        );
+                        try {
+                          await _apiService.logout();
+                          if (context.mounted) {
+                            Navigator.of(context).pushReplacement(
+                              MaterialPageRoute(
+                                builder: (context) => const WelcomeScreens(),
+                              ),
+                            );
+                          }
+                        } catch (e) {
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: AppText(e is ApiException ? e.message : 'Log out failed')),
+                            );
+                          }
+                        }
                       },
                     ),
                   ],

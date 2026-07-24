@@ -3,13 +3,16 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:mocktail/mocktail.dart';
 import 'package:vac_dashboard_app/services/api_service.dart';
+import 'package:vac_dashboard_app/repositories/auth_repository.dart';
 
 class MockHttpClient extends Mock implements http.Client {}
+class MockAuthRepository extends Mock implements AuthRepository {}
 
 class FakeUri extends Fake implements Uri {}
 
 void main() {
   late MockHttpClient mockClient;
+  late MockAuthRepository mockAuthRepository;
   late ApiService api;
 
   setUpAll(() {
@@ -18,7 +21,8 @@ void main() {
 
   setUp(() {
     mockClient = MockHttpClient();
-    api = ApiService(client: mockClient);
+    mockAuthRepository = MockAuthRepository();
+    api = ApiService(client: mockClient, authRepository: mockAuthRepository);
   });
 
   group('ApiService.getSessions', () {
@@ -128,6 +132,43 @@ void main() {
       expect(
         () => api.createSession({'start': 1, 'end': 2, 'mode': 1}),
         throwsA(isA<Exception>()),
+      );
+    });
+  });
+
+  group('ApiService.logout', () {
+    test('sends POST to /auth/logout and succeeds on 200', () async {
+      when(
+        () => mockClient.post(
+          any(),
+          headers: any(named: 'headers'),
+        ),
+      ).thenAnswer(
+        (_) async => http.Response(jsonEncode({'status': 'ok'}), 200),
+      );
+      when(() => mockAuthRepository.clearToken()).thenAnswer((_) async {});
+
+      await expectLater(api.logout(), completes);
+      
+      verify(() => mockAuthRepository.clearToken()).called(1);
+      
+      verify(() => mockClient.post(
+        any(that: predicate<Uri>((uri) => uri.path.endsWith('/auth/logout'))),
+        headers: any(named: 'headers'),
+      )).called(1);
+    });
+
+    test('throws on non-200/201/204 response', () async {
+      when(
+        () => mockClient.post(
+          any(),
+          headers: any(named: 'headers'),
+        ),
+      ).thenAnswer((_) async => http.Response('{"error": {"message": "Unauthorized"}}', 401));
+
+      expect(
+        () => api.logout(),
+        throwsA(isA<ApiException>()),
       );
     });
   });

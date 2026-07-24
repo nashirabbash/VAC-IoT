@@ -56,6 +56,20 @@ class _ScanScreenState extends State<ScanScreen>
 
   Future<void> _bindDevice(String qrKey) async {
     if (_isProcessing) return;
+
+    if (qrKey.trim().isEmpty || !qrKey.contains('|')) {
+      _scannerController.stop();
+      final snackBar = ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: AppText('Invalid QR Code format')),
+      );
+      await snackBar.closed;
+      if (mounted) {
+        _scannerController.start();
+        setState(() => _isScanning = true);
+      }
+      return;
+    }
+
     setState(() {
       _isProcessing = true;
       _isScanning = false;
@@ -107,14 +121,17 @@ class _ScanScreenState extends State<ScanScreen>
     } catch (e) {
       if (mounted) {
         Navigator.of(context).pop(); // Dismiss dialog
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))),
+        final snackBar = ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: AppText(e.toString().replaceAll('Exception: ', ''))),
         );
-        setState(() {
-          _isProcessing = false;
-          _isScanning = true;
-        });
-        _scannerController.start();
+        await snackBar.closed;
+        if (mounted) {
+          setState(() {
+            _isProcessing = false;
+            _isScanning = true;
+          });
+          _scannerController.start();
+        }
       }
     }
   }
