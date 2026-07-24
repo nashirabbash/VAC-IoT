@@ -15,6 +15,7 @@ import 'package:vac_dashboard_app/models/register_dto.dart';
 import 'package:vac_dashboard_app/component/login_form.dart';
 import 'package:vac_dashboard_app/component/register_form.dart';
 import 'package:vac_dashboard_app/component/forgot_password_form.dart';
+import 'package:vac_dashboard_app/component/alert_dialog.dart';
 
 enum AuthMode { login, signUp, forgotPassword }
 
@@ -145,18 +146,12 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> with TickerProviderSt
     if (qrKey.trim().isEmpty || !qrKey.contains('|')) {
       _scannerController?.stop();
       // Show Dialog instead of SnackBar so it's not hidden behind the bottom sheet
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const AppText('Invalid QR Code', type: AppTextType.headline),
-          content: const AppText('The scanned QR code is in an invalid format.', type: AppTextType.body),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const AppText('OK', type: AppTextType.body),
-            ),
-          ],
-        ),
+      showAppAlertDialog(
+        context,
+        title: 'Invalid QR Code',
+        description: 'The scanned QR code is in an invalid format.',
+        primaryButtonLabel: 'OK',
+        onPrimaryPressed: () => Navigator.of(context).pop(),
       ).then((_) {
         if (mounted) {
           _scannerController?.start();
@@ -196,18 +191,12 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> with TickerProviderSt
       setState(() {
         _isLoading = false;
       });
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const AppText('Registration Failed', type: AppTextType.headline),
-          content: AppText(e.toString().replaceAll('Exception: ', ''), type: AppTextType.body),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const AppText('OK', type: AppTextType.body),
-            ),
-          ],
-        ),
+      showAppAlertDialog(
+        context,
+        title: 'Registration Failed',
+        description: e.toString().replaceAll('Exception: ', ''),
+        primaryButtonLabel: 'OK',
+        onPrimaryPressed: () => Navigator.of(context).pop(),
       ).then((_) {
         if (mounted) {
           _scannerController?.start();
