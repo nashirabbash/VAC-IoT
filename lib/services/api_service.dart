@@ -69,21 +69,30 @@ class ApiService {
   Future<void> register(
     String username,
     String password,
-    String hospitalName,
-  ) async {
+    String hospitalName, [
+    String? qrKey,
+  ]) async {
     final uri = Uri.parse('$_baseUrl/auth/register');
+    final Map<String, dynamic> payload = {
+      'username': username,
+      'password': password,
+      'hospitalName': hospitalName,
+    };
+    if (qrKey != null) {
+      payload['qrKey'] = qrKey;
+    }
     final res = await _client.post(
       uri,
-      body: jsonEncode({
-        'username': username,
-        'password': password,
-        'hospitalName': hospitalName,
-      }),
+      body: jsonEncode(payload),
       headers: {'Content-Type': 'application/json'},
     );
+    final body = jsonDecode(res.body) as Map<String, dynamic>;
     if (res.statusCode != 201 && res.statusCode != 200) {
-      final body = jsonDecode(res.body) as Map<String, dynamic>;
       throw Exception(body['message'] ?? 'Failed to register');
+    }
+    final token = body['data'] != null ? body['data']['token'] : body['token'];
+    if (token != null) {
+      await AuthRepository().saveToken(token as String);
     }
   }
 
