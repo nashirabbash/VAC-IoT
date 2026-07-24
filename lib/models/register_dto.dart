@@ -14,6 +14,7 @@ class RegisterDto {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> payload = {
       'username': username,
+      'name': username, // Backend validation requires a 'name' field
       'password': password,
       'hospitalName': hospitalName,
     };
