@@ -53,6 +53,7 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> with TickerProviderSt
   
   bool _isLoading = false;
   bool _showScanner = false;
+  bool _isAnimationComplete = false;
   MobileScannerController? _scannerController;
   
   late AnimationController _laserController;
@@ -125,9 +126,17 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> with TickerProviderSt
     // Snap to scanner view
     FocusScope.of(context).unfocus(); // Dismiss the keyboard to prevent RenderFlex overflow
     setState(() {
-      _scannerController = MobileScannerController();
       _showScanner = true;
+      _isAnimationComplete = false;
     });
+    // Wait for the 400ms transition animation to complete before mounting camera
+    await Future.delayed(const Duration(milliseconds: 450));
+    if (mounted && _showScanner) {
+      setState(() {
+        _scannerController = MobileScannerController();
+        _isAnimationComplete = true;
+      });
+    }
   }
 
   Future<void> _handleQRScan(String qrKey) async {
@@ -267,6 +276,17 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> with TickerProviderSt
   }
 
   Widget _buildScanner(AppColorTokenSet colors) {
+    if (!_isAnimationComplete || _scannerController == null) {
+      return Container(
+        color: Colors.black,
+        child: Center(
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(colors.accentsBlue),
+          ),
+        ),
+      );
+    }
+
     return Stack(
       children: [
         Positioned.fill(
@@ -317,6 +337,7 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> with TickerProviderSt
                     onPressed: () {
                       setState(() {
                         _showScanner = false;
+                        _isAnimationComplete = false;
                       });
                       _scannerController?.dispose();
                       _scannerController = null;
