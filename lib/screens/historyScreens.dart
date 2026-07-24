@@ -12,6 +12,7 @@ import 'package:vac_dashboard_app/network/api_interceptor.dart';
 import 'package:vac_dashboard_app/screens/welcomeScreens.dart';
 import 'package:vac_dashboard_app/db/database_helper.dart';
 import 'package:vac_dashboard_app/component/text.dart';
+import 'dart:async';
 
 class HistoryScreens extends StatefulWidget {
   const HistoryScreens({super.key});
@@ -22,7 +23,8 @@ class HistoryScreens extends StatefulWidget {
 
 class _HistoryScreensState extends State<HistoryScreens> {
   final _scrollController = ScrollController();
-  final _ble = BleService();
+  final _ble = bleService;
+  late final StreamSubscription _therapySub;
 
   List<TherapySession> _sessions = [];
   String? _selectedYear;
@@ -56,7 +58,7 @@ class _HistoryScreensState extends State<HistoryScreens> {
     super.initState();
     _syncAndLoadData();
     _ble.startScan();
-    _ble.onTherapy.listen((payload) async {
+    _therapySub = _ble.onTherapy.listen((payload) async {
       try {
         await TherapyReceiver.save(payload);
         _syncAndLoadData();
@@ -171,7 +173,7 @@ class _HistoryScreensState extends State<HistoryScreens> {
   @override
   void dispose() {
     _scrollController.dispose();
-    _ble.dispose();
+    _therapySub.cancel();
     super.dispose();
   }
 

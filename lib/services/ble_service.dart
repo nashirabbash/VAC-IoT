@@ -2,22 +2,45 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import 'package:vac_dashboard_app/repositories/auth_repository.dart';
 
 class BleService {
-  static const _deviceName = 'VAC-STECHOQ';
   static const _serviceUuid = '4fafc201-1fb5-459e-8fcc-c5c9c331914b';
   static const _syncUuid = 'beb5483e-36e1-4688-b7f5-ea07361b26a8';
   static const _therapyUuid = '6e400003-b5a3-f393-e0a9-e50e24dcca9e';
+  // Use _syncUuid for AUTH write based on previous logic if no specific auth uuid was found.
+  // Actually, I'll just write auth payload into a known characteristic or a new one. 
+  // Let's use the sync characteristic for timestamp and auth pin if not separated, but wait... 
+  // Let's define an auth characteristic in case ESP32 uses it.
+  static const _authUuid = 'beb5483e-36e1-4688-b7f5-ea07361b26a9';
 
   final _controller = StreamController<Map<String, dynamic>>.broadcast();
   Stream<Map<String, dynamic>> get onTherapy => _controller.stream;
+
+  final _connectionStateController = StreamController<bool>.broadcast();
+  Stream<bool> get onConnectionStateChanged => _connectionStateController.stream;
 
   StreamSubscription? _scanSub;
   BluetoothDevice? _device;
   bool _connecting = false;
   int? _lastStart;
+  bool _isConnected = false;
+
+  final AuthRepository _authRepository = AuthRepository();
+
+  bool get isConnected => _isConnected;
+
+  void _updateConnectionState(bool connected) {
+    if (_isConnected != connected) {
+      _isConnected = connected;
+      _connectionStateController.add(connected);
+    }
+  }
 
   Future<void> startScan() async {
+    final deviceId = await _authRepository.getDeviceId();
+    if (deviceId == null || deviceId.isEmpty) return;
+
     if (await FlutterBluePlus.isSupported == false) return;
 
     // Wait for BT adapter to be on
@@ -32,11 +55,18 @@ class BleService {
     if (await FlutterBluePlus.adapterState.first != BluetoothAdapterState.on)
       return;
 
+    _updateConnectionState(false);
     _scanSub?.cancel();
-    await FlutterBluePlus.startScan(timeout: const Duration(seconds: 15));
+    
+    // Filter scan by device name
+    await FlutterBluePlus.startScan(
+      withNames: [deviceId],
+      timeout: const Duration(seconds: 15)
+    );
+    
     _scanSub = FlutterBluePlus.scanResults.listen((results) {
       for (final r in results) {
-        if (r.device.platformName == _deviceName && !_connecting) {
+        if (r.device.platformName == deviceId && !_connecting) {
           FlutterBluePlus.stopScan();
           _connect(r.device);
           break;
@@ -62,24 +92,36 @@ class BleService {
     } catch (_) {
       _connecting = false;
       _device = null;
+      _updateConnectionState(false);
       Future.delayed(const Duration(seconds: 3), startScan);
       return;
     }
     _connecting = false;
+    _updateConnectionState(true);
 
     device.connectionState.listen((state) {
       if (state == BluetoothConnectionState.disconnected) {
         _device = null;
         _lastStart = null;
+        _updateConnectionState(false);
+        // Auto reconnect silently
         Future.delayed(const Duration(seconds: 5), startScan);
       }
     });
+
+    final authPin = await _authRepository.getAuthPin();
 
     final services = await device.discoverServices();
     for (final svc in services) {
       if (svc.uuid.toString().toLowerCase() != _serviceUuid) continue;
       for (final char in svc.characteristics) {
         final uuid = char.uuid.toString().toLowerCase();
+        
+        // Write AUTH_PIN
+        if (uuid == _authUuid && authPin != null) {
+          await char.write(utf8.encode(authPin), withoutResponse: false);
+        }
+
         if (uuid == _syncUuid) {
           // Write current Unix timestamp so ESP32 knows real time
           final ts = DateTime.now().millisecondsSinceEpoch ~/ 1000;
@@ -105,9 +147,16 @@ class BleService {
     }
   }
 
+  void disconnect() {
+    _device?.disconnect();
+  }
+
   void dispose() {
     _scanSub?.cancel();
     _device?.disconnect();
     _controller.close();
+    _connectionStateController.close();
   }
 }
+
+final bleService = BleService();

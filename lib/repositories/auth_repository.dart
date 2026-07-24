@@ -3,6 +3,8 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class AuthRepository {
   static const String _tokenKey = 'jwt_token';
+  static const String _deviceIdKey = 'device_id';
+  static const String _authPinKey = 'auth_pin';
   final _storage = const FlutterSecureStorage();
   String? _cachedToken;
   bool _isInitialized = false;
@@ -29,6 +31,21 @@ class AuthRepository {
     _cachedToken = null;
     _isInitialized = true;
     await _storage.delete(key: _tokenKey);
+    await _storage.delete(key: _deviceIdKey);
+    await _storage.delete(key: _authPinKey);
+  }
+
+  Future<void> saveDeviceConfig(String deviceId, String authPin) async {
+    await _storage.write(key: _deviceIdKey, value: deviceId);
+    await _storage.write(key: _authPinKey, value: authPin);
+  }
+
+  Future<String?> getDeviceId() async {
+    return await _storage.read(key: _deviceIdKey);
+  }
+
+  Future<String?> getAuthPin() async {
+    return await _storage.read(key: _authPinKey);
   }
 
   Future<Map<String, dynamic>?> getDecodedToken() async {

@@ -9,7 +9,9 @@ import 'package:vac_dashboard_app/screens/settingsScreen.dart';
 import 'package:vac_dashboard_app/asset/color_tokens.dart';
 import 'package:vac_dashboard_app/repositories/auth_repository.dart';
 import 'package:vac_dashboard_app/services/api_service.dart';
+import 'package:vac_dashboard_app/services/ble_service.dart';
 import 'package:vac_dashboard_app/component/menu.dart';
+import 'dart:async';
 
 class HomeScreen extends StatefulWidget {
   final AuthRepository? authRepository;
@@ -24,6 +26,8 @@ class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey _avatarKey = GlobalKey();
   bool _hasBoundDevice = false;
   bool _isLoading = true;
+  bool _isBleConnected = false;
+  late final StreamSubscription<bool> _connectionSub;
   late final AuthRepository _authRepository = widget.authRepository ?? AuthRepository();
   late final ApiService _apiService = widget.apiService ?? apiService;
 
@@ -31,6 +35,20 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _checkDeviceBinding();
+    _isBleConnected = bleService.isConnected;
+    _connectionSub = bleService.onConnectionStateChanged.listen((connected) {
+      if (mounted) {
+        setState(() {
+          _isBleConnected = connected;
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _connectionSub.cancel();
+    super.dispose();
   }
 
   Future<void> _checkDeviceBinding() async {
@@ -208,7 +226,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 const CircularProgressIndicator()
               else ...[
                 AppText(
-                  _hasBoundDevice ? 'Device is bound' : 'Connect to device',
+                  _hasBoundDevice 
+                      ? (_isBleConnected ? 'Terkoneksi' : 'Mencoba Connect...') 
+                      : 'Connect to device',
                   type: AppTextType.headline,
                   color: AppTextColor.secondary,
                   fontWeight: FontWeight.w600,

@@ -82,6 +82,12 @@ class ApiService {
     if (token != null) {
       await _authRepository.saveToken(token as String);
     }
+    if (dto.qrKey != null) {
+      final parts = dto.qrKey!.split('|');
+      if (parts.length == 2) {
+        await _authRepository.saveDeviceConfig(parts[0], parts[1]);
+      }
+    }
   }
 
   Future<void> bindDevice(String qrKey) async {
@@ -101,6 +107,11 @@ class ApiService {
         : body['token'];
     if (newToken != null) {
       await _authRepository.saveToken(newToken as String);
+    }
+
+    final parts = qrKey.split('|');
+    if (parts.length == 2) {
+      await _authRepository.saveDeviceConfig(parts[0], parts[1]);
     }
   }
 
