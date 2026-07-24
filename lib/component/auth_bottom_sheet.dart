@@ -142,18 +142,26 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> with TickerProviderSt
   Future<void> _handleQRScan(String qrKey) async {
     if (_isLoading) return;
 
-    final scaffoldMsg = ScaffoldMessenger.of(context);
-    
     if (qrKey.trim().isEmpty || !qrKey.contains('|')) {
       _scannerController?.stop();
-      // DO NOT collapse the scanner view
-      final snackBar = scaffoldMsg.showSnackBar(
-        SnackBar(content: AppText('Invalid QR Code format')),
-      );
-      await snackBar.closed;
-      if (mounted) {
-        _scannerController?.start();
-      }
+      // Show Dialog instead of SnackBar so it's not hidden behind the bottom sheet
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const AppText('Invalid QR Code', type: AppTextType.headline),
+          content: const AppText('The scanned QR code is in an invalid format.', type: AppTextType.body),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const AppText('OK', type: AppTextType.body),
+            ),
+          ],
+        ),
+      ).then((_) {
+        if (mounted) {
+          _scannerController?.start();
+        }
+      });
       return;
     }
 
@@ -169,7 +177,7 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> with TickerProviderSt
       await apiService.register(dto);
       
       if (!mounted) return;
-      scaffoldMsg.showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: AppText('Registration successful!')),
       );
       final nav = Navigator.of(context);
@@ -184,17 +192,26 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> with TickerProviderSt
       );
     } catch (e) {
       if (!mounted) return;
-      final snackBar = scaffoldMsg.showSnackBar(
-        SnackBar(content: AppText(e.toString().replaceAll('Exception: ', ''))),
-      );
-      await snackBar.closed;
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-          _showScanner = true;
-        });
-        _scannerController?.start();
-      }
+      setState(() {
+        _isLoading = false;
+      });
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const AppText('Registration Failed', type: AppTextType.headline),
+          content: AppText(e.toString().replaceAll('Exception: ', ''), type: AppTextType.body),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const AppText('OK', type: AppTextType.body),
+            ),
+          ],
+        ),
+      ).then((_) {
+        if (mounted) {
+          _scannerController?.start();
+        }
+      });
     }
   }
 

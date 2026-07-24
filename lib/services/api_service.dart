@@ -15,7 +15,7 @@ class ApiException implements Exception {
 }
 
 class ApiService {
-  static const _baseUrl = 'http://192.168.1.35:3000/api';
+  static const _baseUrl = 'http://192.168.1.74:3000/api';
 
   final http.Client _client;
   final AuthRepository _authRepository;
