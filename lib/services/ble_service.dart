@@ -8,11 +8,6 @@ class BleService {
   static const _serviceUuid = '4fafc201-1fb5-459e-8fcc-c5c9c331914b';
   static const _syncUuid = 'beb5483e-36e1-4688-b7f5-ea07361b26a8';
   static const _therapyUuid = '6e400003-b5a3-f393-e0a9-e50e24dcca9e';
-  // Use _syncUuid for AUTH write based on previous logic if no specific auth uuid was found.
-  // Actually, I'll just write auth payload into a known characteristic or a new one. 
-  // Let's use the sync characteristic for timestamp and auth pin if not separated, but wait... 
-  // Let's define an auth characteristic in case ESP32 uses it.
-  static const _authUuid = 'beb5483e-36e1-4688-b7f5-ea07361b26a9';
 
   final _controller = StreamController<Map<String, dynamic>>.broadcast();
   Stream<Map<String, dynamic>> get onTherapy => _controller.stream;
@@ -21,6 +16,7 @@ class BleService {
   Stream<bool> get onConnectionStateChanged => _connectionStateController.stream;
 
   StreamSubscription? _scanSub;
+  StreamSubscription? _isScanningSub;
   BluetoothDevice? _device;
   bool _connecting = false;
   int? _lastStart;
@@ -57,6 +53,7 @@ class BleService {
 
     _updateConnectionState(false);
     _scanSub?.cancel();
+    _isScanningSub?.cancel();
     
     // Filter scan by device name
     await FlutterBluePlus.startScan(
@@ -75,9 +72,12 @@ class BleService {
     });
 
     // Retry scan if nothing found
-    FlutterBluePlus.isScanning.where((s) => s == false).first.then((_) {
-      if (_device == null)
-        Future.delayed(const Duration(seconds: 3), startScan);
+    _isScanningSub = FlutterBluePlus.isScanning.listen((isScanning) {
+      if (!isScanning && _device == null && !_connecting) {
+        Future.delayed(const Duration(seconds: 3), () {
+          if (_device == null && !_connecting) startScan();
+        });
+      }
     });
   }
 
@@ -116,12 +116,6 @@ class BleService {
       if (svc.uuid.toString().toLowerCase() != _serviceUuid) continue;
       for (final char in svc.characteristics) {
         final uuid = char.uuid.toString().toLowerCase();
-        
-        // Write AUTH_PIN
-        if (uuid == _authUuid && authPin != null) {
-          await char.write(utf8.encode(authPin), withoutResponse: false);
-        }
-
         if (uuid == _syncUuid) {
           // Write current Unix timestamp so ESP32 knows real time
           final ts = DateTime.now().millisecondsSinceEpoch ~/ 1000;
@@ -153,6 +147,7 @@ class BleService {
 
   void dispose() {
     _scanSub?.cancel();
+    _isScanningSub?.cancel();
     _device?.disconnect();
     _controller.close();
     _connectionStateController.close();

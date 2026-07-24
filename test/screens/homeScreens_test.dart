@@ -41,10 +41,10 @@ void main() {
     await tester.pump();
 
     // Verify the menu opens
-    final logoutButtonFinder = find.text('Log out');
+    final logoutButtonFinder = find.text('Keluar');
     expect(logoutButtonFinder, findsOneWidget);
 
-    // Tap Log out
+    // Tap Keluar
     await tester.tap(logoutButtonFinder);
     
     // Give it enough time for the async methods and navigation animation

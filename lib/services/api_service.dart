@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:vac_dashboard_app/models/therapy_session.dart';
 import 'package:vac_dashboard_app/models/register_dto.dart';
+import 'package:vac_dashboard_app/models/device_credentials.dart';
 import 'package:vac_dashboard_app/network/api_interceptor.dart';
 import 'package:vac_dashboard_app/repositories/auth_repository.dart';
 
@@ -83,9 +84,9 @@ class ApiService {
       await _authRepository.saveToken(token as String);
     }
     if (dto.qrKey != null) {
-      final parts = dto.qrKey!.split('|');
-      if (parts.length == 2) {
-        await _authRepository.saveDeviceConfig(parts[0], parts[1]);
+      final creds = DeviceCredentials.tryParseQrKey(dto.qrKey!);
+      if (creds != null) {
+        await _authRepository.saveDeviceConfig(creds);
       }
     }
   }
@@ -109,9 +110,9 @@ class ApiService {
       await _authRepository.saveToken(newToken as String);
     }
 
-    final parts = qrKey.split('|');
-    if (parts.length == 2) {
-      await _authRepository.saveDeviceConfig(parts[0], parts[1]);
+    final creds = DeviceCredentials.tryParseQrKey(qrKey);
+    if (creds != null) {
+      await _authRepository.saveDeviceConfig(creds);
     }
   }
 

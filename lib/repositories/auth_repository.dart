@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:vac_dashboard_app/models/device_credentials.dart';
 
 class AuthRepository {
   static const String _tokenKey = 'jwt_token';
@@ -35,9 +36,9 @@ class AuthRepository {
     await _storage.delete(key: _authPinKey);
   }
 
-  Future<void> saveDeviceConfig(String deviceId, String authPin) async {
-    await _storage.write(key: _deviceIdKey, value: deviceId);
-    await _storage.write(key: _authPinKey, value: authPin);
+  Future<void> saveDeviceConfig(DeviceCredentials credentials) async {
+    await _storage.write(key: _deviceIdKey, value: credentials.deviceId);
+    await _storage.write(key: _authPinKey, value: credentials.authPin);
   }
 
   Future<String?> getDeviceId() async {

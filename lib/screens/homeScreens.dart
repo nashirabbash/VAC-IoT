@@ -103,7 +103,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     if (_hasBoundDevice)
                       AppMenuItem(
-                        label: 'Change Device',
+                        label: 'Ganti Perangkat',
                         leadingIcon: Icons.qr_code_scanner_rounded,
                         onPressed: () async {
                           Navigator.of(context).pop(); // Dismiss menu
@@ -117,7 +117,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         },
                       ),
                     AppMenuItem(
-                      label: 'Settings',
+                      label: 'Pengaturan',
                       leadingIcon: Icons.settings_rounded,
                       onPressed: () {
                         Navigator.of(context).pop(); // Dismiss menu
@@ -129,7 +129,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       },
                     ),
                     AppMenuItem(
-                      label: 'Log out',
+                      label: 'Keluar',
                       leadingIcon: Icons.logout_rounded,
                       isDestructive: true,
                       onPressed: () async {
@@ -219,7 +219,12 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               const Spacer(),
               // Pulsing Scan Wave Animation
-              const PulsingScanner(size: 160),
+              if (!_isBleConnected && _hasBoundDevice)
+                const PulsingScanner(size: 160)
+              else if (_isBleConnected)
+                Icon(Icons.bluetooth_connected, size: 160, color: context.colors.accentsBlue)
+              else
+                const Icon(Icons.bluetooth_disabled, size: 160, color: Colors.grey),
               const SizedBox(height: 24),
 
               if (_isLoading)
@@ -227,8 +232,8 @@ class _HomeScreenState extends State<HomeScreen> {
               else ...[
                 AppText(
                   _hasBoundDevice 
-                      ? (_isBleConnected ? 'Terkoneksi' : 'Mencoba Connect...') 
-                      : 'Connect to device',
+                      ? (_isBleConnected ? 'Terkoneksi' : 'Mencari Perangkat...') 
+                      : 'Belum Terhubung',
                   type: AppTextType.headline,
                   color: AppTextColor.secondary,
                   fontWeight: FontWeight.w600,
@@ -240,7 +245,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 SizedBox(
                   width: double.infinity,
                   child: AppButton(
-                    label: _hasBoundDevice ? 'View Device' : 'Scan',
+                    label: _hasBoundDevice ? 'Lihat Perangkat' : 'Pindai',
                     size: ButtonSize.large,
                     variant: ButtonVariant.primary,
                     onPressed: () {
