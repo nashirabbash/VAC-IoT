@@ -1,409 +1,291 @@
-.scratch/auth_bottom_sheet_old.dart  |  632 ++++++++++++++++++++
- .scratch/diff_for_subagents.diff     | 1048 ++++++++++++++++------------------
- lib/component/auth_bottom_sheet.dart |   57 +-
- lib/component/login_form.dart        |  201 ++++++-
- lib/component/register_form.dart     |   17 +-
- lib/models/auth_form_data.dart       |   14 +
- lib/screens/deviceScreens.dart       |    4 +-
- lib/screens/historyScreens.dart      |    5 +-
- lib/screens/homeScreens.dart         |    2 +-
- lib/screens/scanScreens.dart         |    7 +-
- 10 files changed, 1411 insertions(+), 576 deletions(-)
+.scratch/diff_for_subagents.diff        | 961 ++++++++++++++++----------------
+ lib/component/auth_bottom_sheet.dart    |  67 ++-
+ lib/component/auth_input_field.dart     |  49 +-
+ lib/component/forgot_password_form.dart | 125 +++++
+ lib/component/login_form.dart           | 155 +-----
+ lib/component/register_form.dart        |  92 ++-
+ 6 files changed, 726 insertions(+), 723 deletions(-)
 
 --- Changes ---
 
-.scratch/auth_bottom_sheet_old.dart
-  @@ -0,0 +1,632 @@
-  +import 'dart:ui';
-  +import 'package:flutter/material.dart';
-  +import 'package:mobile_scanner/mobile_scanner.dart';
-  +import 'package:vac_dashboard_app/asset/color_tokens.dart';
-  +import 'package:vac_dashboard_app/component/button.dart';
-  +import 'package:vac_dashboard_app/component/text.dart';
-  +import 'package:vac_dashboard_app/component/grouped_list.dart';
-  +import 'package:vac_dashboard_app/component/bottom_sheet_header.dart';
-  +import 'package:vac_dashboard_app/screens/homeScreens.dart';
-  +import 'package:vac_dashboard_app/services/api_service.dart';
-  +import 'package:vac_dashboard_app/repositories/auth_repository.dart';
-  +
-  +enum AuthMode { login, signUp, forgotPassword }
-  +
-  +class AuthBottomSheet extends StatefulWidget {
-  +  final AuthMode initialMode;
-  +
-  +  const AuthBottomSheet({super.key, this.initialMode = AuthMode.login});
-  +
-  +  static void show(
-  +    BuildContext context, {
-  +    AuthMode initialMode = AuthMode.login,
-  +  }) {
-  +    showModalBottomSheet(
-  +      context: context,
-  +      isScrollControlled:
-  +          true, // Allows bottom sheet to resize when keyboard appears
-  +      backgroundColor: Colors.transparent, // Custom rounded shape with blur
-  +      barrierColor: Colors.black26,
-  +      builder: (context) => Padding(
-  +        padding: EdgeInsets.only(
-  +          bottom: MediaQuery.of(context).viewInsets.bottom, // Keyboard offset
-  +        ),
-  +        child: AuthBottomSheet(initialMode: initialMode),
-  +      ),
-  +    );
+.scratch/diff_for_subagents.diff
+  @@ -1,519 +1,522 @@
+  -.scratch/diff_for_subagents.diff     | 553 +++++++++++++++++++++++++++++++++++
+  - lib/component/auth_bottom_sheet.dart | 481 +++++-------------------------
+  - lib/component/auth_input_field.dart  |  46 +++
+  - lib/component/login_form.dart        | 150 ++++++++++
+  - lib/component/register_form.dart     | 203 +++++++++++++
+  - lib/models/auth_form_data.dart       |  62 ++++
+  - lib/models/register_dto.dart         |  25 ++
+  - lib/screens/scanScreens.dart         |  30 +-
+  - lib/services/api_service.dart        |  28 +-
+  - 9 files changed, 1139 insertions(+), 439 deletions(-)
+  +.scratch/auth_bottom_sheet_old.dart  |  632 ++++++++++++++++++++
+  + .scratch/diff_for_subagents.diff     | 1048 ++++++++++++++++------------------
+  + lib/component/auth_bottom_sheet.dart |   57 +-
+  + lib/component/login_form.dart        |  201 ++++++-
+  + lib/component/register_form.dart     |   17 +-
+  + lib/models/auth_form_data.dart       |   14 +
+  + lib/screens/deviceScreens.dart       |    4 +-
+  + lib/screens/historyScreens.dart      |    5 +-
+  + lib/screens/homeScreens.dart         |    2 +-
+  + lib/screens/scanScreens.dart         |    7 +-
+  + 10 files changed, 1411 insertions(+), 576 deletions(-)
+   
+   --- Changes ---
+   
+  -.scratch/diff_for_subagents.diff
+  -  @@ -0,0 +1,553 @@
+  -  +.../issues/10_flutter_ble_handshake_connect.md     |   18 +
+  -  + .../issues/11_backend_registration_bind.md         |   13 +
+  -  + .../issues/12_flutter_register_qr_bottomsheet.md   |   14 +
+  -  + .../issues/13_flutter_home_change_device.md        |   13 +
+  -  + .../issues/14_flutter_ble_auto_reconnect.md        |   14 +
+  -  + .scratch/qr_ota_feature/issues/1_web_ota_api.md    |   15 +
+  -  + .scratch/qr_ota_feature/issues/2_esp32_self_ota.md |   17 +
+  -  + .../qr_ota_feature/issues/3_safe_update_lock.md    |   16 +
+  -  + .../qr_ota_feature/issues/4_web_targeted_ota.md    |   15 +
+  -  + .../qr_ota_feature/issues/5_esp32_avr_isp_ota.md   |   16 +
+  -  + .../issues/6_esp32_nextion_tft_ota.md              |   16 +
+  -  + .../issues/7_esp32_ble_wifi_provisioning.md        |   17 +
+  -  + .../issues/8_flutter_wifi_provisioning_ui.md       |   16 +
+  -  + .../issues/9_flutter_qr_scanner_utility.md         |   15 +
+  -  + .scratch/qr_ota_feature/spec.md                    |   52 +
+  -  + clean_commit2_diff.txt                             |   97 -
+  -  + commit2_diff.txt                                   |  528 ----
+  -  + commit2_review_comment.md                          |   57 -
+  -  + commit_diff.txt                                    |  109 -
+  -  + commit_review_comment.md                           |   47 -
+  -  + diff_output.txt                                    | 2515 --------------------
+  -  + lib/component/auth_bottom_sheet.dart               |  770 +++---
+  -  + lib/services/api_service.dart                      |   25 +-
+  -  + pr_diff.txt                                        |  587 -----
+  -  + pr_review_comment.md                               |   64 -
+  -  + ss/RemoteQR.png                                    |  Bin 0 -> 23012 bytes
+  -  + ss/bluetoothQr.png                                 |  Bin 0 -> 23067 bytes
+  -  + ticket1.md                                         |   15 -
+  -  + ticket2.md                                         |   15 -
+  -  + 29 files changed, 734 insertions(+), 4362 deletions(-)
+  +.scratch/auth_bottom_sheet_old.dart
+  +  @@ -0,0 +1,632 @@
+  +  +import 'dart:ui';
+  +  +import 'package:flutter/material.dart';
+  +  +import 'package:mobile_scanner/mobile_scanner.dart';
+  +  +import 'package:vac_dashboard_app/asset/color_tokens.dart';
+  +  +import 'package:vac_dashboard_app/component/button.dart';
+  +  +import 'package:vac_dashboard_app/component/text.dart';
+  +  +import 'package:vac_dashboard_app/component/grouped_list.dart';
+  +  +import 'package:vac_dashboard_app/component/bottom_sheet_header.dart';
+  +  +import 'package:vac_dashboard_app/screens/homeScreens.dart';
+  +  +import 'package:vac_dashboard_app/services/api_service.dart';
+  +  +import 'package:vac_dashboard_app/repositories/auth_repository.dart';
+     +
+  -  +--- Changes ---
+  +  +enum AuthMode { login, signUp, forgotPassword }
+     +
+  -  +.scratch/qr_ota_feature/issues/10_flutter_ble_handshake_connect.md
+  -  +  @@ -0,0 +1,18 @@
+  -  +  +# 10 — Flutter BLE Auto-Connect & Auth Handshake
+  -  +  +
+  -  +  +**What to build:**
+  -  +  +Implement the Bluetooth auto-connect sequence driven by the scanned QR parameters. The Flutter application must scan for the specific device name, establish a connection, write the AUTH_KEY to authenticate, and subscribe to update notifications.
+  -  +  +
+  -  +  +**Blocked by:**
+  -  +  +- [9_flutter_qr_scanner_utility.md](file:///home/broo/Documents/apps/vac_dashboard_app/.scratch/qr_ota_feature/issues/9_flutter_qr_scanner_utility.md)
+  -  +  +
+  -  +  +**Status:** ready-for-agent
+  -  +  +
+  -  +  +- [ ] Implement background scan using `flutter_blue_plus` filtering for the specific `DEVICE_NAME` parsed from the QR code.
+  -  +  +- [ ] Implement auto-connect behavior: once the matching device name is found, automatically stop scanning and initiate the BLE connection.
+  -  +  +- [ ] Implement connection timeout security handshake: Write the parsed `AUTH_KEY` to the ESP32 security characteristic immediately upon connecting (must be completed within 5 seconds to prevent the ESP32 from dropping the connection).
+  -  +  +- [ ] **Auto-Reconnect (Hilang Jarak):** Jika koneksi BLE terputus karena jarak jauh, simpan status Device ID lokal dan buat aplikasi otomatis mencari dan terkoneksi ulang saat mesin kembali ke dalam jangkauan tanpa perlu scan QR.
+  -  +  +- [ ] **Ganti Mesin (Unbind):** Sediakan tombol "Ganti Mesin" di layar Home UI untuk menghapus pengikatan alat lama, membuka kamera, dan men-scan QR alat baru.
+  -  +  +- [ ] Subscribe to the `UPDATE_PENDING` characteristic to listen for firmware update notifications.
+  -  +  +- [ ] Show user feedback in the UI for connecting, authenticating, and connection success/failure.
+  -  +  +- [ ] Unit/Integration tests mock `flutter_blue_plus` connection states to verify the handshake flow.
+  -  +  +18 -0
+  +  +class AuthBottomSheet extends StatefulWidget {
+  +  +  final AuthMode initialMode;
+     +
+  -  +.scratch/qr_ota_feature/issues/11_backend_registration_bind.md
+  -  +  @@ -0,0 +1,13 @@
+  -  +  +# 11 — Backend API Registration & Binding Integration
+  ... (867 lines truncated)
+  +482 -479
+
+lib/component/auth_bottom_sheet.dart
+  @@ -11,6 +11,7 @@
+  +import 'package:vac_dashboard_app/component/forgot_password_form.dart';
+   
+   enum AuthMode { login, signUp, forgotPassword }
+   
+  @@ -193,41 +194,49 @@
+  -            child: _showScanner
+  -                ? _buildScanner(colors)
+  -                : (_mode == AuthMode.login
+  -                    ? LoginForm(
+  -                        formData: _loginData,
+  -                        isLoading: _isLoading,
+  -                        onLogin: _handleLogin,
+  -                        onToggleMode: _toggleMode,
+  -                        onClose: () => Navigator.of(context).pop(),
+  -                        onForgotPassword: () => setState(() => _mode = AuthMode.forgotPassword),
+  -                      )
+  -                    : (_mode == AuthMode.signUp
+  -                        ? RegisterForm(
+  -                            formData: _registerData,
+  -                            isLoading: _isLoading,
+  -                            onNext: _handleRegisterNext,
+  -                            onToggleMode: _toggleMode,
+  -                            onClose: () => Navigator.of(context).pop(),
+  -                          )
+  -                        : ForgotPasswordForm(
+  -                            formData: _forgotPasswordData,
+  -                            isLoading: _isLoading,
+  -                            onResetPassword: () {
+  -                              // Optional: handle forgot password
+  -                              setState(() => _mode = AuthMode.login);
+  -                            },
+  -                            onBackToLogin: () => setState(() => _mode = AuthMode.login),
+  -                            onClose: () => Navigator.of(context).pop(),
+  -                          ))),
+  +            child: _buildForm(colors),
+             ),
+           ),
+         ),
+       );
+     }
+   
+  +  Widget _buildForm(AppColorTokenSet colors) {
+  +    if (_showScanner) {
+  +      return _buildScanner(colors);
+  +    }
+  +    switch (_mode) {
+  +      case AuthMode.login:
+  +        return LoginForm(
+  +          formData: _loginData,
+  +          isLoading: _isLoading,
+  +          onLogin: _handleLogin,
+  +          onToggleMode: _toggleMode,
+  +          onClose: () => Navigator.of(context).pop(),
+  +          onForgotPassword: () => setState(() => _mode = AuthMode.forgotPassword),
+  +        );
+  +      case AuthMode.signUp:
+  +        return RegisterForm(
+  +          formData: _registerData,
+  +          isLoading: _isLoading,
+  +          onNext: _handleRegisterNext,
+  +          onToggleMode: _toggleMode,
+  +          onClose: () => Navigator.of(context).pop(),
+  +        );
+  +      case AuthMode.forgotPassword:
+  +        return ForgotPasswordForm(
+  +          formData: _forgotPasswordData,
+  +          isLoading: _isLoading,
+  +          onResetPassword: () {
+  +            // Optional: handle forgot password
+  +            setState(() => _mode = AuthMode.login);
+  +          },
+  +          onBackToLogin: () => setState(() => _mode = AuthMode.login),
+  +          onClose: () => Navigator.of(context).pop(),
+  +        );
+  +    }
   +  }
   +
+     Widget _buildScanner(AppColorTokenSet colors) {
+       return SafeArea(
+         child: Column(
+  +38 -29
+
+lib/component/auth_input_field.dart
+  @@ -1,12 +1,11 @@
+  -class AuthInputField extends StatelessWidget {
+  +class AuthInputField extends StatefulWidget {
+     final TextEditingController controller;
+     final String labelText;
+     final String? errorText;
+  -  final bool obscureText;
+  -  final Widget? suffixIcon;
+  +  final bool isPassword;
+     final AppColorTokenSet colors;
+   
+     const AuthInputField({
+  @@ -14,32 +13,56 @@
+  -    this.obscureText = false,
+  -    this.suffixIcon,
+  +    this.isPassword = false,
+       required this.colors,
+     });
+   
   +  @override
-  +  State<AuthBottomSheet> createState() => _AuthBottomSheetState();
+  +  State<AuthInputField> createState() => _AuthInputFieldState();
   +}
   +
-  +class _AuthBottomSheetState extends State<AuthBottomSheet> {
-  +  late AuthMode _mode;
-  +  final _usernameController = TextEditingController();
-  +  final _hospitalController = TextEditingController();
-  +  final _passwordController = TextEditingController();
-  +  final _confirmPasswordController = TextEditingController();
-  +  bool _obscurePassword = true;
-  +  bool _obscureConfirmPassword = true;
-  +  bool _rememberMe = false;
-  +  bool _isLoading = false;
-  +
-  +  bool _showScanner = false;
-  +  String? _usernameError;
-  +  String? _hospitalError;
-  +  String? _passwordError;
-  +  String? _confirmPasswordError;
-  +  final MobileScannerController _scannerController = MobileScannerController();
+  +class _AuthInputFieldState extends State<AuthInputField> {
+  +  bool _obscureText = false;
   +
   +  @override
   +  void initState() {
   +    super.initState();
-  +    _mode = widget.initialMode;
-  +    _usernameController.addListener(_validateUsername);
-  +    _hospitalController.addListener(_validateHospital);
-  +    _passwordController.addListener(_validatePassword);
-  +    _confirmPasswordController.addListener(_validateConfirmPassword);
+  +    _obscureText = widget.isPassword;
   +  }
   +
-  +  void _validateUsername() {
-  +    if (_mode != AuthMode.signUp) return;
-  +    setState(() {
-  +      if (_usernameController.text.isEmpty) {
-  +        _usernameError = 'Username is required';
-  +      } else {
-  +        _usernameError = null;
-  +      }
-  +    });
-  +  }
-  +
-  +  void _validateHospital() {
-  +    if (_mode != AuthMode.signUp) return;
-  +    setState(() {
-  +      if (_hospitalController.text.isEmpty) {
-  +        _hospitalError = 'Hospital name is required';
-  +      } else {
-  +        _hospitalError = null;
-  +      }
-  +    });
-  +  }
-  +
-  +  void _validatePassword() {
-  +    if (_mode != AuthMode.signUp) return;
-  +    setState(() {
-  +      if (_passwordController.text.length < 6) {
-  +        _passwordError = 'Password must be at least 6 characters';
-  +      } else {
-  +        _passwordError = null;
-  +      }
-  ... (532 lines truncated)
-  +632 -0
-
-.scratch/diff_for_subagents.diff
-  @@ -1,553 +1,519 @@
-  -.../issues/10_flutter_ble_handshake_connect.md     |   18 +
-  - .../issues/11_backend_registration_bind.md         |   13 +
-  - .../issues/12_flutter_register_qr_bottomsheet.md   |   14 +
-  - .../issues/13_flutter_home_change_device.md        |   13 +
-  - .../issues/14_flutter_ble_auto_reconnect.md        |   14 +
-  - .scratch/qr_ota_feature/issues/1_web_ota_api.md    |   15 +
-  - .scratch/qr_ota_feature/issues/2_esp32_self_ota.md |   17 +
-  - .../qr_ota_feature/issues/3_safe_update_lock.md    |   16 +
-  - .../qr_ota_feature/issues/4_web_targeted_ota.md    |   15 +
-  - .../qr_ota_feature/issues/5_esp32_avr_isp_ota.md   |   16 +
-  - .../issues/6_esp32_nextion_tft_ota.md              |   16 +
-  - .../issues/7_esp32_ble_wifi_provisioning.md        |   17 +
-  - .../issues/8_flutter_wifi_provisioning_ui.md       |   16 +
-  - .../issues/9_flutter_qr_scanner_utility.md         |   15 +
-  - .scratch/qr_ota_feature/spec.md                    |   52 +
-  - clean_commit2_diff.txt                             |   97 -
-  - commit2_diff.txt                                   |  528 ----
-  - commit2_review_comment.md                          |   57 -
-  - commit_diff.txt                                    |  109 -
-  - commit_review_comment.md                           |   47 -
-  - diff_output.txt                                    | 2515 --------------------
-  - lib/component/auth_bottom_sheet.dart               |  770 +++---
-  - lib/services/api_service.dart                      |   25 +-
-  - pr_diff.txt                                        |  587 -----
-  - pr_review_comment.md                               |   64 -
-  - ss/RemoteQR.png                                    |  Bin 0 -> 23012 bytes
-  - ss/bluetoothQr.png                                 |  Bin 0 -> 23067 bytes
-  - ticket1.md                                         |   15 -
-  - ticket2.md                                         |   15 -
-  - 29 files changed, 734 insertions(+), 4362 deletions(-)
-  +.scratch/diff_for_subagents.diff     | 553 +++++++++++++++++++++++++++++++++++
-  + lib/component/auth_bottom_sheet.dart | 481 +++++-------------------------
-  + lib/component/auth_input_field.dart  |  46 +++
-  + lib/component/login_form.dart        | 150 ++++++++++
-  + lib/component/register_form.dart     | 203 +++++++++++++
-  + lib/models/auth_form_data.dart       |  62 ++++
-  + lib/models/register_dto.dart         |  25 ++
-  + lib/screens/scanScreens.dart         |  30 +-
-  + lib/services/api_service.dart        |  28 +-
-  + 9 files changed, 1139 insertions(+), 439 deletions(-)
-   
-   --- Changes ---
-   
-  -.scratch/qr_ota_feature/issues/10_flutter_ble_handshake_connect.md
-  -  @@ -0,0 +1,18 @@
-  -  +# 10 — Flutter BLE Auto-Connect & Auth Handshake
-  -  +
-  -  +**What to build:**
-  -  +Implement the Bluetooth auto-connect sequence driven by the scanned QR parameters. The Flutter application must scan for the specific device name, establish a connection, write the AUTH_KEY to authenticate, and subscribe to update notifications.
-  -  +
-  -  +**Blocked by:**
-  -  +- [9_flutter_qr_scanner_utility.md](file:///home/broo/Documents/apps/vac_dashboard_app/.scratch/qr_ota_feature/issues/9_flutter_qr_scanner_utility.md)
-  -  +
-  -  +**Status:** ready-for-agent
-  -  +
-  -  +- [ ] Implement background scan using `flutter_blue_plus` filtering for the specific `DEVICE_NAME` parsed from the QR code.
-  -  +- [ ] Implement auto-connect behavior: once the matching device name is found, automatically stop scanning and initiate the BLE connection.
-  -  +- [ ] Implement connection timeout security handshake: Write the parsed `AUTH_KEY` to the ESP32 security characteristic immediately upon connecting (must be completed within 5 seconds to prevent the ESP32 from dropping the connection).
-  -  +- [ ] **Auto-Reconnect (Hilang Jarak):** Jika koneksi BLE terputus karena jarak jauh, simpan status Device ID lokal dan buat aplikasi otomatis mencari dan terkoneksi ulang saat mesin kembali ke dalam jangkauan tanpa perlu scan QR.
-  -  +- [ ] **Ganti Mesin (Unbind):** Sediakan tombol "Ganti Mesin" di layar Home UI untuk menghapus pengikatan alat lama, membuka kamera, dan men-scan QR alat baru.
-  -  +- [ ] Subscribe to the `UPDATE_PENDING` characteristic to listen for firmware update notifications.
-  -  +- [ ] Show user feedback in the UI for connecting, authenticating, and connection success/failure.
-  -  +- [ ] Unit/Integration tests mock `flutter_blue_plus` connection states to verify the handshake flow.
-  -  +18 -0
-  +.scratch/diff_for_subagents.diff
-  +  @@ -0,0 +1,553 @@
-  +  +.../issues/10_flutter_ble_handshake_connect.md     |   18 +
-  +  + .../issues/11_backend_registration_bind.md         |   13 +
-  +  + .../issues/12_flutter_register_qr_bottomsheet.md   |   14 +
-  +  + .../issues/13_flutter_home_change_device.md        |   13 +
-  +  + .../issues/14_flutter_ble_auto_reconnect.md        |   14 +
-  +  + .scratch/qr_ota_feature/issues/1_web_ota_api.md    |   15 +
-  +  + .scratch/qr_ota_feature/issues/2_esp32_self_ota.md |   17 +
-  +  + .../qr_ota_feature/issues/3_safe_update_lock.md    |   16 +
-  +  + .../qr_ota_feature/issues/4_web_targeted_ota.md    |   15 +
-  +  + .../qr_ota_feature/issues/5_esp32_avr_isp_ota.md   |   16 +
-  +  + .../issues/6_esp32_nextion_tft_ota.md              |   16 +
-  +  + .../issues/7_esp32_ble_wifi_provisioning.md        |   17 +
-  +  + .../issues/8_flutter_wifi_provisioning_ui.md       |   16 +
-  +  + .../issues/9_flutter_qr_scanner_utility.md         |   15 +
-  +  + .scratch/qr_ota_feature/spec.md                    |   52 +
-  +  + clean_commit2_diff.txt                             |   97 -
-  +  + commit2_diff.txt                                   |  528 ----
-  +  + commit2_review_comment.md                          |   57 -
-  +  + commit_diff.txt                                    |  109 -
-  +  + commit_review_comment.md                           |   47 -
-  +  + diff_output.txt                                    | 2515 --------------------
-  +  + lib/component/auth_bottom_sheet.dart               |  770 +++---
-  +  + lib/services/api_service.dart                      |   25 +-
-  +  + pr_diff.txt                                        |  587 -----
-  +  + pr_review_comment.md                               |   64 -
-  +  + ss/RemoteQR.png                                    |  Bin 0 -> 23012 bytes
-  +  + ss/bluetoothQr.png                                 |  Bin 0 -> 23067 bytes
-  +  + ticket1.md                                         |   15 -
-  +  + ticket2.md                                         |   15 -
-  +  + 29 files changed, 734 insertions(+), 4362 deletions(-)
-  +  +
-  +  +--- Changes ---
-  +  +
-  +  +.scratch/qr_ota_feature/issues/10_flutter_ble_handshake_connect.md
-  ... (951 lines truncated)
-  +507 -541
-
-lib/component/auth_bottom_sheet.dart
-  @@ -12,7 +12,7 @@
-  -enum AuthMode { login, signUp }
-  +enum AuthMode { login, signUp, forgotPassword }
-   
-   class AuthBottomSheet extends StatefulWidget {
-     final AuthMode initialMode;
-  @@ -45,6 +45,7 @@
-  +  final ForgotPasswordFormData _forgotPasswordData = ForgotPasswordFormData();
-     
-     bool _isLoading = false;
-     bool _showScanner = false;
-  @@ -60,13 +61,18 @@
-  +    _forgotPasswordData.dispose();
-       _scannerController.dispose();
-       super.dispose();
-     }
-   
-     void _toggleMode() {
-       setState(() {
-  -      _mode = _mode == AuthMode.login ? AuthMode.signUp : AuthMode.login;
-  +      if (_mode == AuthMode.login) {
-  +        _mode = AuthMode.signUp;
-  +      } else {
-  +        _mode = AuthMode.login;
-  +      }
-         _showScanner = false;
-       });
-     }
-  @@ -88,7 +94,7 @@
-  -        SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))),
-  +        SnackBar(content: AppText(e.toString().replaceAll('Exception: ', ''))),
-         );
-       } finally {
-         if (mounted) {
-  @@ -98,13 +104,7 @@
-  -    _registerData.validateAll();
-  -    if (!_registerData.isValid) {
-  -      ScaffoldMessenger.of(context).showSnackBar(
-  -        const SnackBar(content: Text('Please fix the errors in the form')),
-  -      );
-  -      return;
-  -    }
-  +    // Validation is now handled inside RegisterForm before this is called
-       // Snap to scanner view
-       FocusScope.of(context).unfocus(); // Dismiss the keyboard to prevent RenderFlex overflow
-       setState(() {
-  @@ -118,16 +118,15 @@
-  -    if (qrKey.trim().isEmpty) {
-  +    if (qrKey.trim().isEmpty || !qrKey.contains('|')) {
-         _scannerController.stop();
-  -      setState(() => _showScanner = false);
-  +      // DO NOT collapse the scanner view
-         final snackBar = scaffoldMsg.showSnackBar(
-  -        const SnackBar(content: Text('Invalid QR Code format')),
-  +        SnackBar(content: AppText('Invalid QR Code format')),
-         );
-         await snackBar.closed;
-         if (mounted) {
-           _scannerController.start();
-  -        setState(() => _showScanner = true);
-         }
-         return;
-       }
-  @@ -145,7 +144,7 @@
-  -        const SnackBar(content: Text('Registration successful!')),
-  +        SnackBar(content: AppText('Registration successful!')),
-         );
-         final nav = Navigator.of(context);
-         nav.pop(); // Dismiss bottom sheet
-  @@ -155,7 +154,7 @@
-  -        SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))),
-  +        SnackBar(content: AppText(e.toString().replaceAll('Exception: ', ''))),
-         );
-         await snackBar.closed;
-         if (mounted) {
-  @@ -203,14 +202,26 @@
-  +                        onForgotPassword: () => setState(() => _mode = AuthMode.forgotPassword),
-                         )
-  -                    : RegisterForm(
-  -                        formData: _registerData,
-  -                        isLoading: _isLoading,
-  -                        onNext: _handleRegisterNext,
-  -                        onToggleMode: _toggleMode,
-  -                        onClose: () => Navigator.of(context).pop(),
-  -                      )),
-  +                    : (_mode == AuthMode.signUp
-  +                        ? RegisterForm(
-  +                            formData: _registerData,
-  +                            isLoading: _isLoading,
-  +                            onNext: _handleRegisterNext,
-  +                            onToggleMode: _toggleMode,
-  +                            onClose: () => Navigator.of(context).pop(),
-  +                          )
-  +                        : ForgotPasswordForm(
-  +                            formData: _forgotPasswordData,
-  +                            isLoading: _isLoading,
-  +                            onResetPassword: () {
-  +                              // Optional: handle forgot password
-  +                              setState(() => _mode = AuthMode.login);
-  +                            },
-  +                            onBackToLogin: () => setState(() => _mode = AuthMode.login),
-  +                            onClose: () => Navigator.of(context).pop(),
-  +                          ))),
-             ),
-           ),
-         ),
-  +34 -23
-
-lib/component/login_form.dart
-  @@ -17,10 +17,10 @@
-  -    required this.isLoading,
-       required this.onLogin,
-       required this.onToggleMode,
-       required this.onClose,
-  +    required this.onForgotPassword,
-     });
-   
      @override
-  @@ -101,7 +101,64 @@
-  +              ),
-                 const SizedBox(height: 14),
-  +              Row(
-  +                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  +                crossAxisAlignment: CrossAxisAlignment.center,
-  +                children: [
-  +                  Row(
-  +                    mainAxisSize: MainAxisSize.min,
-  +                    children: [
-  +                      GestureDetector(
-  +                        onTap: () {
-  +                          setState(() {
-  +                            widget.formData.rememberMe = !widget.formData.rememberMe;
-  +                          });
-  +                        },
-  +                        child: Container(
-  +                          width: 20,
-  +                          height: 20,
-  +                          decoration: BoxDecoration(
-  +                            color: widget.formData.rememberMe
-  +                                ? colors.accentsBlue
-  +                                : Colors.transparent,
-  +                            border: Border.all(
-  +                              color: widget.formData.rememberMe
-  +                                  ? colors.accentsBlue
-  +                                  : colors.labelsTertiary,
-  +                              width: 2,
-  +                            ),
-  +                            borderRadius: BorderRadius.circular(4),
-  +                          ),
-  +                          child: widget.formData.rememberMe
-  +                              ? Icon(
-  +                                  Icons.check,
-  +                                  size: 14,
-  +                                  color: colors.graysWhite,
-  +                                )
-  +                              : null,
-  +                        ),
-  +                      ),
-  +                      const SizedBox(width: 10),
-  +                      AppText(
-  +                        'Remember me',
-  +                        type: AppTextType.subheadline,
-  +                        customColor: colors.labelsPrimary,
-  +                      ),
-  +                    ],
-  +                  ),
-  +                  GestureDetector(
-  +                    onTap: widget.onForgotPassword,
-  +                    child: AppText(
-  +                      'Forgot Password?',
-  +                      type: AppTextType.subheadline,
-  +                      customColor: colors.accentsBlue,
-  +                      fontWeight: FontWeight.w600,
-  +                    ),
-  +                  ),
-  +                ],
-  +              ),
-               ],
-             ),
-             const SizedBox(height: 64),
-  @@ -148,3 +205,145 @@
+     Widget build(BuildContext context) {
+       return TextField(
+  -      controller: controller,
+  -      obscureText: obscureText,
+  +      controller: widget.controller,
+  +      obscureText: _obscureText,
+         style: TextStyle(
+           fontFamily: 'Roboto',
+           fontSize: 16,
+  -        color: colors.labelsPrimary,
+  +        color: widget.colors.labelsPrimary,
+         ),
+         decoration: InputDecoration(
+  -        labelText: labelText,
+  -        errorText: errorText,
+  -        labelStyle: TextStyle(color: colors.labelsSecondary),
+  -        floatingLabelStyle: TextStyle(color: colors.accentsBlue),
+  +        labelText: widget.labelText,
+  +        errorText: widget.errorText,
+  +        labelStyle: TextStyle(color: widget.colors.labelsSecondary),
+  +        floatingLabelStyle: TextStyle(color: widget.colors.accentsBlue),
+           border: InputBorder.none,
+           contentPadding: const EdgeInsets.symmetric(
+             horizontal: 16,
+             vertical: 16,
+           ),
+  -        suffixIcon: suffixIcon,
+  +        suffixIcon: widget.isPassword
+  +            ? IconButton(
+  +                icon: Icon(
+  +                  _obscureText ? Icons.visibility_off : Icons.visibility,
+  +                  color: _obscureText ? widget.colors.labelsTertiary : widget.colors.accentsBlue,
+  +                ),
+  +                onPressed: () {
+  +                  setState(() {
+  +                    _obscureText = !_obscureText;
+  +                  });
+  +                },
+  +              )
+  +            : null,
+         ),
+       );
+     }
+  +36 -13
+
+lib/component/forgot_password_form.dart
+  @@ -0,0 +1,125 @@
+  +import 'package:flutter/material.dart';
+  +import 'package:vac_dashboard_app/asset/color_tokens.dart';
+  +import 'package:vac_dashboard_app/component/bottom_sheet_header.dart';
+  +import 'package:vac_dashboard_app/component/button.dart';
+  +import 'package:vac_dashboard_app/component/grouped_list.dart';
+  +import 'package:vac_dashboard_app/component/text.dart';
+  +import 'package:vac_dashboard_app/component/auth_input_field.dart';
+  +import 'package:vac_dashboard_app/models/auth_form_data.dart';
   +
   +class ForgotPasswordForm extends StatefulWidget {
   +  final ForgotPasswordFormData formData;
@@ -426,9 +308,6 @@ lib/component/login_form.dart
   +}
   +
   +class _ForgotPasswordFormState extends State<ForgotPasswordForm> {
-  +  bool _obscurePassword = true;
-  +  bool _obscureConfirmPassword = true;
-  +
   +  @override
   +  Widget build(BuildContext context) {
   +    final colors = context.colors;
@@ -486,37 +365,155 @@ lib/component/login_form.dart
   +                  AuthInputField(
   +                    controller: widget.formData.passwordController,
   +                    labelText: 'New Password',
-  +                    obscureText: _obscurePassword,
+  +                    isPassword: true,
   +                    colors: colors,
-  +                    suffixIcon: IconButton(
-  +                      icon: Icon(
-  +                        _obscurePassword ? Icons.visibility_off : Icons.visibility,
-  +                        color: _obscurePassword ? colors.labelsTertiary : colors.accentsBlue,
-  +                      ),
-  +                      onPressed: () {
-  +                        setState(() {
-  +                          _obscurePassword = !_obscurePassword;
-  +                        });
-  +                      },
-  +                    ),
   +                  ),
   +                  AuthInputField(
   +                    controller: widget.formData.confirmPasswordController,
   +                    labelText: 'Confirm New Password',
-  +                    obscureText: _obscureConfirmPassword,
+  +                    isPassword: true,
+  +                    colors: colors,
+  +                  ),
+  +                ],
+  +              ),
+  +              const SizedBox(height: 14),
+  +            ],
+  ... (25 lines truncated)
+  +125 -0
+
+lib/component/login_form.dart
+  @@ -85,19 +85,8 @@
+  -                    obscureText: _obscurePassword,
+  +                    isPassword: true,
+                       colors: colors,
+  -                    suffixIcon: IconButton(
+  -                      icon: Icon(
+  -                        _obscurePassword ? Icons.visibility_off : Icons.visibility,
+  -                        color: _obscurePassword ? colors.labelsTertiary : colors.accentsBlue,
+  -                      ),
+  -                      onPressed: () {
+  -                        setState(() {
+  -                          _obscurePassword = !_obscurePassword;
+  -                        });
+  -                      },
+  -                    ),
+                     ),
+                   ],
+                 ),
+  @@ -205,145 +194,3 @@
+  -
+  -class ForgotPasswordForm extends StatefulWidget {
+  -  final ForgotPasswordFormData formData;
+  -  final bool isLoading;
+  -  final VoidCallback onResetPassword;
+  -  final VoidCallback onBackToLogin;
+  -  final VoidCallback onClose;
+  -
+  -  const ForgotPasswordForm({
+  -    super.key,
+  -    required this.formData,
+  -    required this.isLoading,
+  -    required this.onResetPassword,
+  -    required this.onBackToLogin,
+  -    required this.onClose,
+  -  });
+  -
+  -  @override
+  -  State<ForgotPasswordForm> createState() => _ForgotPasswordFormState();
+  -}
+  -
+  -class _ForgotPasswordFormState extends State<ForgotPasswordForm> {
+  -  bool _obscurePassword = true;
+  -  bool _obscureConfirmPassword = true;
+  -
+  -  @override
+  -  Widget build(BuildContext context) {
+  -    final colors = context.colors;
+  -    
+  -    return SingleChildScrollView(
+  -      key: const ValueKey('forgot_password_form'),
+  -      padding: const EdgeInsets.only(left: 20, right: 20, bottom: 24, top: 8),
+  -      child: Column(
+  -        mainAxisSize: MainAxisSize.min,
+  -        crossAxisAlignment: CrossAxisAlignment.center,
+  -        children: [
+  -          BottomSheetHeader(
+  -            title: '',
+  -            showGrabber: false,
+  -            leadingIcon: Icons.arrow_back_ios_new_rounded,
+  -            onLeadingPressed: widget.onBackToLogin,
+  -            trailingIcon: Icons.close_rounded,
+  -            trailingVariant: ButtonVariant.tertiary,
+  -            onTrailingPressed: widget.onClose,
+  -          ),
+  -          Container(
+  -            width: double.infinity,
+  -            padding: const EdgeInsets.only(bottom: 8),
+  -            alignment: Alignment.centerLeft,
+  -            child: Column(
+  -              crossAxisAlignment: CrossAxisAlignment.start,
+  -              children: [
+  -                AppText(
+  -                  'Reset Password',
+  -                  type: AppTextType.title3,
+  -                  fontWeight: FontWeight.w600,
+  -                  customColor: colors.labelsPrimary,
+  -                ),
+  -                const SizedBox(height: 4),
+  -                AppText(
+  -                  'Enter your username and your new password to update your credentials.',
+  -                  type: AppTextType.body,
+  -                  customColor: colors.labelsSecondary,
+  -                ),
+  -              ],
+  -            ),
+  -          ),
+  -          Column(
+  -            mainAxisSize: MainAxisSize.min,
+  -            crossAxisAlignment: CrossAxisAlignment.start,
+  -            children: [
+  -              AppGroupedList(
+  -                backgroundColor: colors.backgroundsSecondaryElevated,
+  -                children: [
+  -                  AuthInputField(
+  -                    controller: widget.formData.usernameController,
+  -                    labelText: 'Username',
+  -                    colors: colors,
+  -                  ),
+  -                  AuthInputField(
+  -                    controller: widget.formData.passwordController,
+  -                    labelText: 'New Password',
+  -                    obscureText: _obscurePassword,
+  -                    colors: colors,
+  -                    suffixIcon: IconButton(
+  -                      icon: Icon(
+  -                        _obscurePassword ? Icons.visibility_off : Icons.visibility,
+  -                        color: _obscurePassword ? colors.labelsTertiary : colors.accentsBlue,
+  -                      ),
+  -                      onPressed: () {
+  -                        setState(() {
+  -                          _obscurePassword = !_obscurePassword;
+  -                        });
+  -                      },
+  -                    ),
+  -                  ),
+  -                  AuthInputField(
+  -                    controller: widget.formData.confirmPasswordController,
+  -                    labelText: 'Confirm New Password',
+  -                    obscureText: _obscureConfirmPassword,
   ... (42 lines truncated)
-  +200 -1
+  +1 -154
 
 lib/component/register_form.dart
-  @@ -30,6 +30,7 @@
-  +  bool _hasSubmitted = false;
-   
-     @override
-     void initState() {
-  @@ -41,7 +42,7 @@
-  -    if (mounted) {
-  +    if (mounted && _hasSubmitted) {
+  @@ -28,33 +28,51 @@
+  -  bool _obscurePassword = true;
+  -  bool _obscureConfirmPassword = true;
+  -  bool _hasSubmitted = false;
+  +  bool _forceShowErrors = false;
+  +  bool _usernameTouched = false;
+  +  bool _hospitalTouched = false;
+  +  bool _passwordTouched = false;
 
 ... (more changes truncated)
-  +2 -1
+  +4 -3
 [full diff: rtk git diff --no-compact]

@@ -13,10 +13,12 @@ class LoginForm extends StatefulWidget {
   final VoidCallback onLogin;
   final VoidCallback onToggleMode;
   final VoidCallback onClose;
+  final VoidCallback onForgotPassword;
 
   const LoginForm({
     super.key,
     required this.formData,
+    required this.isLoading,
     required this.onLogin,
     required this.onToggleMode,
     required this.onClose,
@@ -28,8 +30,6 @@ class LoginForm extends StatefulWidget {
 }
 
 class _LoginFormState extends State<LoginForm> {
-  bool _obscurePassword = true;
-
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
@@ -89,7 +89,6 @@ class _LoginFormState extends State<LoginForm> {
                     colors: colors,
                   ),
                 ],
-              ),
               ),
               const SizedBox(height: 14),
               Row(
