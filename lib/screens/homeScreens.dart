@@ -65,6 +65,7 @@ class _HomeScreenState extends State<HomeScreen> {
         setState(() {
           _hasBoundDevice = true;
         });
+        bleService.startScan();
       }
     } catch (e) {
       debugPrint('Error decoding token: $e');
@@ -75,6 +76,13 @@ class _HomeScreenState extends State<HomeScreen> {
         });
       }
     }
+  }
+
+  String get _connectionStatusText {
+    if (!_hasBoundDevice) return 'Belum Terhubung';
+    if (_isBleConnected) return 'Terkoneksi';
+    if (_hasConnectionDropped) return 'Gagal Connect';
+    return 'Mencari Perangkat...';
   }
 
   void _showAvatarMenu(BuildContext context) async {
@@ -238,9 +246,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 const CircularProgressIndicator()
               else ...[
                 AppText(
-                  _hasBoundDevice 
-                      ? (_isBleConnected ? 'Terkoneksi' : (_hasConnectionDropped ? 'Gagal Connect' : 'Mencari Perangkat...')) 
-                      : 'Belum Terhubung',
+                  _connectionStatusText,
                   type: AppTextType.headline,
                   color: AppTextColor.secondary,
                   fontWeight: FontWeight.w600,

@@ -23,7 +23,9 @@ class BleService {
   int? _lastStart;
   bool _isConnected = false;
 
-  final AuthRepository _authRepository = AuthRepository();
+  final AuthRepository _authRepository;
+
+  BleService({AuthRepository? authRepository}) : _authRepository = authRepository ?? AuthRepository();
 
   bool get isConnected => _isConnected;
 
@@ -119,11 +121,18 @@ class BleService {
       if (svc.uuid.toString().toLowerCase() != _serviceUuid) continue;
       for (final char in svc.characteristics) {
         final uuid = char.uuid.toString().toLowerCase();
+        
+        if (uuid == _authUuid && authPin != null) {
+          // Priority 1: Write AUTH_PIN within the 5s window
+          await char.write(utf8.encode(authPin), withoutResponse: false);
+        }
+
         if (uuid == _syncUuid) {
           // Write current Unix timestamp so ESP32 knows real time
           final ts = DateTime.now().millisecondsSinceEpoch ~/ 1000;
           await char.write(utf8.encode(ts.toString()), withoutResponse: false);
         }
+        
         if (uuid == _therapyUuid) {
           await char.setNotifyValue(true);
           char.lastValueStream.listen((bytes) {
@@ -138,10 +147,6 @@ class BleService {
               _controller.add(data);
             } catch (_) {}
           });
-        }
-        if (uuid == _authUuid && authPin != null) {
-          // Write AUTH_PIN within the 5s window
-          await char.write(utf8.encode(authPin), withoutResponse: false);
         }
       }
       break;

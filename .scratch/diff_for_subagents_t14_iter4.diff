@@ -1,0 +1,525 @@
+.scratch/diff_for_subagents_t14.diff       | 240 +++++++++++++
+ .scratch/diff_for_subagents_t14_iter2.diff | 423 +++++++++++++++++++++++
+ .scratch/diff_for_subagents_t14_iter3.diff | 524 +++++++++++++++++++++++++++++
+ lib/models/device_credentials.dart         |  14 +
+ lib/repositories/auth_repository.dart      |  19 ++
+ lib/screens/historyScreens.dart            |   8 +-
+ lib/screens/homeScreens.dart               |  44 ++-
+ lib/services/api_service.dart              |  13 +
+ lib/services/ble_service.dart              |  63 +++-
+ test/screens/homeScreens_test.dart         |   4 +-
+ 10 files changed, 1335 insertions(+), 17 deletions(-)
+
+--- Changes ---
+
+.scratch/diff_for_subagents_t14.diff
+  @@ -0,0 +1,240 @@
+  +lib/repositories/auth_repository.dart | 17 +++++++++++
+  + lib/screens/historyScreens.dart       |  8 +++--
+  + lib/screens/homeScreens.dart          | 22 +++++++++++++-
+  + lib/services/api_service.dart         | 11 +++++++
+  + lib/services/ble_service.dart         | 55 +++++++++++++++++++++++++++++++++--
+  + 5 files changed, 106 insertions(+), 7 deletions(-)
+  +
+  +--- Changes ---
+  +
+  +lib/repositories/auth_repository.dart
+  +  @@ -3,6 +3,8 @@
+  +  +  static const String _deviceIdKey = 'device_id';
+  +  +  static const String _authPinKey = 'auth_pin';
+  +     final _storage = const FlutterSecureStorage();
+  +     String? _cachedToken;
+  +     bool _isInitialized = false;
+  +  @@ -29,6 +31,21 @@
+  +  +    await _storage.delete(key: _deviceIdKey);
+  +  +    await _storage.delete(key: _authPinKey);
+  +  +  }
+  +  +
+  +  +  Future<void> saveDeviceConfig(String deviceId, String authPin) async {
+  +  +    await _storage.write(key: _deviceIdKey, value: deviceId);
+  +  +    await _storage.write(key: _authPinKey, value: authPin);
+  +  +  }
+  +  +
+  +  +  Future<String?> getDeviceId() async {
+  +  +    return await _storage.read(key: _deviceIdKey);
+  +  +  }
+  +  +
+  +  +  Future<String?> getAuthPin() async {
+  +  +    return await _storage.read(key: _authPinKey);
+  +     }
+  +   
+  +     Future<Map<String, dynamic>?> getDecodedToken() async {
+  +  +17 -0
+  +
+  +lib/screens/historyScreens.dart
+  +  @@ -12,6 +12,7 @@
+  +  +import 'dart:async';
+  +   
+  +   class HistoryScreens extends StatefulWidget {
+  +     const HistoryScreens({super.key});
+  +  @@ -22,7 +23,8 @@
+  +  -  final _ble = BleService();
+  +  +  final _ble = bleService;
+  +  +  late final StreamSubscription _therapySub;
+  +   
+  +     List<TherapySession> _sessions = [];
+  +     String? _selectedYear;
+  +  @@ -56,7 +58,7 @@
+  +  -    _ble.onTherapy.listen((payload) async {
+  +  +    _therapySub = _ble.onTherapy.listen((payload) async {
+  +         try {
+  +           await TherapyReceiver.save(payload);
+  +           _syncAndLoadData();
+  +  @@ -171,7 +173,7 @@
+  +  -    _ble.dispose();
+  +  +    _therapySub.cancel();
+  +       super.dispose();
+  +     }
+  +   
+  +  +5 -3
+  +
+  +lib/screens/homeScreens.dart
+  +  @@ -9,7 +9,9 @@
+  +  +import 'package:vac_dashboard_app/services/ble_service.dart';
+  +   import 'package:vac_dashboard_app/component/menu.dart';
+  +  +import 'dart:async';
+  +   
+  +   class HomeScreen extends StatefulWidget {
+  +     final AuthRepository? authRepository;
+  +  @@ -24,6 +26,8 @@
+  +  +  bool _isBleConnected = false;
+  +  +  late final StreamSubscription<bool> _connectionSub;
+  +     late final AuthRepository _authRepository = widget.authRepository ?? AuthRepository();
+  +     late final ApiService _apiService = widget.apiService ?? apiService;
+  +   
+  +  @@ -31,6 +35,20 @@
+  +  +    _isBleConnected = bleService.isConnected;
+  +  +    _connectionSub = bleService.onConnectionStateChanged.listen((connected) {
+  +  +      if (mounted) {
+  +  +        setState(() {
+  +  +          _isBleConnected = connected;
+  +  +        });
+  +  +      }
+  +  +    });
+  +  +  }
+  +  +
+  +  +  @override
+  +  +  void dispose() {
+  +  +    _connectionSub.cancel();
+  +  +    super.dispose();
+  +     }
+  +   
+  +     Future<void> _checkDeviceBinding() async {
+  +  @@ -208,7 +226,9 @@
+  +  -                  _hasBoundDevice ? 'Device is bound' : 'Connect to device',
+  +  +                  _hasBoundDevice 
+  +  +                      ? (_isBleConnected ? 'Terkoneksi' : 'Mencoba Connect...') 
+  ... (140 lines truncated)
+  +240 -0
+
+.scratch/diff_for_subagents_t14_iter2.diff
+  @@ -0,0 +1,423 @@
+  +.scratch/diff_for_subagents_t14.diff  | 240 ++++++++++++++++++++++++++++++++++
+  + lib/models/device_credentials.dart    |  14 ++
+  + lib/repositories/auth_repository.dart |  18 +++
+  + lib/screens/historyScreens.dart       |   8 +-
+  + lib/screens/homeScreens.dart          |  37 +++++-
+  + lib/services/api_service.dart         |  12 ++
+  + lib/services/ble_service.dart         |  56 +++++++-
+  + test/screens/homeScreens_test.dart    |   4 +-
+  + 8 files changed, 372 insertions(+), 17 deletions(-)
+  +
+  +--- Changes ---
+  +
+  +.scratch/diff_for_subagents_t14.diff
+  +  @@ -0,0 +1,240 @@
+  +  +lib/repositories/auth_repository.dart | 17 +++++++++++
+  +  + lib/screens/historyScreens.dart       |  8 +++--
+  +  + lib/screens/homeScreens.dart          | 22 +++++++++++++-
+  +  + lib/services/api_service.dart         | 11 +++++++
+  +  + lib/services/ble_service.dart         | 55 +++++++++++++++++++++++++++++++++--
+  +  + 5 files changed, 106 insertions(+), 7 deletions(-)
+  +  +
+  +  +--- Changes ---
+  +  +
+  +  +lib/repositories/auth_repository.dart
+  +  +  @@ -3,6 +3,8 @@
+  +  +  +  static const String _deviceIdKey = 'device_id';
+  +  +  +  static const String _authPinKey = 'auth_pin';
+  +  +     final _storage = const FlutterSecureStorage();
+  +  +     String? _cachedToken;
+  +  +     bool _isInitialized = false;
+  +  +  @@ -29,6 +31,21 @@
+  +  +  +    await _storage.delete(key: _deviceIdKey);
+  +  +  +    await _storage.delete(key: _authPinKey);
+  +  +  +  }
+  +  +  +
+  +  +  +  Future<void> saveDeviceConfig(String deviceId, String authPin) async {
+  +  +  +    await _storage.write(key: _deviceIdKey, value: deviceId);
+  +  +  +    await _storage.write(key: _authPinKey, value: authPin);
+  +  +  +  }
+  +  +  +
+  +  +  +  Future<String?> getDeviceId() async {
+  +  +  +    return await _storage.read(key: _deviceIdKey);
+  +  +  +  }
+  +  +  +
+  +  +  +  Future<String?> getAuthPin() async {
+  +  +  +    return await _storage.read(key: _authPinKey);
+  +  +     }
+  +  +   
+  +  +     Future<Map<String, dynamic>?> getDecodedToken() async {
+  +  +  +17 -0
+  +  +
+  +  +lib/screens/historyScreens.dart
+  +  +  @@ -12,6 +12,7 @@
+  +  +  +import 'dart:async';
+  +  +   
+  +  +   class HistoryScreens extends StatefulWidget {
+  +  +     const HistoryScreens({super.key});
+  +  +  @@ -22,7 +23,8 @@
+  +  +  -  final _ble = BleService();
+  +  +  +  final _ble = bleService;
+  +  +  +  late final StreamSubscription _therapySub;
+  +  +   
+  +  +     List<TherapySession> _sessions = [];
+  +  +     String? _selectedYear;
+  +  +  @@ -56,7 +58,7 @@
+  +  +  -    _ble.onTherapy.listen((payload) async {
+  +  +  +    _therapySub = _ble.onTherapy.listen((payload) async {
+  +  +         try {
+  +  +           await TherapyReceiver.save(payload);
+  +  +           _syncAndLoadData();
+  +  +  @@ -171,7 +173,7 @@
+  +  +  -    _ble.dispose();
+  +  +  +    _therapySub.cancel();
+  +  +       super.dispose();
+  +  +     }
+  +  +   
+  +  +  +5 -3
+  +  +
+  +  +lib/screens/homeScreens.dart
+  +  +  @@ -9,7 +9,9 @@
+  +  +  +import 'package:vac_dashboard_app/services/ble_service.dart';
+  +  +   import 'package:vac_dashboard_app/component/menu.dart';
+  +  +  +import 'dart:async';
+  +  +   
+  +  +   class HomeScreen extends StatefulWidget {
+  +  +     final AuthRepository? authRepository;
+  +  +  @@ -24,6 +26,8 @@
+  +  +  +  bool _isBleConnected = false;
+  +  +  +  late final StreamSubscription<bool> _connectionSub;
+  +  +     late final AuthRepository _authRepository = widget.authRepository ?? AuthRepository();
+  +  +     late final ApiService _apiService = widget.apiService ?? apiService;
+  +  +   
+  +  +  @@ -31,6 +35,20 @@
+  +  +  +    _isBleConnected = bleService.isConnected;
+  +  +  +    _connectionSub = bleService.onConnectionStateChanged.listen((connected) {
+  +  +  +      if (mounted) {
+  +  +  +        setState(() {
+  +  +  +          _isBleConnected = connected;
+  +  +  +        });
+  +  +  +      }
+  ... (323 lines truncated)
+  +423 -0
+
+.scratch/diff_for_subagents_t14_iter3.diff
+  @@ -0,0 +1,524 @@
+  +.scratch/diff_for_subagents_t14.diff       | 240 ++++++++++++++++
+  + .scratch/diff_for_subagents_t14_iter2.diff | 423 +++++++++++++++++++++++++++++
+  + lib/models/device_credentials.dart         |  14 +
+  + lib/repositories/auth_repository.dart      |  19 ++
+  + lib/screens/historyScreens.dart            |   8 +-
+  + lib/screens/homeScreens.dart               |  37 ++-
+  + lib/services/api_service.dart              |  13 +
+  + lib/services/ble_service.dart              |  63 ++++-
+  + test/screens/homeScreens_test.dart         |   4 +-
+  + 9 files changed, 804 insertions(+), 17 deletions(-)
+  +
+  +--- Changes ---
+  +
+  +.scratch/diff_for_subagents_t14.diff
+  +  @@ -0,0 +1,240 @@
+  +  +lib/repositories/auth_repository.dart | 17 +++++++++++
+  +  + lib/screens/historyScreens.dart       |  8 +++--
+  +  + lib/screens/homeScreens.dart          | 22 +++++++++++++-
+  +  + lib/services/api_service.dart         | 11 +++++++
+  +  + lib/services/ble_service.dart         | 55 +++++++++++++++++++++++++++++++++--
+  +  + 5 files changed, 106 insertions(+), 7 deletions(-)
+  +  +
+  +  +--- Changes ---
+  +  +
+  +  +lib/repositories/auth_repository.dart
+  +  +  @@ -3,6 +3,8 @@
+  +  +  +  static const String _deviceIdKey = 'device_id';
+  +  +  +  static const String _authPinKey = 'auth_pin';
+  +  +     final _storage = const FlutterSecureStorage();
+  +  +     String? _cachedToken;
+  +  +     bool _isInitialized = false;
+  +  +  @@ -29,6 +31,21 @@
+  +  +  +    await _storage.delete(key: _deviceIdKey);
+  +  +  +    await _storage.delete(key: _authPinKey);
+  +  +  +  }
+  +  +  +
+  +  +  +  Future<void> saveDeviceConfig(String deviceId, String authPin) async {
+  +  +  +    await _storage.write(key: _deviceIdKey, value: deviceId);
+  +  +  +    await _storage.write(key: _authPinKey, value: authPin);
+  +  +  +  }
+  +  +  +
+  +  +  +  Future<String?> getDeviceId() async {
+  +  +  +    return await _storage.read(key: _deviceIdKey);
+  +  +  +  }
+  +  +  +
+  +  +  +  Future<String?> getAuthPin() async {
+  +  +  +    return await _storage.read(key: _authPinKey);
+  +  +     }
+  +  +   
+  +  +     Future<Map<String, dynamic>?> getDecodedToken() async {
+  +  +  +17 -0
+  +  +
+  +  +lib/screens/historyScreens.dart
+  +  +  @@ -12,6 +12,7 @@
+  +  +  +import 'dart:async';
+  +  +   
+  +  +   class HistoryScreens extends StatefulWidget {
+  +  +     const HistoryScreens({super.key});
+  +  +  @@ -22,7 +23,8 @@
+  +  +  -  final _ble = BleService();
+  +  +  +  final _ble = bleService;
+  +  +  +  late final StreamSubscription _therapySub;
+  +  +   
+  +  +     List<TherapySession> _sessions = [];
+  +  +     String? _selectedYear;
+  +  +  @@ -56,7 +58,7 @@
+  +  +  -    _ble.onTherapy.listen((payload) async {
+  +  +  +    _therapySub = _ble.onTherapy.listen((payload) async {
+  +  +         try {
+  +  +           await TherapyReceiver.save(payload);
+  +  +           _syncAndLoadData();
+  +  +  @@ -171,7 +173,7 @@
+  +  +  -    _ble.dispose();
+  +  +  +    _therapySub.cancel();
+  +  +       super.dispose();
+  +  +     }
+  +  +   
+  +  +  +5 -3
+  +  +
+  +  +lib/screens/homeScreens.dart
+  +  +  @@ -9,7 +9,9 @@
+  +  +  +import 'package:vac_dashboard_app/services/ble_service.dart';
+  +  +   import 'package:vac_dashboard_app/component/menu.dart';
+  +  +  +import 'dart:async';
+  +  +   
+  +  +   class HomeScreen extends StatefulWidget {
+  +  +     final AuthRepository? authRepository;
+  +  +  @@ -24,6 +26,8 @@
+  +  +  +  bool _isBleConnected = false;
+  +  +  +  late final StreamSubscription<bool> _connectionSub;
+  +  +     late final AuthRepository _authRepository = widget.authRepository ?? AuthRepository();
+  +  +     late final ApiService _apiService = widget.apiService ?? apiService;
+  +  +   
+  +  +  @@ -31,6 +35,20 @@
+  +  +  +    _isBleConnected = bleService.isConnected;
+  +  +  +    _connectionSub = bleService.onConnectionStateChanged.listen((connected) {
+  +  +  +      if (mounted) {
+  +  +  +        setState(() {
+  +  +  +          _isBleConnected = connected;
+  +  +  +        });
+  ... (424 lines truncated)
+  +524 -0
+
+lib/models/device_credentials.dart
+  @@ -0,0 +1,14 @@
+  +class DeviceCredentials {
+  +  final String deviceId;
+  +  final String authPin;
+  +
+  +  DeviceCredentials({required this.deviceId, required this.authPin});
+  +
+  +  static DeviceCredentials? tryParseQrKey(String qrKey) {
+  +    final parts = qrKey.split('|');
+  +    if (parts.length == 2) {
+  +      return DeviceCredentials(deviceId: parts[0], authPin: parts[1]);
+  +    }
+  +    return null;
+  +  }
+  +}
+  +14 -0
+
+lib/repositories/auth_repository.dart
+  @@ -1,8 +1,11 @@
+  +import 'package:vac_dashboard_app/models/device_credentials.dart';
+   
+   class AuthRepository {
+     static const String _tokenKey = 'jwt_token';
+  +  static const String _deviceIdKey = 'device_id';
+  +  static const String _authPinKey = 'auth_pin';
+     final _storage = const FlutterSecureStorage();
+     String? _cachedToken;
+     bool _isInitialized = false;
+  @@ -29,6 +32,22 @@
+  +    await _storage.delete(key: _deviceIdKey);
+  +    await _storage.delete(key: _authPinKey);
+  +  }
+  +
+  +  Future<void> saveDeviceConfig(DeviceCredentials credentials) async {
+  +    await _storage.write(key: _deviceIdKey, value: credentials.deviceId);
+  +    await _storage.write(key: _authPinKey, value: credentials.authPin);
+  +  }
+  +
+  +  Future<DeviceCredentials?> getDeviceCredentials() async {
+  +    final deviceId = await _storage.read(key: _deviceIdKey);
+  +    final authPin = await _storage.read(key: _authPinKey);
+  +    if (deviceId != null && authPin != null) {
+  +      return DeviceCredentials(deviceId: deviceId, authPin: authPin);
+  +    }
+  +    return null;
+     }
+   
+     Future<Map<String, dynamic>?> getDecodedToken() async {
+  +19 -0
+
+lib/screens/historyScreens.dart
+  @@ -12,6 +12,7 @@
+  +import 'dart:async';
+   
+   class HistoryScreens extends StatefulWidget {
+     const HistoryScreens({super.key});
+  @@ -22,7 +23,8 @@
+  -  final _ble = BleService();
+  +  final _ble = bleService;
+  +  late final StreamSubscription _therapySub;
+   
+     List<TherapySession> _sessions = [];
+     String? _selectedYear;
+  @@ -56,7 +58,7 @@
+  -    _ble.onTherapy.listen((payload) async {
+  +    _therapySub = _ble.onTherapy.listen((payload) async {
+         try {
+           await TherapyReceiver.save(payload);
+           _syncAndLoadData();
+  @@ -171,7 +173,7 @@
+  -    _ble.dispose();
+  +    _therapySub.cancel();
+       super.dispose();
+     }
+   
+  +5 -3
+
+lib/screens/homeScreens.dart
+  @@ -9,7 +9,9 @@
+  +import 'package:vac_dashboard_app/services/ble_service.dart';
+   import 'package:vac_dashboard_app/component/menu.dart';
+  +import 'dart:async';
+   
+   class HomeScreen extends StatefulWidget {
+     final AuthRepository? authRepository;
+  @@ -24,6 +26,9 @@
+  +  bool _isBleConnected = false;
+  +  bool _hasConnectionDropped = false;
+  +  late final StreamSubscription<bool> _connectionSub;
+     late final AuthRepository _authRepository = widget.authRepository ?? AuthRepository();
+     late final ApiService _apiService = widget.apiService ?? apiService;
+   
+  @@ -31,6 +36,26 @@
+  +    _isBleConnected = bleService.isConnected;
+  +    _connectionSub = bleService.onConnectionStateChanged.listen((connected) {
+  +      if (mounted) {
+  +        setState(() {
+  +          if (_isBleConnected && !connected) {
+  +            _hasConnectionDropped = true;
+  +          }
+  +          if (connected) {
+  +            _hasConnectionDropped = false;
+  +          }
+  +          _isBleConnected = connected;
+  +        });
+  +      }
+  +    });
+  +  }
+  +
+  +  @override
+  +  void dispose() {
+  +    _connectionSub.cancel();
+  +    super.dispose();
+     }
+   
+     Future<void> _checkDeviceBinding() async {
+  @@ -85,7 +110,7 @@
+  -                        label: 'Change Device',
+  +                        label: 'Ganti Perangkat',
+                           leadingIcon: Icons.qr_code_scanner_rounded,
+                           onPressed: () async {
+                             Navigator.of(context).pop(); // Dismiss menu
+  @@ -99,7 +124,7 @@
+  -                      label: 'Settings',
+  +                      label: 'Pengaturan',
+                         leadingIcon: Icons.settings_rounded,
+                         onPressed: () {
+                           Navigator.of(context).pop(); // Dismiss menu
+  @@ -111,7 +136,7 @@
+  -                      label: 'Log out',
+  +                      label: 'Keluar',
+                         leadingIcon: Icons.logout_rounded,
+                         isDestructive: true,
+                         onPressed: () async {
+  @@ -201,14 +226,21 @@
+  -              const PulsingScanner(size: 160),
+  +              if (!_isBleConnected && _hasBoundDevice)
+  +                const PulsingScanner(size: 160)
+  +              else if (_isBleConnected)
+  +                Icon(Icons.bluetooth_connected, size: 160, color: context.colors.accentsBlue)
+  +              else
+  +                Icon(Icons.bluetooth_disabled, size: 160, color: context.colors.graysGray),
+                 const SizedBox(height: 24),
+   
+                 if (_isLoading)
+                   const CircularProgressIndicator()
+                 else ...[
+                   AppText(
+  -                  _hasBoundDevice ? 'Device is bound' : 'Connect to device',
+  +                  _hasBoundDevice 
+  +                      ? (_isBleConnected ? 'Terkoneksi' : (_hasConnectionDropped ? 'Gagal Connect' : 'Mencari Perangkat...')) 
+  +                      : 'Belum Terhubung',
+                     type: AppTextType.headline,
+                     color: AppTextColor.secondary,
+                     fontWeight: FontWeight.w600,
+  @@ -220,7 +252,7 @@
+  -                    label: _hasBoundDevice ? 'View Device' : 'Scan',
+  +                    label: _hasBoundDevice ? 'Lihat Perangkat' : 'Pindai',
+                       size: ButtonSize.large,
+                       variant: ButtonVariant.primary,
+                       onPressed: () {
+  +38 -6
+
+lib/services/api_service.dart
+  @@ -2,6 +2,7 @@
+  +import 'package:vac_dashboard_app/models/device_credentials.dart';
+   import 'package:vac_dashboard_app/network/api_interceptor.dart';
+   import 'package:vac_dashboard_app/repositories/auth_repository.dart';
+   
+  @@ -82,6 +83,9 @@
+  +    if (dto.qrKey != null) {
+  +      await _saveDeviceCredentials(dto.qrKey!);
+  +    }
+     }
+   
+     Future<void> bindDevice(String qrKey) async {
+  @@ -102,6 +106,8 @@
+  +
+  +    await _saveDeviceCredentials(qrKey);
+     }
+   
+     Future<void> logout() async {
+  @@ -115,6 +121,13 @@
+  +
+  +  Future<void> _saveDeviceCredentials(String qrKey) async {
+  +    final creds = DeviceCredentials.tryParseQrKey(qrKey);
+  +    if (creds != null) {
+  +      await _authRepository.saveDeviceConfig(creds);
+  +    }
+  +  }
+   }
+
+... (more changes truncated)
+  +13 -0
+[full diff: rtk git diff --no-compact]
