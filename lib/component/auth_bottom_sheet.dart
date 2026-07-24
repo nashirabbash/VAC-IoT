@@ -12,7 +12,7 @@ import 'package:vac_dashboard_app/models/register_dto.dart';
 import 'package:vac_dashboard_app/component/login_form.dart';
 import 'package:vac_dashboard_app/component/register_form.dart';
 
-enum AuthMode { login, signUp }
+enum AuthMode { login, signUp, forgotPassword }
 
 class AuthBottomSheet extends StatefulWidget {
   final AuthMode initialMode;
@@ -45,6 +45,7 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
   late AuthMode _mode;
   final LoginFormData _loginData = LoginFormData();
   final RegisterFormData _registerData = RegisterFormData();
+  final ForgotPasswordFormData _forgotPasswordData = ForgotPasswordFormData();
   
   bool _isLoading = false;
   bool _showScanner = false;
@@ -60,13 +61,18 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
   void dispose() {
     _loginData.dispose();
     _registerData.dispose();
+    _forgotPasswordData.dispose();
     _scannerController.dispose();
     super.dispose();
   }
 
   void _toggleMode() {
     setState(() {
-      _mode = _mode == AuthMode.login ? AuthMode.signUp : AuthMode.login;
+      if (_mode == AuthMode.login) {
+        _mode = AuthMode.signUp;
+      } else {
+        _mode = AuthMode.login;
+      }
       _showScanner = false;
     });
   }
@@ -88,7 +94,7 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
     } catch (e) {
       if (!mounted) return;
       scaffoldMsg.showSnackBar(
-        SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))),
+        SnackBar(content: AppText(e.toString().replaceAll('Exception: ', ''))),
       );
     } finally {
       if (mounted) {
@@ -98,13 +104,7 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
   }
 
   Future<void> _handleRegisterNext() async {
-    _registerData.validateAll();
-    if (!_registerData.isValid) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fix the errors in the form')),
-      );
-      return;
-    }
+    // Validation is now handled inside RegisterForm before this is called
     // Snap to scanner view
     FocusScope.of(context).unfocus(); // Dismiss the keyboard to prevent RenderFlex overflow
     setState(() {
@@ -118,16 +118,15 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
 
     final scaffoldMsg = ScaffoldMessenger.of(context);
     
-    if (qrKey.trim().isEmpty) {
+    if (qrKey.trim().isEmpty || !qrKey.contains('|')) {
       _scannerController.stop();
-      setState(() => _showScanner = false);
+      // DO NOT collapse the scanner view
       final snackBar = scaffoldMsg.showSnackBar(
-        const SnackBar(content: Text('Invalid QR Code format')),
+        SnackBar(content: AppText('Invalid QR Code format')),
       );
       await snackBar.closed;
       if (mounted) {
         _scannerController.start();
-        setState(() => _showScanner = true);
       }
       return;
     }
@@ -145,7 +144,7 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
       
       if (!mounted) return;
       scaffoldMsg.showSnackBar(
-        const SnackBar(content: Text('Registration successful!')),
+        SnackBar(content: AppText('Registration successful!')),
       );
       final nav = Navigator.of(context);
       nav.pop(); // Dismiss bottom sheet
@@ -155,7 +154,7 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
     } catch (e) {
       if (!mounted) return;
       final snackBar = scaffoldMsg.showSnackBar(
-        SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))),
+        SnackBar(content: AppText(e.toString().replaceAll('Exception: ', ''))),
       );
       await snackBar.closed;
       if (mounted) {
@@ -203,14 +202,26 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
                         onLogin: _handleLogin,
                         onToggleMode: _toggleMode,
                         onClose: () => Navigator.of(context).pop(),
+                        onForgotPassword: () => setState(() => _mode = AuthMode.forgotPassword),
                       )
-                    : RegisterForm(
-                        formData: _registerData,
-                        isLoading: _isLoading,
-                        onNext: _handleRegisterNext,
-                        onToggleMode: _toggleMode,
-                        onClose: () => Navigator.of(context).pop(),
-                      )),
+                    : (_mode == AuthMode.signUp
+                        ? RegisterForm(
+                            formData: _registerData,
+                            isLoading: _isLoading,
+                            onNext: _handleRegisterNext,
+                            onToggleMode: _toggleMode,
+                            onClose: () => Navigator.of(context).pop(),
+                          )
+                        : ForgotPasswordForm(
+                            formData: _forgotPasswordData,
+                            isLoading: _isLoading,
+                            onResetPassword: () {
+                              // Optional: handle forgot password
+                              setState(() => _mode = AuthMode.login);
+                            },
+                            onBackToLogin: () => setState(() => _mode = AuthMode.login),
+                            onClose: () => Navigator.of(context).pop(),
+                          ))),
           ),
         ),
       ),

@@ -11,6 +11,7 @@ import 'package:vac_dashboard_app/asset/color_tokens.dart';
 import 'package:vac_dashboard_app/network/api_interceptor.dart';
 import 'package:vac_dashboard_app/screens/welcomeScreens.dart';
 import 'package:vac_dashboard_app/db/database_helper.dart';
+import 'package:vac_dashboard_app/component/text.dart';
 
 class HistoryScreens extends StatefulWidget {
   const HistoryScreens({super.key});
@@ -65,7 +66,7 @@ class _HistoryScreensState extends State<HistoryScreens> {
         if (!mounted) return;
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Gagal menyimpan data: $e')));
+        ).showSnackBar(SnackBar(content: AppText('Gagal menyimpan data: $e')));
       }
     });
   }
@@ -117,7 +118,7 @@ class _HistoryScreensState extends State<HistoryScreens> {
       if (!mounted) return;
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('Gagal memuat data: $e')));
+      ).showSnackBar(SnackBar(content: AppText('Gagal memuat data: $e')));
     }
   }
 

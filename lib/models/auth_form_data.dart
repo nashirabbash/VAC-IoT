@@ -4,9 +4,23 @@ class LoginFormData {
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   
+  bool rememberMe = false;
+
   void dispose() {
     usernameController.dispose();
     passwordController.dispose();
+  }
+}
+
+class ForgotPasswordFormData {
+  final TextEditingController usernameController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController confirmPasswordController = TextEditingController();
+
+  void dispose() {
+    usernameController.dispose();
+    passwordController.dispose();
+    confirmPasswordController.dispose();
   }
 }
 

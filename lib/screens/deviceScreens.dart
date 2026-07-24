@@ -24,7 +24,7 @@ class DeviceScreen extends StatelessWidget {
         // Show a brief disconnection simulation
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Disconnecting device...'),
+            content: AppText('Disconnecting device...'),
             duration: Duration(seconds: 1),
           ),
         );
@@ -136,7 +136,7 @@ class DeviceScreen extends StatelessWidget {
                     showChevron: true,
                     onTap: () {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Opening device logs...')),
+                        const SnackBar(content: AppText('Opening device logs...')),
                       );
                     },
                   ),

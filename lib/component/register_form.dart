@@ -30,6 +30,7 @@ class RegisterForm extends StatefulWidget {
 class _RegisterFormState extends State<RegisterForm> {
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
+  bool _hasSubmitted = false;
 
   @override
   void initState() {
@@ -41,7 +42,7 @@ class _RegisterFormState extends State<RegisterForm> {
   }
 
   void _rebuild() {
-    if (mounted) {
+    if (mounted && _hasSubmitted) {
       setState(() {
         widget.formData.validateAll();
       });
@@ -171,7 +172,19 @@ class _RegisterFormState extends State<RegisterForm> {
                         label: 'Next',
                         size: ButtonSize.large,
                         variant: ButtonVariant.primary,
-                        onPressed: widget.onNext,
+                        onPressed: () {
+                          setState(() {
+                            _hasSubmitted = true;
+                            widget.formData.validateAll();
+                          });
+                          if (widget.formData.isValid) {
+                            widget.onNext();
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: AppText('Please fix the errors in the form')),
+                            );
+                          }
+                        },
                       ),
               ),
               const SizedBox(height: 16),
