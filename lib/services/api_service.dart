@@ -84,10 +84,7 @@ class ApiService {
       await _authRepository.saveToken(token as String);
     }
     if (dto.qrKey != null) {
-      final creds = DeviceCredentials.tryParseQrKey(dto.qrKey!);
-      if (creds != null) {
-        await _authRepository.saveDeviceConfig(creds);
-      }
+      await _saveDeviceCredentials(dto.qrKey!);
     }
   }
 
@@ -110,10 +107,7 @@ class ApiService {
       await _authRepository.saveToken(newToken as String);
     }
 
-    final creds = DeviceCredentials.tryParseQrKey(qrKey);
-    if (creds != null) {
-      await _authRepository.saveDeviceConfig(creds);
-    }
+    await _saveDeviceCredentials(qrKey);
   }
 
   Future<void> logout() async {
@@ -126,6 +120,13 @@ class ApiService {
       throw ApiException('Failed to logout');
     }
     await _authRepository.clearToken();
+  }
+
+  Future<void> _saveDeviceCredentials(String qrKey) async {
+    final creds = DeviceCredentials.tryParseQrKey(qrKey);
+    if (creds != null) {
+      await _authRepository.saveDeviceConfig(creds);
+    }
   }
 }
 

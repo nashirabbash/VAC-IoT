@@ -8,6 +8,7 @@ class BleService {
   static const _serviceUuid = '4fafc201-1fb5-459e-8fcc-c5c9c331914b';
   static const _syncUuid = 'beb5483e-36e1-4688-b7f5-ea07361b26a8';
   static const _therapyUuid = '6e400003-b5a3-f393-e0a9-e50e24dcca9e';
+  static const _authUuid = '8f4c0228-4447-4cf0-8a7c-dc9f4007f35a';
 
   final _controller = StreamController<Map<String, dynamic>>.broadcast();
   Stream<Map<String, dynamic>> get onTherapy => _controller.stream;
@@ -34,8 +35,9 @@ class BleService {
   }
 
   Future<void> startScan() async {
-    final deviceId = await _authRepository.getDeviceId();
-    if (deviceId == null || deviceId.isEmpty) return;
+    final creds = await _authRepository.getDeviceCredentials();
+    if (creds == null) return;
+    final deviceId = creds.deviceId;
 
     if (await FlutterBluePlus.isSupported == false) return;
 
@@ -109,7 +111,8 @@ class BleService {
       }
     });
 
-    final authPin = await _authRepository.getAuthPin();
+    final creds = await _authRepository.getDeviceCredentials();
+    final authPin = creds?.authPin;
 
     final services = await device.discoverServices();
     for (final svc in services) {
@@ -135,6 +138,10 @@ class BleService {
               _controller.add(data);
             } catch (_) {}
           });
+        }
+        if (uuid == _authUuid && authPin != null) {
+          // Write AUTH_PIN within the 5s window
+          await char.write(utf8.encode(authPin), withoutResponse: false);
         }
       }
       break;

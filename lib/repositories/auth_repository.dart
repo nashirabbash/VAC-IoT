@@ -41,12 +41,13 @@ class AuthRepository {
     await _storage.write(key: _authPinKey, value: credentials.authPin);
   }
 
-  Future<String?> getDeviceId() async {
-    return await _storage.read(key: _deviceIdKey);
-  }
-
-  Future<String?> getAuthPin() async {
-    return await _storage.read(key: _authPinKey);
+  Future<DeviceCredentials?> getDeviceCredentials() async {
+    final deviceId = await _storage.read(key: _deviceIdKey);
+    final authPin = await _storage.read(key: _authPinKey);
+    if (deviceId != null && authPin != null) {
+      return DeviceCredentials(deviceId: deviceId, authPin: authPin);
+    }
+    return null;
   }
 
   Future<Map<String, dynamic>?> getDecodedToken() async {
