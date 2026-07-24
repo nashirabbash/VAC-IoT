@@ -27,6 +27,7 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _hasBoundDevice = false;
   bool _isLoading = true;
   bool _isBleConnected = false;
+  bool _hasConnectionDropped = false;
   late final StreamSubscription<bool> _connectionSub;
   late final AuthRepository _authRepository = widget.authRepository ?? AuthRepository();
   late final ApiService _apiService = widget.apiService ?? apiService;
@@ -39,6 +40,12 @@ class _HomeScreenState extends State<HomeScreen> {
     _connectionSub = bleService.onConnectionStateChanged.listen((connected) {
       if (mounted) {
         setState(() {
+          if (_isBleConnected && !connected) {
+            _hasConnectionDropped = true;
+          }
+          if (connected) {
+            _hasConnectionDropped = false;
+          }
           _isBleConnected = connected;
         });
       }
@@ -224,7 +231,7 @@ class _HomeScreenState extends State<HomeScreen> {
               else if (_isBleConnected)
                 Icon(Icons.bluetooth_connected, size: 160, color: context.colors.accentsBlue)
               else
-                const Icon(Icons.bluetooth_disabled, size: 160, color: Colors.grey),
+                Icon(Icons.bluetooth_disabled, size: 160, color: context.colors.graysGray),
               const SizedBox(height: 24),
 
               if (_isLoading)
@@ -232,7 +239,7 @@ class _HomeScreenState extends State<HomeScreen> {
               else ...[
                 AppText(
                   _hasBoundDevice 
-                      ? (_isBleConnected ? 'Terkoneksi' : 'Mencari Perangkat...') 
+                      ? (_isBleConnected ? 'Terkoneksi' : (_hasConnectionDropped ? 'Gagal Connect' : 'Mencari Perangkat...')) 
                       : 'Belum Terhubung',
                   type: AppTextType.headline,
                   color: AppTextColor.secondary,
