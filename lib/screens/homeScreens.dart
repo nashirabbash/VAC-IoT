@@ -258,22 +258,26 @@ class _HomeScreenState extends State<HomeScreen> {
                 SizedBox(
                   width: double.infinity,
                   child: AppButton(
-                    label: _hasBoundDevice ? 'Lihat Perangkat' : 'Pindai',
+                    label: _isBleConnected
+                        ? 'Lihat Perangkat'
+                        : (_hasBoundDevice ? 'Hubungkan Kembali' : 'Pindai'),
                     size: ButtonSize.large,
                     variant: ButtonVariant.primary,
                     onPressed: () {
-                      if (_hasBoundDevice) {
+                      if (_isBleConnected) {
                         Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (context) => const DeviceScreen(),
                           ),
                         );
+                      } else if (_hasBoundDevice) {
+                        bleService.startScan(force: true);
                       } else {
                         Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (context) => const ScanScreen(),
                           ),
-                        );
+                        ).then((_) => _checkDeviceBinding());
                       }
                     },
                   ),

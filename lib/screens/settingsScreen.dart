@@ -34,7 +34,7 @@ class SettingsScreen extends StatelessWidget {
                       leading: const Icon(Icons.dark_mode_rounded),
                       trailing: Switch(
                         value: currentMode == ThemeMode.dark,
-                        activeColor: context.colors.accentsBlue,
+                        activeThumbColor: context.colors.accentsBlue,
                         onChanged: (isDark) {
                           appThemeMode.value = isDark
                               ? ThemeMode.dark

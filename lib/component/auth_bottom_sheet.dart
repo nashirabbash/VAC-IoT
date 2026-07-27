@@ -2,11 +2,8 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:vac_dashboard_app/asset/color_tokens.dart';
-import 'package:vac_dashboard_app/component/bottom_sheet_header.dart';
-import 'package:vac_dashboard_app/component/button.dart';
 import 'package:vac_dashboard_app/component/text.dart';
 import 'package:vac_dashboard_app/screens/homeScreens.dart';
-import 'package:vac_dashboard_app/screens/deviceScreens.dart';
 import 'package:vac_dashboard_app/screens/scanScreens.dart';
 import 'package:vac_dashboard_app/component/header.dart';
 import 'package:vac_dashboard_app/services/api_service.dart';
@@ -179,12 +176,9 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> with TickerProviderSt
       final nav = Navigator.of(context);
       nav.pop(); // Dismiss bottom sheet
       
-      // Navigate to HomeScreen as the base, then push DeviceScreen on top
+      // Navigate to HomeScreen as the base so the user sees the connection process
       nav.pushReplacement(
         MaterialPageRoute(builder: (context) => const HomeScreen()),
-      );
-      nav.push(
-        MaterialPageRoute(builder: (context) => const DeviceScreen()),
       );
     } catch (e) {
       if (!mounted) return;

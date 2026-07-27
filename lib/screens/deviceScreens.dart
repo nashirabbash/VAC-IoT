@@ -6,10 +6,21 @@ import 'package:vac_dashboard_app/component/alert_dialog.dart';
 import 'package:vac_dashboard_app/component/button.dart';
 import 'package:vac_dashboard_app/screens/historyScreens.dart';
 import 'package:vac_dashboard_app/screens/homeScreens.dart';
-import 'package:vac_dashboard_app/screens/scanScreens.dart';
 import 'package:vac_dashboard_app/asset/color_tokens.dart';
+import 'package:vac_dashboard_app/screens/wifiScreens.dart';
+import 'package:vac_dashboard_app/services/ble_service.dart';
+
+import 'dart:math';
 
 class DeviceScreen extends StatelessWidget {
+  static String _generateRandomAlias() {
+    const chars =
+        'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    final random = Random();
+    return 'VAC-${List.generate(6, (index) => chars[random.nextInt(chars.length)]).join()}';
+  }
+
+  static final String _randomName = _generateRandomAlias();
   const DeviceScreen({super.key});
 
   void _showDisconnectConfirmation(BuildContext context) {
@@ -20,6 +31,9 @@ class DeviceScreen extends StatelessWidget {
       primaryButtonLabel: 'Disconnect',
       onPrimaryPressed: () {
         Navigator.of(context).pop(); // Close dialog
+
+        // Trigger manual BLE disconnection
+        bleService.disconnect();
 
         // Show a brief disconnection simulation
         ScaffoldMessenger.of(context).showSnackBar(
@@ -108,10 +122,7 @@ class DeviceScreen extends StatelessWidget {
               AppGroupedList(
                 borderRadius: 26,
                 children: [
-                  const AppGroupedListTile(
-                    title: 'Device 01',
-                    detail: 'Online',
-                  ),
+                  AppGroupedListTile(title: _randomName, detail: 'Online'),
                 ],
               ),
 
@@ -131,23 +142,19 @@ class DeviceScreen extends StatelessWidget {
                       );
                     },
                   ),
-                  AppGroupedListTile(
-                    title: 'Device log',
-                    showChevron: true,
-                    onTap: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: AppText('Opening device logs...')),
-                      );
-                    },
-                  ),
-                  AppGroupedListTile(
-                    title: 'Change Device',
-                    showChevron: true,
-                    onTap: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => const ScanScreen(),
-                        ),
+                  StreamBuilder<String>(
+                    stream: bleService.onWifiStatusChanged,
+                    initialData: bleService.wifiStatus,
+                    builder: (context, snapshot) {
+                      final status = snapshot.data ?? bleService.wifiStatus;
+                      final isConnected = status.toUpperCase() == 'CONNECTED';
+                      return AppGroupedListTile(
+                        title: 'Connect Wifi',
+                        detail: isConnected ? 'Connected' : 'Not Connected',
+                        showChevron: true,
+                        onTap: () {
+                          WifiBottomSheet.show(context);
+                        },
                       );
                     },
                   ),

@@ -4,7 +4,6 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:vac_dashboard_app/component/button.dart';
 import 'package:vac_dashboard_app/component/text.dart';
 import 'package:vac_dashboard_app/component/header.dart';
-import 'package:vac_dashboard_app/screens/deviceScreens.dart';
 import 'package:vac_dashboard_app/asset/color_tokens.dart';
 import 'package:vac_dashboard_app/services/api_service.dart';
 
@@ -114,9 +113,7 @@ class _ScanScreenState extends State<ScanScreen>
       await apiService.bindDevice(qrKey);
       if (mounted) {
         Navigator.of(context).pop(); // Dismiss connecting dialog
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const DeviceScreen()),
-        );
+        Navigator.of(context).pop(true); // Pop ScanScreen to return to HomeScreen
       }
     } catch (e) {
       if (mounted) {
