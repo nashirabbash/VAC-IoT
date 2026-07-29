@@ -71,6 +71,7 @@ class ApiService {
     final data = (body['data'] as Map<String, dynamic>?) ?? body;
     final token = (data['token'] ?? body['token']) as String;
     await _authRepository.saveToken(token);
+    await _authRepository.saveUsername(username);
 
     // Extract device credentials if returned in login response
     final user = data['user'] as Map<String, dynamic>?;
@@ -98,6 +99,7 @@ class ApiService {
     if (token != null) {
       await _authRepository.saveToken(token as String);
     }
+    await _authRepository.saveUsername(dto.username);
     if (dto.qrKey != null) {
       await _saveDeviceCredentials(dto.qrKey!);
     }

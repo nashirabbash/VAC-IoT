@@ -24,4 +24,21 @@ void main() {
       expect(decoded, isNull);
     });
   });
+
+  group('AuthRepository Username & Initials', () {
+    test('saveUsername and getUsername persist value', () async {
+      final repo = AuthRepository();
+      await repo.saveUsername('nashirabbash');
+      final username = await repo.getUsername();
+      expect(username, equals('nashirabbash'));
+    });
+
+    test('getInitials formats username correctly', () {
+      expect(AuthRepository.getInitials('john doe'), equals('JD'));
+      expect(AuthRepository.getInitials('john_doe'), equals('JD'));
+      expect(AuthRepository.getInitials('nashirabbash'), equals('N'));
+      expect(AuthRepository.getInitials(''), equals('U'));
+      expect(AuthRepository.getInitials(null), equals('U'));
+    });
+  });
 }
