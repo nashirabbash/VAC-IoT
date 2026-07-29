@@ -83,4 +83,30 @@ void main() {
       expect(session.duration, '30 detik');
     });
   });
+
+  group('TherapySession.parsedDateTime', () {
+    test('parses ISO string directly', () {
+      const session = TherapySession(
+        sessionDate: '2026-07-29T11:04:00.000',
+        title: 'Kontinyu 125 mmHg',
+        date: '29 Jul, 11:04',
+        mode: 'Kontinyu',
+        duration: '45 min',
+      );
+
+      expect(session.parsedDateTime, DateTime(2026, 7, 29, 11, 4));
+    });
+
+    test('parses date and time string fallback', () {
+      const session = TherapySession(
+        sessionDate: '2026-07-29',
+        title: 'Kontinyu 125 mmHg',
+        date: '29 Jul, 11:04',
+        mode: 'Kontinyu',
+        duration: '45 min',
+      );
+
+      expect(session.parsedDateTime, DateTime(2026, 7, 29, 11, 4));
+    });
+  });
 }
