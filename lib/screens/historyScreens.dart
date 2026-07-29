@@ -57,7 +57,6 @@ class _HistoryScreensState extends State<HistoryScreens> {
   void initState() {
     super.initState();
     _syncAndLoadData();
-    _ble.startScan();
     _therapySub = _ble.onTherapy.listen((payload) async {
       try {
         await TherapyReceiver.save(payload);

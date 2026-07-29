@@ -9,6 +9,7 @@ class HistoryCard extends StatefulWidget {
     required this.date,
     required this.mode,
     required this.duration,
+    this.pressure,
     super.key,
   });
 
@@ -16,6 +17,7 @@ class HistoryCard extends StatefulWidget {
   final String date;
   final String mode;
   final String duration;
+  final String? pressure;
 
   @override
   State<HistoryCard> createState() => _HistoryCardState();
@@ -24,6 +26,11 @@ class HistoryCard extends StatefulWidget {
 class _HistoryCardState extends State<HistoryCard> {
   @override
   Widget build(BuildContext context) {
+    final displayDuration =
+        (widget.pressure != null && widget.pressure!.isNotEmpty)
+            ? '${widget.duration} • ${widget.pressure}'
+            : widget.duration;
+
     return InkWell(
       hoverColor: Colors.transparent,
       focusColor: Colors.transparent,
@@ -35,7 +42,7 @@ class _HistoryCardState extends State<HistoryCard> {
         title: widget.title,
         date: widget.date,
         mode: widget.mode,
-        duration: widget.duration,
+        duration: displayDuration,
       ),
       child: Card(
         shadowColor: Colors.transparent,
@@ -53,8 +60,21 @@ class _HistoryCardState extends State<HistoryCard> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(widget.title, style: AppTextStyles.cardTitle),
+                      const SizedBox(height: 2),
                       Text(widget.date, style: AppTextStyles.bodyMedium),
-                      Text(widget.duration, style: AppTextStyles.bodySemiBold),
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          Text(widget.duration, style: AppTextStyles.bodySemiBold),
+                          if (widget.pressure != null &&
+                              widget.pressure!.isNotEmpty) ...[
+                            const SizedBox(width: 8),
+                            Text('•', style: AppTextStyles.bodyMedium),
+                            const SizedBox(width: 8),
+                            Text(widget.pressure!, style: AppTextStyles.bodySemiBold),
+                          ],
+                        ],
+                      ),
                     ],
                   ),
                   ModeBadge(mode: widget.mode),

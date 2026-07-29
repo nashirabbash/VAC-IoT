@@ -36,16 +36,33 @@ class _SectionHistoryState extends State<SectionHistory> {
           ],
         ),
         ...widget.items.asMap().entries.map(
-          (e) => _TimelineItem(
-            isFirst: e.key == 0,
-            isLast: e.key == widget.items.length - 1,
-            child: HistoryCard(
-              title: e.value['title'] ?? '',
-              date: e.value['date'] ?? '',
-              mode: e.value['mode'] ?? '',
-              duration: e.value['duration'] ?? '',
-            ),
-          ),
+          (e) {
+            final index = e.key + 1;
+            final item = e.value;
+            final rawTitle = item['title'] ?? '';
+
+            // Extract pressure (e.g. "125 mmHg") if present in title or duration
+            String pressure = item['pressure'] ?? '';
+            if (pressure.isEmpty) {
+              final match = RegExp(r'(\d+\s*mmHg)').firstMatch(rawTitle) ??
+                  RegExp(r'(\d+\s*mmHg)').firstMatch(item['duration'] ?? '');
+              if (match != null) {
+                pressure = match.group(1) ?? '';
+              }
+            }
+
+            return _TimelineItem(
+              isFirst: e.key == 0,
+              isLast: e.key == widget.items.length - 1,
+              child: HistoryCard(
+                title: 'Terapi $index',
+                date: item['date'] ?? '',
+                mode: item['mode'] ?? '',
+                duration: item['duration'] ?? '',
+                pressure: pressure,
+              ),
+            );
+          },
         ),
       ],
     );

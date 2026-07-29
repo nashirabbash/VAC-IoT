@@ -15,7 +15,7 @@ class ApiException implements Exception {
 }
 
 class ApiService {
-  static const _baseUrl = 'http://192.168.1.74:3000/api';
+  static const _baseUrl = 'https://be-vac-production.up.railway.app/api';
 
   final http.Client _client;
   final AuthRepository _authRepository;
@@ -48,9 +48,13 @@ class ApiService {
       body: jsonEncode(payload),
       headers: {'Content-Type': 'application/json'},
     );
-    if (res.statusCode != 200) throw Exception('Failed to save session');
+    if (res.statusCode != 200 && res.statusCode != 201) {
+      throw Exception('Failed to save session: ${res.statusCode} ${res.body}');
+    }
     final body = jsonDecode(res.body) as Map<String, dynamic>;
-    return TherapySession.fromJson(body['data'] as Map<String, dynamic>);
+    // BE returns { status: "ok", data: { ... } }
+    final data = (body['data'] ?? body) as Map<String, dynamic>;
+    return TherapySession.fromJson(data);
   }
 
   Future<void> login(String username, String password) async {

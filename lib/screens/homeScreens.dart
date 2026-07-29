@@ -10,6 +10,8 @@ import 'package:vac_dashboard_app/asset/color_tokens.dart';
 import 'package:vac_dashboard_app/repositories/auth_repository.dart';
 import 'package:vac_dashboard_app/services/api_service.dart';
 import 'package:vac_dashboard_app/services/ble_service.dart';
+import 'package:vac_dashboard_app/services/ota_banner_service.dart';
+import 'package:vac_dashboard_app/services/therapy_sync_service.dart';
 import 'package:vac_dashboard_app/component/menu.dart';
 import 'dart:async';
 
@@ -35,6 +37,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    TherapySyncService.instance.syncPendingSessions();
     _checkDeviceBinding();
     _isBleConnected = bleService.isConnected;
     _connectionSub = bleService.onConnectionStateChanged.listen((connected) {
@@ -148,22 +151,21 @@ class _HomeScreenState extends State<HomeScreen> {
                       leadingIcon: Icons.logout_rounded,
                       isDestructive: true,
                       onPressed: () async {
-                        Navigator.of(context).pop(); // Dismiss menu
+                        Navigator.of(context).pop();
+                        bleService.disconnect();
+                        OtaBannerService.instance.disable();
                         try {
                           await _apiService.logout();
-                          if (context.mounted) {
-                            Navigator.of(context).pushReplacement(
-                              MaterialPageRoute(
-                                builder: (context) => const WelcomeScreens(),
-                              ),
-                            );
-                          }
-                        } catch (e) {
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: AppText(e is ApiException ? e.message : 'Log out failed')),
-                            );
-                          }
+                        } catch (_) {
+                          // BE logout failing should not block local cleanup
+                        }
+                        if (context.mounted) {
+                          Navigator.of(context).pushAndRemoveUntil(
+                            MaterialPageRoute(
+                              builder: (_) => const WelcomeScreens(),
+                            ),
+                            (_) => false,
+                          );
                         }
                       },
                     ),

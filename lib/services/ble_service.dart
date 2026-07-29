@@ -3,7 +3,9 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import 'package:vac_dashboard_app/models/therapy_session.dart';
 import 'package:vac_dashboard_app/repositories/auth_repository.dart';
+import 'package:vac_dashboard_app/services/therapy_receiver.dart';
 
 class BleService {
   static const _serviceUuid = '4fafc201-1fb5-459e-8fcc-c5c9c331914b';
@@ -31,6 +33,10 @@ class BleService {
   StreamSubscription? _scanSub;
   StreamSubscription? _isScanningSub;
   BluetoothDevice? _device;
+  Timer? _rssiTimer;
+  int _lowRssiCount = 0;
+  static const int rssiFarThreshold = -85; // dBm (~8-10 meters far distance)
+
   bool _connecting = false;
   int? _lastStart;
   bool _isConnected = false;
@@ -43,6 +49,27 @@ class BleService {
 
   bool get isConnected => _isConnected;
 
+  // Request BT permissions and turn on adapter.
+  // Call once at app startup (before runApp) so the system dialog appears
+  // during the native splash, not during QR scan.
+  static Future<void> initBluetooth() async {
+    if (await FlutterBluePlus.isSupported == false) return;
+
+    // flutter_blue_plus triggers the OS permission dialog automatically on
+    // first adapter state access on Android 12+ / iOS.
+    await FlutterBluePlus.adapterState.first;
+
+    // Android only: ask the user to enable BT if it's off.
+    final state = await FlutterBluePlus.adapterState.first;
+    if (state != BluetoothAdapterState.on) {
+      try {
+        await FlutterBluePlus.turnOn();
+      } catch (_) {
+        // User declined or platform doesn't support turnOn (iOS) — fine.
+      }
+    }
+  }
+
   void _updateConnectionState(bool connected) {
     if (_isConnected != connected) {
       _isConnected = connected;
@@ -51,6 +78,7 @@ class BleService {
   }
 
   Future<void> startScan({bool force = false}) async {
+    if (isConnected && !force) return;
     if (isExplicitlyDisconnected && !force) return;
     if (force) {
       isExplicitlyDisconnected = false;
@@ -75,7 +103,9 @@ class BleService {
       return;
     }
 
-    _updateConnectionState(false);
+    if (!isConnected) {
+      _updateConnectionState(false);
+    }
     _scanSub?.cancel();
     _isScanningSub?.cancel();
 
@@ -125,9 +155,11 @@ class BleService {
     }
     _connecting = false;
     _updateConnectionState(true);
+    _startRssiMonitoring(device);
 
     device.connectionState.listen((state) {
       if (state == BluetoothConnectionState.disconnected) {
+        _stopRssiMonitoring();
         _device = null;
         _rxChar = null;
         _txChar = null;
@@ -219,6 +251,23 @@ class BleService {
             _connectedSsid = data['ssid']?.toString();
           }
         }
+        final type = data['type'] as String?;
+        final start = (data['start'] as num?)?.toInt();
+        if (type == 'therapy_event' || type == 'therapy' || start != null) {
+          if (start != null && start != _lastStart) {
+            _lastStart = start;
+            TherapyReceiver.save(data).catchError((e) {
+              debugPrint('Global therapy receiver save error: $e');
+              return const TherapySession(
+                sessionDate: '',
+                title: '',
+                date: '',
+                mode: '',
+                duration: '',
+              );
+            });
+          }
+        }
         _messageController.add(data);
       }
     } catch (_) {}
@@ -256,13 +305,46 @@ class BleService {
     });
   }
 
+  void _startRssiMonitoring(BluetoothDevice device) {
+    _stopRssiMonitoring();
+    _lowRssiCount = 0;
+    _rssiTimer = Timer.periodic(const Duration(seconds: 4), (timer) async {
+      if (!_isConnected || _device == null) {
+        timer.cancel();
+        return;
+      }
+      try {
+        final rssi = await device.readRssi();
+        if (rssi < rssiFarThreshold) {
+          _lowRssiCount++;
+          debugPrint('Weak RSSI ($rssi dBm) detected ($_lowRssiCount/3)...');
+          if (_lowRssiCount >= 3) {
+            debugPrint('Auto-disconnecting BLE due to far distance (RSSI: $rssi dBm)');
+            _stopRssiMonitoring();
+            disconnect();
+          }
+        } else {
+          _lowRssiCount = 0;
+        }
+      } catch (_) {}
+    });
+  }
+
+  void _stopRssiMonitoring() {
+    _rssiTimer?.cancel();
+    _rssiTimer = null;
+    _lowRssiCount = 0;
+  }
+
   void disconnect() {
+    _stopRssiMonitoring();
     _shouldAutoReconnect = false;
     isExplicitlyDisconnected = true;
     _device?.disconnect();
   }
 
   void dispose() {
+    _stopRssiMonitoring();
     _scanSub?.cancel();
     _isScanningSub?.cancel();
     _txCharSub?.cancel();
