@@ -30,16 +30,33 @@ class _DeviceScreenState extends State<DeviceScreen> {
   static final String _randomName = _generateRandomAlias();
   StreamSubscription<bool>? _connSub;
 
+  void _fetchWifiStatus() {
+    unawaited(
+      bleService.readWifiStatus().catchError((e) {
+        debugPrint('Error reading Wi-Fi status: $e');
+        return bleService.wifiStatus;
+      }),
+    );
+  }
+
   @override
   void initState() {
     super.initState();
-    // Automatically navigate back to HomeScreen if BLE disconnects
+
+    // Fetch Wi-Fi status jika BLE sudah terhubung
+    if (bleService.isConnected) {
+      _fetchWifiStatus();
+    }
+
+    // Listen koneksi BLE: Navigasi jika terputus, atau auto-fetch Wi-Fi jika reconnect
     _connSub = bleService.onConnectionStateChanged.listen((connected) {
       if (!connected && mounted) {
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(builder: (context) => const HomeScreen()),
           (route) => false,
         );
+      } else if (connected && mounted) {
+        _fetchWifiStatus();
       }
     });
   }
