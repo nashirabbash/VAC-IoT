@@ -3,18 +3,23 @@ import 'package:vac_dashboard_app/component/header.dart';
 import 'package:vac_dashboard_app/component/grouped_list.dart';
 import 'package:vac_dashboard_app/component/text.dart';
 import 'package:vac_dashboard_app/main.dart';
-import 'package:vac_dashboard_app/repositories/auth_repository.dart';
+import 'package:vac_dashboard_app/repositories/settings_repository.dart';
 
 class SettingsScreen extends StatelessWidget {
-  const SettingsScreen({super.key});
+  final SettingsRepository _settingsRepository;
 
-  void _updateThemeMode(ThemeMode mode) {
+  const SettingsScreen({
+    super.key,
+    SettingsRepository? settingsRepository,
+  }) : _settingsRepository = settingsRepository ?? const SettingsRepository();
+
+  Future<void> _updateThemeMode(ThemeMode mode) async {
     appThemeMode.value = mode;
-    final authRepo = AuthRepository();
-    String value = 'system';
-    if (mode == ThemeMode.light) value = 'light';
-    if (mode == ThemeMode.dark) value = 'dark';
-    authRepo.saveThemeMode(value);
+    try {
+      await _settingsRepository.saveThemeMode(mode);
+    } catch (e) {
+      debugPrint('Failed to save theme mode: $e');
+    }
   }
 
   @override

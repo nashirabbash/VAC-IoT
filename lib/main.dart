@@ -12,6 +12,7 @@ import 'package:vac_dashboard_app/screens/welcomeScreens.dart';
 import 'package:vac_dashboard_app/screens/homeScreens.dart';
 import 'package:vac_dashboard_app/repositories/auth_repository.dart';
 import 'package:vac_dashboard_app/services/ble_service.dart';
+import 'package:vac_dashboard_app/repositories/settings_repository.dart';
 import 'package:vac_dashboard_app/services/ota_banner_service.dart';
 
 final ValueNotifier<ThemeMode> appThemeMode = ValueNotifier(ThemeMode.system);
@@ -22,17 +23,11 @@ Future<void> main() async {
   // Request BT permissions + turn on adapter during native splash
   await BleService.initBluetooth();
   final authRepo = AuthRepository();
+  final settingsRepo = SettingsRepository();
   final token = await authRepo.getToken();
   
   // Load saved theme mode preference (defaults to system / auto)
-  final savedTheme = await authRepo.getThemeMode();
-  if (savedTheme == 'light') {
-    appThemeMode.value = ThemeMode.light;
-  } else if (savedTheme == 'dark') {
-    appThemeMode.value = ThemeMode.dark;
-  } else {
-    appThemeMode.value = ThemeMode.system;
-  }
+  appThemeMode.value = await settingsRepo.getThemeMode();
 
   runApp(MainApp(initialToken: token));
 }
