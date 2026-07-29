@@ -45,9 +45,8 @@ class TherapyReceiver {
     };
   }
 
-  /// "2026-07-29"
-  static String _toDateKey(DateTime dt) =>
-      '${dt.year}-${_pad(dt.month)}-${_pad(dt.day)}';
+  /// ISO-8601 timestamp string e.g. "2026-07-29T09:08:00.000"
+  static String _toDateKey(DateTime dt) => dt.toIso8601String();
 
   /// "29 Jul, 09:08"
   static String _toDisplayDate(DateTime dt) {

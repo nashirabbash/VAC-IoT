@@ -126,14 +126,66 @@ class _HistoryScreensState extends State<HistoryScreens> {
       _sessions.map((s) => s.sessionDate.substring(0, 4)).toSet().toList()
         ..sort((a, b) => b.compareTo(a));
 
+  static DateTime _parseTherapyDateTime(TherapySession s) {
+    try {
+      final parsed = DateTime.parse(s.sessionDate);
+      if (s.sessionDate.contains('T') || s.sessionDate.contains(':')) {
+        return parsed;
+      }
+    } catch (_) {}
+
+    try {
+      final year =
+          int.tryParse(s.sessionDate.substring(0, 4)) ?? DateTime.now().year;
+      final parts = s.date.split(',');
+      final dateParts = parts[0].trim().split(' ');
+      final day = int.parse(dateParts[0]);
+      final monthStr = dateParts[1];
+
+      int month = _parseMonth(monthStr);
+
+      int hour = 0;
+      int minute = 0;
+      if (parts.length > 1) {
+        final timeParts = parts[1].trim().split(':');
+        hour = int.parse(timeParts[0]);
+        minute = int.parse(timeParts[1]);
+      }
+
+      return DateTime(year, month, day, hour, minute);
+    } catch (_) {
+      return DateTime.tryParse(s.sessionDate) ?? DateTime(2000);
+    }
+  }
+
+  static int _parseMonth(String name) {
+    final m = name.toLowerCase();
+    if (m.startsWith('jan')) return 1;
+    if (m.startsWith('feb')) return 2;
+    if (m.startsWith('mar')) return 3;
+    if (m.startsWith('apr')) return 4;
+    if (m.startsWith('mei') || m.startsWith('may')) return 5;
+    if (m.startsWith('jun')) return 6;
+    if (m.startsWith('jul')) return 7;
+    if (m.startsWith('agu') || m.startsWith('aug')) return 8;
+    if (m.startsWith('sep')) return 9;
+    if (m.startsWith('okt') || m.startsWith('oct')) return 10;
+    if (m.startsWith('nov')) return 11;
+    if (m.startsWith('des') || m.startsWith('dec')) return 12;
+    return 1;
+  }
+
   List<Map<String, dynamic>> get _sections {
     if (_selectedYear == null) return [];
 
-    // 1. Sort chronologically ascending from oldest to newest with id tie-breaker
+    // 1. Sort all sessions chronologically ASCENDING (oldest -> newest) for "Terapi N" numbering
     final sortedAsc = List<TherapySession>.from(_sessions)
       ..sort((a, b) {
-        final cmp = a.sessionDate.compareTo(b.sessionDate);
-        return cmp != 0 ? cmp : (a.id ?? 0).compareTo(b.id ?? 0);
+        final dtA = _parseTherapyDateTime(a);
+        final dtB = _parseTherapyDateTime(b);
+        final cmp = dtA.compareTo(dtB);
+        if (cmp != 0) return cmp;
+        return (a.id ?? 0).compareTo(b.id ?? 0);
       });
 
     // 2. Map using session id (or session instance fallback) for collision-safe lookup
@@ -158,7 +210,18 @@ class _HistoryScreensState extends State<HistoryScreens> {
     return keys.map((k) {
       final parts = k.split('-');
       final label = '${_monthNames[int.parse(parts[1])]} ${parts[0]}';
-      final items = byMonth[k]!
+
+      // 3. Sort sessions inside this month DESCENDING (newest at top, oldest at bottom)
+      final monthSessions = List<TherapySession>.from(byMonth[k]!)
+        ..sort((a, b) {
+          final dtA = _parseTherapyDateTime(a);
+          final dtB = _parseTherapyDateTime(b);
+          final cmp = dtB.compareTo(dtA); // Descending (newest first)
+          if (cmp != 0) return cmp;
+          return (b.id ?? 0).compareTo(a.id ?? 0);
+        });
+
+      final items = monthSessions
           .map(
             (s) => {
               'title': sessionTitleMap[s.id ?? s] ?? s.title,
