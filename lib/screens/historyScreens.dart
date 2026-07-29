@@ -129,11 +129,12 @@ class _HistoryScreensState extends State<HistoryScreens> {
   List<Map<String, dynamic>> get _sections {
     if (_selectedYear == null) return [];
 
-    // 1. Sort chronologically ascending from oldest to newest with id tie-breaker
+    // 1. Sort all sessions chronologically ASCENDING (oldest -> newest) for "Terapi N" numbering
     final sortedAsc = List<TherapySession>.from(_sessions)
       ..sort((a, b) {
-        final cmp = a.sessionDate.compareTo(b.sessionDate);
-        return cmp != 0 ? cmp : (a.id ?? 0).compareTo(b.id ?? 0);
+        final cmp = a.parsedDateTime.compareTo(b.parsedDateTime);
+        if (cmp != 0) return cmp;
+        return (a.id ?? 0).compareTo(b.id ?? 0);
       });
 
     // 2. Map using session id (or session instance fallback) for collision-safe lookup
@@ -158,7 +159,16 @@ class _HistoryScreensState extends State<HistoryScreens> {
     return keys.map((k) {
       final parts = k.split('-');
       final label = '${_monthNames[int.parse(parts[1])]} ${parts[0]}';
-      final items = byMonth[k]!
+
+      // 3. Sort sessions inside this month DESCENDING (newest at top, oldest at bottom)
+      final monthSessions = List<TherapySession>.from(byMonth[k]!)
+        ..sort((a, b) {
+          final cmp = b.parsedDateTime.compareTo(a.parsedDateTime); // Descending (newest first)
+          if (cmp != 0) return cmp;
+          return (b.id ?? 0).compareTo(a.id ?? 0);
+        });
+
+      final items = monthSessions
           .map(
             (s) => {
               'title': sessionTitleMap[s.id ?? s] ?? s.title,
