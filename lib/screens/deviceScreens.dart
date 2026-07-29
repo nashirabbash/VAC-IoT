@@ -33,6 +33,9 @@ class _DeviceScreenState extends State<DeviceScreen> {
   @override
   void initState() {
     super.initState();
+    // Fetch latest Wi-Fi status over BLE when device screen opens
+    bleService.readWifiStatus();
+
     // Automatically navigate back to HomeScreen if BLE disconnects
     _connSub = bleService.onConnectionStateChanged.listen((connected) {
       if (!connected && mounted) {
