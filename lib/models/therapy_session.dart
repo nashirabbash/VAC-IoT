@@ -44,11 +44,12 @@ class TherapySession {
           duration == other.duration;
 
   @override
-  int get hashCode =>
-      id.hashCode ^
-      sessionDate.hashCode ^
-      title.hashCode ^
-      date.hashCode ^
-      mode.hashCode ^
-      duration.hashCode;
+  int get hashCode => Object.hash(
+        id,
+        sessionDate,
+        title,
+        date,
+        mode,
+        duration,
+      );
 }

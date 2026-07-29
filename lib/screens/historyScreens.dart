@@ -137,11 +137,11 @@ class _HistoryScreensState extends State<HistoryScreens> {
         return cmp != 0 ? cmp : (a.id ?? 0).compareTo(b.id ?? 0);
       });
 
-    // 2. Map using session id (or identityHashCode if id is null) for value-safe lookup
-    final sessionTitleMap = <int, String>{};
+    // 2. Map using session id (or session instance fallback) for collision-safe lookup
+    final sessionTitleMap = <Object, String>{};
     for (int i = 0; i < sortedAsc.length; i++) {
       final session = sortedAsc[i];
-      final key = session.id ?? identityHashCode(session);
+      final key = session.id ?? session;
       sessionTitleMap[key] = 'Terapi ${i + 1}';
     }
 
@@ -162,7 +162,7 @@ class _HistoryScreensState extends State<HistoryScreens> {
       final items = byMonth[k]!
           .map(
             (s) => {
-              'title': sessionTitleMap[s.id ?? identityHashCode(s)] ?? s.title,
+              'title': sessionTitleMap[s.id ?? s] ?? s.title,
               'date': s.date,
               'mode': s.mode,
               'duration': s.duration,
