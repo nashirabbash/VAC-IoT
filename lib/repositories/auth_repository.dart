@@ -21,6 +21,7 @@ class AuthRepository {
   }
 
   Future<void> saveToken(String token) async {
+    await _initCache();
     _cachedToken = token;
     _isInitialized = true;
     await _storage.write(key: _tokenKey, value: token);

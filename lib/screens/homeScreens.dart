@@ -219,21 +219,12 @@ class _HomeScreenState extends State<HomeScreen> {
             ).withValues(alpha: 0.1), // Brand color background
             border: Border.all(color: const Color(0x1F000000), width: 1),
           ),
-          child: ClipOval(
-            child: Image.network(
-              'https://placehold.co/42x42',
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                // High-quality fallback user initials
-                return Center(
-                  child: AppText(
-                    _userInitials,
-                    type: AppTextType.caption1,
-                    fontWeight: FontWeight.w600,
-                    customColor: const Color(0xFF6750A4),
-                  ),
-                );
-              },
+          child: Center(
+            child: AppText(
+              _userInitials,
+              type: AppTextType.caption1,
+              fontWeight: FontWeight.w600,
+              customColor: const Color(0xFF6750A4),
             ),
           ),
         ),

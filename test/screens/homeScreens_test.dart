@@ -76,7 +76,8 @@ void main() {
     );
     await tester.pump();
 
-    // Verify avatar widget is rendered
+    // Verify avatar widget is rendered with initials 'NA'
     expect(find.byTooltip('Account Actions'), findsOneWidget);
+    expect(find.text('NA'), findsOneWidget);
   });
 }
