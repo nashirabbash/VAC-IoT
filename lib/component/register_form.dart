@@ -35,53 +35,85 @@ class _RegisterFormState extends State<RegisterForm> {
   bool _passwordTouched = false;
   bool _confirmPasswordTouched = false;
 
+  void _onNameChanged() {
+    if (mounted) {
+      setState(() {
+        _nameTouched = true;
+        widget.formData.validateAll();
+      });
+    }
+  }
+
+  void _onUsernameChanged() {
+    if (mounted) {
+      setState(() {
+        _usernameTouched = true;
+        widget.formData.validateAll();
+      });
+    }
+  }
+
+  void _onHospitalChanged() {
+    if (mounted) {
+      setState(() {
+        _hospitalTouched = true;
+        widget.formData.validateAll();
+      });
+    }
+  }
+
+  void _onPasswordChanged() {
+    if (mounted) {
+      setState(() {
+        _passwordTouched = true;
+        widget.formData.validateAll();
+      });
+    }
+  }
+
+  void _onConfirmPasswordChanged() {
+    if (mounted) {
+      setState(() {
+        _confirmPasswordTouched = true;
+        widget.formData.validateAll();
+      });
+    }
+  }
+
   @override
   void initState() {
     super.initState();
-    widget.formData.nameController.addListener(() {
-      if (mounted) {
-        setState(() {
-          _nameTouched = true;
-          widget.formData.validateAll();
-        });
-      }
-    });
-    widget.formData.usernameController.addListener(() {
-      if (mounted) {
-        setState(() {
-          _usernameTouched = true;
-          widget.formData.validateAll();
-        });
-      }
-    });
-    widget.formData.hospitalController.addListener(() {
-      if (mounted) {
-        setState(() {
-          _hospitalTouched = true;
-          widget.formData.validateAll();
-        });
-      }
-    });
-    widget.formData.passwordController.addListener(() {
-      if (mounted) {
-        setState(() {
-          _passwordTouched = true;
-          widget.formData.validateAll();
-        });
-      }
-    });
-    widget.formData.confirmPasswordController.addListener(() {
-      if (mounted) {
-        setState(() {
-          _confirmPasswordTouched = true;
-          widget.formData.validateAll();
-        });
-      }
-    });
+    widget.formData.nameController.addListener(_onNameChanged);
+    widget.formData.usernameController.addListener(_onUsernameChanged);
+    widget.formData.hospitalController.addListener(_onHospitalChanged);
+    widget.formData.passwordController.addListener(_onPasswordChanged);
+    widget.formData.confirmPasswordController.addListener(_onConfirmPasswordChanged);
+  }
+
+  @override
+  void didUpdateWidget(RegisterForm oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.formData != widget.formData) {
+      oldWidget.formData.nameController.removeListener(_onNameChanged);
+      oldWidget.formData.usernameController.removeListener(_onUsernameChanged);
+      oldWidget.formData.hospitalController.removeListener(_onHospitalChanged);
+      oldWidget.formData.passwordController.removeListener(_onPasswordChanged);
+      oldWidget.formData.confirmPasswordController.removeListener(_onConfirmPasswordChanged);
+      widget.formData.nameController.addListener(_onNameChanged);
+      widget.formData.usernameController.addListener(_onUsernameChanged);
+      widget.formData.hospitalController.addListener(_onHospitalChanged);
+      widget.formData.passwordController.addListener(_onPasswordChanged);
+      widget.formData.confirmPasswordController.addListener(_onConfirmPasswordChanged);
+    }
   }
 
   @override
   void dispose() {
+    widget.formData.nameController.removeListener(_onNameChanged);
+    widget.formData.usernameController.removeListener(_onUsernameChanged);
+    widget.formData.hospitalController.removeListener(_onHospitalChanged);
+    widget.formData.passwordController.removeListener(_onPasswordChanged);
+    widget.formData.confirmPasswordController.removeListener(_onConfirmPasswordChanged);
     super.dispose();
   }
 
@@ -191,8 +223,21 @@ class _RegisterFormState extends State<RegisterForm> {
                           if (widget.formData.isValid) {
                             widget.onNext();
                           } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: AppText('Please fix the errors in the form')),
+                            final scaffoldMessenger = ScaffoldMessenger.of(context);
+                            scaffoldMessenger.hideCurrentSnackBar();
+                            scaffoldMessenger.showSnackBar(
+                              SnackBar(
+                                backgroundColor: colors.backgroundsSecondaryElevated,
+                                behavior: SnackBarBehavior.floating,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                content: AppText(
+                                  'Please fix the errors in the form',
+                                  type: AppTextType.subheadline,
+                                  customColor: colors.labelsPrimary,
+                                ),
+                              ),
                             );
                           }
                         },

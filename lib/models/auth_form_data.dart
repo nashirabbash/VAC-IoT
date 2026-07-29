@@ -6,10 +6,33 @@ class LoginFormData {
   
   bool rememberMe = false;
 
+  String? usernameError;
+  String? passwordError;
+
   void dispose() {
     usernameController.dispose();
     passwordController.dispose();
   }
+
+  void validateAll() {
+    if (usernameController.text.trim().isEmpty) {
+      usernameError = 'Username is required';
+    } else {
+      usernameError = null;
+    }
+
+    if (passwordController.text.isEmpty) {
+      passwordError = 'Password is required';
+    } else {
+      passwordError = null;
+    }
+  }
+
+  bool get isValid => 
+      usernameError == null && 
+      passwordError == null && 
+      usernameController.text.trim().isNotEmpty && 
+      passwordController.text.isNotEmpty;
 }
 
 class ForgotPasswordFormData {

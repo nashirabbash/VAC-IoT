@@ -30,6 +30,53 @@ class LoginForm extends StatefulWidget {
 }
 
 class _LoginFormState extends State<LoginForm> {
+  bool _forceShowErrors = false;
+  bool _usernameTouched = false;
+  bool _passwordTouched = false;
+
+  void _onUsernameChanged() {
+    if (mounted) {
+      setState(() {
+        _usernameTouched = true;
+        widget.formData.validateAll();
+      });
+    }
+  }
+
+  void _onPasswordChanged() {
+    if (mounted) {
+      setState(() {
+        _passwordTouched = true;
+        widget.formData.validateAll();
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    widget.formData.usernameController.addListener(_onUsernameChanged);
+    widget.formData.passwordController.addListener(_onPasswordChanged);
+  }
+
+  @override
+  void didUpdateWidget(LoginForm oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.formData != widget.formData) {
+      oldWidget.formData.usernameController.removeListener(_onUsernameChanged);
+      oldWidget.formData.passwordController.removeListener(_onPasswordChanged);
+      widget.formData.usernameController.addListener(_onUsernameChanged);
+      widget.formData.passwordController.addListener(_onPasswordChanged);
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.formData.usernameController.removeListener(_onUsernameChanged);
+    widget.formData.passwordController.removeListener(_onPasswordChanged);
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
@@ -80,11 +127,13 @@ class _LoginFormState extends State<LoginForm> {
                   AuthInputField(
                     controller: widget.formData.usernameController,
                     labelText: 'Username',
+                    errorText: (_usernameTouched || _forceShowErrors) ? widget.formData.usernameError : null,
                     colors: colors,
                   ),
                   AuthInputField(
                     controller: widget.formData.passwordController,
                     labelText: 'Password',
+                    errorText: (_passwordTouched || _forceShowErrors) ? widget.formData.passwordError : null,
                     isPassword: true,
                     colors: colors,
                   ),
@@ -163,7 +212,32 @@ class _LoginFormState extends State<LoginForm> {
                         label: 'Login',
                         size: ButtonSize.large,
                         variant: ButtonVariant.primary,
-                        onPressed: widget.onLogin,
+                        onPressed: () {
+                          setState(() {
+                            _forceShowErrors = true;
+                            widget.formData.validateAll();
+                          });
+                          if (widget.formData.isValid) {
+                            widget.onLogin();
+                          } else {
+                            final scaffoldMessenger = ScaffoldMessenger.of(context);
+                            scaffoldMessenger.hideCurrentSnackBar();
+                            scaffoldMessenger.showSnackBar(
+                              SnackBar(
+                                backgroundColor: colors.backgroundsSecondaryElevated,
+                                behavior: SnackBarBehavior.floating,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                content: AppText(
+                                  'Please fill in all required fields',
+                                  type: AppTextType.subheadline,
+                                  customColor: colors.labelsPrimary,
+                                ),
+                              ),
+                            );
+                          }
+                        },
                       ),
               ),
               const SizedBox(height: 16),
