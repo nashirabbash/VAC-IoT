@@ -64,4 +64,14 @@ class AuthRepository {
       return null;
     }
   }
+
+  static const String _themeModeKey = 'theme_mode';
+
+  Future<void> saveThemeMode(String mode) async {
+    await _storage.write(key: _themeModeKey, value: mode);
+  }
+
+  Future<String?> getThemeMode() async {
+    return await _storage.read(key: _themeModeKey);
+  }
 }

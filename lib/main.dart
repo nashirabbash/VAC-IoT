@@ -14,7 +14,7 @@ import 'package:vac_dashboard_app/repositories/auth_repository.dart';
 import 'package:vac_dashboard_app/services/ble_service.dart';
 import 'package:vac_dashboard_app/services/ota_banner_service.dart';
 
-final ValueNotifier<ThemeMode> appThemeMode = ValueNotifier(ThemeMode.light);
+final ValueNotifier<ThemeMode> appThemeMode = ValueNotifier(ThemeMode.system);
 final _navigatorKey = GlobalKey<NavigatorState>();
 
 Future<void> main() async {
@@ -23,6 +23,17 @@ Future<void> main() async {
   await BleService.initBluetooth();
   final authRepo = AuthRepository();
   final token = await authRepo.getToken();
+  
+  // Load saved theme mode preference (defaults to system / auto)
+  final savedTheme = await authRepo.getThemeMode();
+  if (savedTheme == 'light') {
+    appThemeMode.value = ThemeMode.light;
+  } else if (savedTheme == 'dark') {
+    appThemeMode.value = ThemeMode.dark;
+  } else {
+    appThemeMode.value = ThemeMode.system;
+  }
+
   runApp(MainApp(initialToken: token));
 }
 
