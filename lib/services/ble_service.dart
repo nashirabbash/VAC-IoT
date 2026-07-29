@@ -340,6 +340,13 @@ class BleService {
     _device?.disconnect();
   }
 
+  /// Call after login so the next startScan() is not blocked
+  /// by the isExplicitlyDisconnected guard set during logout.
+  void resetForNewSession() {
+    isExplicitlyDisconnected = false;
+    _shouldAutoReconnect = true;
+  }
+
   void dispose() {
     _stopRssiMonitoring();
     _scanSub?.cancel();

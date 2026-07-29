@@ -4,7 +4,6 @@ import 'package:vac_dashboard_app/component/sectionHistory.dart';
 import 'package:vac_dashboard_app/models/therapy_session.dart';
 import 'package:vac_dashboard_app/services/api_service.dart';
 import 'package:vac_dashboard_app/services/ble_service.dart';
-import 'package:vac_dashboard_app/services/therapy_receiver.dart';
 import 'package:vac_dashboard_app/component/menu.dart';
 import 'package:vac_dashboard_app/component/splitButton.dart';
 import 'package:vac_dashboard_app/asset/color_tokens.dart';
@@ -57,17 +56,17 @@ class _HistoryScreensState extends State<HistoryScreens> {
   void initState() {
     super.initState();
     _syncAndLoadData();
-    _therapySub = _ble.onTherapy.listen((payload) async {
+    _therapySub = _ble.onTherapy.listen((_) async {
+      // BleService.handleIncomingBytes already saves globally — just reload
       try {
-        await TherapyReceiver.save(payload);
-        _syncAndLoadData();
+        await _syncAndLoadData();
       } on AuthException {
         _handleAuthException();
       } catch (e) {
         if (!mounted) return;
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: AppText('Gagal menyimpan data: $e')));
+        ).showSnackBar(SnackBar(content: AppText('Gagal memuat data: $e')));
       }
     });
   }
