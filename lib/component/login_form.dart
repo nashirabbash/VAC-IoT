@@ -30,6 +30,31 @@ class LoginForm extends StatefulWidget {
 }
 
 class _LoginFormState extends State<LoginForm> {
+  bool _forceShowErrors = false;
+  bool _usernameTouched = false;
+  bool _passwordTouched = false;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.formData.usernameController.addListener(() {
+      if (mounted) {
+        setState(() {
+          _usernameTouched = true;
+          widget.formData.validateAll();
+        });
+      }
+    });
+    widget.formData.passwordController.addListener(() {
+      if (mounted) {
+        setState(() {
+          _passwordTouched = true;
+          widget.formData.validateAll();
+        });
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
@@ -80,11 +105,13 @@ class _LoginFormState extends State<LoginForm> {
                   AuthInputField(
                     controller: widget.formData.usernameController,
                     labelText: 'Username',
+                    errorText: (_usernameTouched || _forceShowErrors) ? widget.formData.usernameError : null,
                     colors: colors,
                   ),
                   AuthInputField(
                     controller: widget.formData.passwordController,
                     labelText: 'Password',
+                    errorText: (_passwordTouched || _forceShowErrors) ? widget.formData.passwordError : null,
                     isPassword: true,
                     colors: colors,
                   ),
@@ -163,7 +190,19 @@ class _LoginFormState extends State<LoginForm> {
                         label: 'Login',
                         size: ButtonSize.large,
                         variant: ButtonVariant.primary,
-                        onPressed: widget.onLogin,
+                        onPressed: () {
+                          setState(() {
+                            _forceShowErrors = true;
+                            widget.formData.validateAll();
+                          });
+                          if (widget.formData.isValid) {
+                            widget.onLogin();
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: AppText('Please fill in all required fields')),
+                            );
+                          }
+                        },
                       ),
               ),
               const SizedBox(height: 16),
