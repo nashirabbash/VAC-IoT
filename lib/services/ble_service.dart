@@ -57,9 +57,6 @@ class BleService {
 
     // flutter_blue_plus triggers the OS permission dialog automatically on
     // first adapter state access on Android 12+ / iOS.
-    await FlutterBluePlus.adapterState.first;
-
-    // Android only: ask the user to enable BT if it's off.
     final state = await FlutterBluePlus.adapterState.first;
     if (state != BluetoothAdapterState.on) {
       try {

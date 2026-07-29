@@ -39,17 +39,6 @@ class _SectionHistoryState extends State<SectionHistory> {
           (e) {
             final index = e.key + 1;
             final item = e.value;
-            final rawTitle = item['title'] ?? '';
-
-            // Extract pressure (e.g. "125 mmHg") if present in title or duration
-            String pressure = item['pressure'] ?? '';
-            if (pressure.isEmpty) {
-              final match = RegExp(r'(\d+\s*mmHg)').firstMatch(rawTitle) ??
-                  RegExp(r'(\d+\s*mmHg)').firstMatch(item['duration'] ?? '');
-              if (match != null) {
-                pressure = match.group(1) ?? '';
-              }
-            }
 
             return _TimelineItem(
               isFirst: e.key == 0,
@@ -59,7 +48,7 @@ class _SectionHistoryState extends State<SectionHistory> {
                 date: item['date'] ?? '',
                 mode: item['mode'] ?? '',
                 duration: item['duration'] ?? '',
-                pressure: pressure,
+                pressure: item['pressure'] ?? '',
               ),
             );
           },

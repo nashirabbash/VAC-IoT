@@ -150,6 +150,7 @@ class _HistoryScreensState extends State<HistoryScreens> {
               'date': s.date,
               'mode': s.mode,
               'duration': s.duration,
+              'pressure': s.pressure,
             },
           )
           .toList();

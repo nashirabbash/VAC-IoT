@@ -58,9 +58,9 @@ class TherapyReceiver {
     return '${dt.day} ${months[dt.month]}, ${_pad(dt.hour)}:${_pad(dt.minute)}';
   }
 
-  /// 0 → "Continuous", 1 → "Intermittent"
+  /// 0 → "Kontinyu", 1 → "Intermiten"
   static String _modeLabel(int mode) =>
-      mode == 0 ? 'Continuous' : 'Intermittent';
+      mode == 0 ? 'Kontinyu' : 'Intermiten';
 
   /// 2700 sec → "45 min" ; 45 sec → "0 min"
   static String _formatDuration(int totalSec) {

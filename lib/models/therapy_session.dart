@@ -15,6 +15,13 @@ class TherapySession {
     required this.duration,
   });
 
+  /// Extracted pressure value (e.g., "125 mmHg") from title or duration.
+  String get pressure {
+    final match = RegExp(r'(\d+\s*mmHg)').firstMatch(title) ??
+        RegExp(r'(\d+\s*mmHg)').firstMatch(duration);
+    return match?.group(1) ?? '';
+  }
+
   factory TherapySession.fromJson(Map<String, dynamic> json) => TherapySession(
     id: json['id'] as int?,
     sessionDate: json['sessionDate'] as String,
