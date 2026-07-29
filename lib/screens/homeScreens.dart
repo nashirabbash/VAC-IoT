@@ -63,15 +63,23 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _checkDeviceBinding() async {
     try {
-      final data = await _authRepository.getDecodedToken();
-      if (data != null && data['deviceId'] != null) {
-        setState(() {
-          _hasBoundDevice = true;
-        });
+      final creds = await _authRepository.getDeviceCredentials();
+      if (creds != null && creds.deviceId.isNotEmpty) {
+        if (mounted) {
+          setState(() {
+            _hasBoundDevice = true;
+          });
+        }
         bleService.startScan();
+      } else {
+        if (mounted) {
+          setState(() {
+            _hasBoundDevice = false;
+          });
+        }
       }
     } catch (e) {
-      debugPrint('Error decoding token: $e');
+      debugPrint('Error checking device binding: $e');
     } finally {
       if (mounted) {
         setState(() {

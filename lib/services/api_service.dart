@@ -68,8 +68,19 @@ class ApiService {
     if (res.statusCode != 200) {
       throw Exception(body['message'] ?? 'Failed to login');
     }
-    final token = (body['data'] != null ? body['data']['token'] : body['token']) as String;
+    final data = (body['data'] as Map<String, dynamic>?) ?? body;
+    final token = (data['token'] ?? body['token']) as String;
     await _authRepository.saveToken(token);
+
+    // Extract device credentials if returned in login response
+    final user = data['user'] as Map<String, dynamic>?;
+    final deviceId = (data['deviceId'] ?? user?['deviceId'] ?? user?['device_id'])?.toString();
+    final authPin = (data['authPin'] ?? user?['authPin'] ?? user?['auth_pin'] ?? '')?.toString();
+    if (deviceId != null && deviceId.isNotEmpty) {
+      await _authRepository.saveDeviceConfig(
+        DeviceCredentials(deviceId: deviceId, authPin: authPin ?? ''),
+      );
+    }
   }
 
   Future<void> register(RegisterDto dto) async {
