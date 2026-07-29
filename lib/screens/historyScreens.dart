@@ -229,7 +229,6 @@ class _HistoryScreensState extends State<HistoryScreens> {
           ? const Center(child: Text('Belum ada data terapi'))
           : ListView.builder(
               controller: _scrollController,
-              padding: const EdgeInsets.all(34),
               itemCount: _sections.length,
               itemBuilder: (context, i) {
                 final section = _sections[i];
