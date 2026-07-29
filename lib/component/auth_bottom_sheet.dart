@@ -94,6 +94,14 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> with TickerProviderSt
     });
   }
 
+  void _navigateToHome(NavigatorState nav) {
+    nav.pop(); // Dismiss bottom sheet
+    bleService.resetForNewSession();
+    nav.pushReplacement(
+      MaterialPageRoute(builder: (context) => const HomeScreen()),
+    );
+  }
+
   Future<void> _handleLogin() async {
     final nav = Navigator.of(context);
     final scaffoldMsg = ScaffoldMessenger.of(context);
@@ -104,11 +112,7 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> with TickerProviderSt
         _loginData.passwordController.text,
       );
       if (!mounted) return;
-      nav.pop(); // Dismiss bottom sheet
-      bleService.resetForNewSession();
-      nav.pushReplacement(
-        MaterialPageRoute(builder: (context) => const HomeScreen()),
-      );
+      _navigateToHome(nav);
     } catch (e) {
       if (!mounted) return;
       scaffoldMsg.showSnackBar(
@@ -176,13 +180,7 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> with TickerProviderSt
         SnackBar(content: AppText('Registration successful!')),
       );
       final nav = Navigator.of(context);
-      nav.pop(); // Dismiss bottom sheet
-
-      // Navigate to HomeScreen as the base so the user sees the connection process
-      bleService.resetForNewSession();
-      nav.pushReplacement(
-        MaterialPageRoute(builder: (context) => const HomeScreen()),
-      );
+      _navigateToHome(nav);
     } catch (e) {
       if (!mounted) return;
       setState(() {

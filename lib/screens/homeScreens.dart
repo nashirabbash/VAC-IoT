@@ -127,8 +127,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         leadingIcon: Icons.qr_code_scanner_rounded,
                         onPressed: () async {
                           Navigator.of(dialogContext).pop(); // Dismiss menu
-                          await Navigator.push(
-                            dialogContext,
+                          await nav.push(
                             MaterialPageRoute(
                               builder: (context) => const ScanScreen(),
                             ),
