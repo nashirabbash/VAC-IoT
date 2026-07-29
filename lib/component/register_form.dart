@@ -91,6 +91,23 @@ class _RegisterFormState extends State<RegisterForm> {
   }
 
   @override
+  void didUpdateWidget(RegisterForm oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.formData != widget.formData) {
+      oldWidget.formData.nameController.removeListener(_onNameChanged);
+      oldWidget.formData.usernameController.removeListener(_onUsernameChanged);
+      oldWidget.formData.hospitalController.removeListener(_onHospitalChanged);
+      oldWidget.formData.passwordController.removeListener(_onPasswordChanged);
+      oldWidget.formData.confirmPasswordController.removeListener(_onConfirmPasswordChanged);
+      widget.formData.nameController.addListener(_onNameChanged);
+      widget.formData.usernameController.addListener(_onUsernameChanged);
+      widget.formData.hospitalController.addListener(_onHospitalChanged);
+      widget.formData.passwordController.addListener(_onPasswordChanged);
+      widget.formData.confirmPasswordController.addListener(_onConfirmPasswordChanged);
+    }
+  }
+
+  @override
   void dispose() {
     widget.formData.nameController.removeListener(_onNameChanged);
     widget.formData.usernameController.removeListener(_onUsernameChanged);
@@ -206,7 +223,9 @@ class _RegisterFormState extends State<RegisterForm> {
                           if (widget.formData.isValid) {
                             widget.onNext();
                           } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
+                            final scaffoldMessenger = ScaffoldMessenger.of(context);
+                            scaffoldMessenger.hideCurrentSnackBar();
+                            scaffoldMessenger.showSnackBar(
                               SnackBar(
                                 backgroundColor: colors.backgroundsSecondaryElevated,
                                 behavior: SnackBarBehavior.floating,

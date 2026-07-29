@@ -60,6 +60,17 @@ class _LoginFormState extends State<LoginForm> {
   }
 
   @override
+  void didUpdateWidget(LoginForm oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.formData != widget.formData) {
+      oldWidget.formData.usernameController.removeListener(_onUsernameChanged);
+      oldWidget.formData.passwordController.removeListener(_onPasswordChanged);
+      widget.formData.usernameController.addListener(_onUsernameChanged);
+      widget.formData.passwordController.addListener(_onPasswordChanged);
+    }
+  }
+
+  @override
   void dispose() {
     widget.formData.usernameController.removeListener(_onUsernameChanged);
     widget.formData.passwordController.removeListener(_onPasswordChanged);
@@ -209,7 +220,9 @@ class _LoginFormState extends State<LoginForm> {
                           if (widget.formData.isValid) {
                             widget.onLogin();
                           } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
+                            final scaffoldMessenger = ScaffoldMessenger.of(context);
+                            scaffoldMessenger.hideCurrentSnackBar();
+                            scaffoldMessenger.showSnackBar(
                               SnackBar(
                                 backgroundColor: colors.backgroundsSecondaryElevated,
                                 behavior: SnackBarBehavior.floating,
