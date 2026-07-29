@@ -106,18 +106,12 @@ class BleService {
     _scanSub?.cancel();
     _isScanningSub?.cancel();
 
-    // Filter scan by our specific Service UUID for reliability
-    await FlutterBluePlus.startScan(
-      withServices: [Guid(_serviceUuid)],
-      timeout: const Duration(seconds: 15),
-    );
-
     _scanSub = FlutterBluePlus.scanResults.listen((results) {
       for (final r in results) {
         final name = r.device.platformName.isNotEmpty
             ? r.device.platformName
             : r.advertisementData.advName;
-        if (name == deviceId && !_connecting) {
+        if (name == deviceId && !_connecting && !isConnected) {
           FlutterBluePlus.stopScan();
           _connect(r.device);
           break;
@@ -125,11 +119,19 @@ class BleService {
       }
     });
 
+    try {
+      await FlutterBluePlus.startScan(
+        timeout: const Duration(seconds: 15),
+      );
+    } catch (e) {
+      debugPrint('BLE startScan error: $e');
+    }
+
     // Retry scan if nothing found
     _isScanningSub = FlutterBluePlus.isScanning.listen((isScanning) {
-      if (!isScanning && _device == null && !_connecting) {
+      if (!isScanning && _device == null && !_connecting && !isConnected) {
         Future.delayed(const Duration(seconds: 3), () {
-          if (_device == null && !_connecting) startScan();
+          if (_device == null && !_connecting && !isConnected) startScan();
         });
       }
     });

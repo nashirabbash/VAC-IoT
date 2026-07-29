@@ -44,8 +44,25 @@ class AuthRepository {
   Future<DeviceCredentials?> getDeviceCredentials() async {
     final deviceId = await _storage.read(key: _deviceIdKey);
     final authPin = await _storage.read(key: _authPinKey);
-    if (deviceId != null && authPin != null) {
-      return DeviceCredentials(deviceId: deviceId, authPin: authPin);
+    if (deviceId != null && deviceId.isNotEmpty) {
+      return DeviceCredentials(deviceId: deviceId, authPin: authPin ?? '');
+    }
+
+    // Fallback: check JWT token payload if stored deviceId is missing
+    final decoded = await getDecodedToken();
+    if (decoded != null) {
+      final tokenDeviceId =
+          (decoded['deviceId'] ?? decoded['device_id'])?.toString();
+      if (tokenDeviceId != null && tokenDeviceId.isNotEmpty) {
+        final tokenAuthPin =
+            (decoded['authPin'] ?? decoded['pin'] ?? '')?.toString() ?? '';
+        final creds = DeviceCredentials(
+          deviceId: tokenDeviceId,
+          authPin: tokenAuthPin,
+        );
+        await saveDeviceConfig(creds);
+        return creds;
+      }
     }
     return null;
   }
