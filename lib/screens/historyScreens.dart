@@ -129,6 +129,15 @@ class _HistoryScreensState extends State<HistoryScreens> {
 
   List<Map<String, dynamic>> get _sections {
     if (_selectedYear == null) return [];
+
+    // Map each session to its 1-based chronological number ("Terapi N")
+    final sortedAsc = List<TherapySession>.from(_sessions)
+      ..sort((a, b) => a.sessionDate.compareTo(b.sessionDate));
+    final sessionTitleMap = <TherapySession, String>{};
+    for (int i = 0; i < sortedAsc.length; i++) {
+      sessionTitleMap[sortedAsc[i]] = 'Terapi ${i + 1}';
+    }
+
     final filtered = _sessions
         .where((s) => s.sessionDate.startsWith(_selectedYear!))
         .toList();
@@ -146,7 +155,7 @@ class _HistoryScreensState extends State<HistoryScreens> {
       final items = byMonth[k]!
           .map(
             (s) => {
-              'title': s.title,
+              'title': sessionTitleMap[s] ?? s.title,
               'date': s.date,
               'mode': s.mode,
               'duration': s.duration,

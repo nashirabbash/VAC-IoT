@@ -37,14 +37,13 @@ class _SectionHistoryState extends State<SectionHistory> {
         ),
         ...widget.items.asMap().entries.map(
           (e) {
-            final index = e.key + 1;
             final item = e.value;
 
             return _TimelineItem(
               isFirst: e.key == 0,
               isLast: e.key == widget.items.length - 1,
               child: HistoryCard(
-                title: 'Terapi $index',
+                title: item['title'] ?? 'Terapi ${e.key + 1}',
                 date: item['date'] ?? '',
                 mode: item['mode'] ?? '',
                 duration: item['duration'] ?? '',
