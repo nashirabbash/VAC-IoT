@@ -30,18 +30,22 @@ class _DeviceScreenState extends State<DeviceScreen> {
   static final String _randomName = _generateRandomAlias();
   StreamSubscription<bool>? _connSub;
 
+  void _fetchWifiStatus() {
+    unawaited(
+      bleService.readWifiStatus().catchError((e) {
+        debugPrint('Error reading Wi-Fi status: $e');
+        return bleService.wifiStatus;
+      }),
+    );
+  }
+
   @override
   void initState() {
     super.initState();
 
     // Fetch Wi-Fi status jika BLE sudah terhubung
     if (bleService.isConnected) {
-      unawaited(
-        bleService.readWifiStatus().catchError((e) {
-          debugPrint('Error reading Wi-Fi status: $e');
-          return bleService.wifiStatus;
-        }),
-      );
+      _fetchWifiStatus();
     }
 
     // Listen koneksi BLE: Navigasi jika terputus, atau auto-fetch Wi-Fi jika reconnect
@@ -52,9 +56,7 @@ class _DeviceScreenState extends State<DeviceScreen> {
           (route) => false,
         );
       } else if (connected && mounted) {
-        unawaited(
-          bleService.readWifiStatus().catchError((_) => bleService.wifiStatus),
-        );
+        _fetchWifiStatus();
       }
     });
   }
