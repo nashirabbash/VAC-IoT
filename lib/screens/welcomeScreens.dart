@@ -4,9 +4,27 @@ import 'package:vac_dashboard_app/component/button.dart';
 import 'package:vac_dashboard_app/component/text.dart';
 import 'package:vac_dashboard_app/component/auth_bottom_sheet.dart';
 import 'package:vac_dashboard_app/asset/color_tokens.dart';
+import 'package:vac_dashboard_app/services/ota_banner_service.dart';
 
-class WelcomeScreens extends StatelessWidget {
+class WelcomeScreens extends StatefulWidget {
   const WelcomeScreens({super.key});
+
+  @override
+  State<WelcomeScreens> createState() => _WelcomeScreensState();
+}
+
+class _WelcomeScreensState extends State<WelcomeScreens> {
+  @override
+  void initState() {
+    super.initState();
+    OtaBannerService.instance.disable();
+  }
+
+  @override
+  void dispose() {
+    OtaBannerService.instance.enable();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {

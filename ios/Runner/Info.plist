@@ -11,8 +11,12 @@
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
 	</dict>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>bluetooth-central</string>
+	</array>
 	<key>CFBundleDisplayName</key>
-	<string>Vac Dashboard App</string>
+	<string>VAC apps</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -20,7 +24,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>vac_dashboard_app</string>
+	<string>VAC apps</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -75,5 +79,7 @@
 	<string>This app needs camera access to scan for VAC devices.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>This app needs microphone access for camera support.</string>
+	<key>UIStatusBarHidden</key>
+	<false/>
 </dict>
 </plist>

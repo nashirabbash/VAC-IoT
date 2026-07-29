@@ -6,6 +6,7 @@ import 'package:vac_dashboard_app/component/text.dart';
 import 'package:vac_dashboard_app/component/header.dart';
 import 'package:vac_dashboard_app/asset/color_tokens.dart';
 import 'package:vac_dashboard_app/services/api_service.dart';
+import 'package:vac_dashboard_app/services/ota_banner_service.dart';
 
 class ScanScreen extends StatefulWidget {
   const ScanScreen({super.key});
@@ -27,6 +28,7 @@ class _ScanScreenState extends State<ScanScreen>
   @override
   void initState() {
     super.initState();
+    OtaBannerService.instance.disable();
 
     // Set up laser sweep animation
     _laserController = AnimationController(
@@ -135,6 +137,7 @@ class _ScanScreenState extends State<ScanScreen>
 
   @override
   void dispose() {
+    OtaBannerService.instance.enable();
     _scannerController.dispose();
     _laserController.dispose();
     super.dispose();

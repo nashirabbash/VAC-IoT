@@ -36,16 +36,21 @@ class _SectionHistoryState extends State<SectionHistory> {
           ],
         ),
         ...widget.items.asMap().entries.map(
-          (e) => _TimelineItem(
-            isFirst: e.key == 0,
-            isLast: e.key == widget.items.length - 1,
-            child: HistoryCard(
-              title: e.value['title'] ?? '',
-              date: e.value['date'] ?? '',
-              mode: e.value['mode'] ?? '',
-              duration: e.value['duration'] ?? '',
-            ),
-          ),
+          (e) {
+            final item = e.value;
+
+            return _TimelineItem(
+              isFirst: e.key == 0,
+              isLast: e.key == widget.items.length - 1,
+              child: HistoryCard(
+                title: item['title'] ?? 'Terapi ${e.key + 1}',
+                date: item['date'] ?? '',
+                mode: item['mode'] ?? '',
+                duration: item['duration'] ?? '',
+                pressure: item['pressure'] ?? '',
+              ),
+            );
+          },
         ),
       ],
     );

@@ -15,6 +15,13 @@ class TherapySession {
     required this.duration,
   });
 
+  /// Extracted pressure value (e.g., "125 mmHg") from title or duration.
+  String get pressure {
+    final match = RegExp(r'(\d+\s*mmHg)').firstMatch(title) ??
+        RegExp(r'(\d+\s*mmHg)').firstMatch(duration);
+    return match?.group(1) ?? '';
+  }
+
   factory TherapySession.fromJson(Map<String, dynamic> json) => TherapySession(
     id: json['id'] as int?,
     sessionDate: json['sessionDate'] as String,
@@ -23,4 +30,26 @@ class TherapySession {
     mode: json['mode'] as String,
     duration: json['duration'] as String,
   );
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is TherapySession &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          sessionDate == other.sessionDate &&
+          title == other.title &&
+          date == other.date &&
+          mode == other.mode &&
+          duration == other.duration;
+
+  @override
+  int get hashCode => Object.hash(
+        id,
+        sessionDate,
+        title,
+        date,
+        mode,
+        duration,
+      );
 }

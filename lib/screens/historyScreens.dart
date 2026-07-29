@@ -57,7 +57,6 @@ class _HistoryScreensState extends State<HistoryScreens> {
   void initState() {
     super.initState();
     _syncAndLoadData();
-    _ble.startScan();
     _therapySub = _ble.onTherapy.listen((payload) async {
       try {
         await TherapyReceiver.save(payload);
@@ -130,6 +129,22 @@ class _HistoryScreensState extends State<HistoryScreens> {
 
   List<Map<String, dynamic>> get _sections {
     if (_selectedYear == null) return [];
+
+    // 1. Sort chronologically ascending from oldest to newest with id tie-breaker
+    final sortedAsc = List<TherapySession>.from(_sessions)
+      ..sort((a, b) {
+        final cmp = a.sessionDate.compareTo(b.sessionDate);
+        return cmp != 0 ? cmp : (a.id ?? 0).compareTo(b.id ?? 0);
+      });
+
+    // 2. Map using session id (or session instance fallback) for collision-safe lookup
+    final sessionTitleMap = <Object, String>{};
+    for (int i = 0; i < sortedAsc.length; i++) {
+      final session = sortedAsc[i];
+      final key = session.id ?? session;
+      sessionTitleMap[key] = 'Terapi ${i + 1}';
+    }
+
     final filtered = _sessions
         .where((s) => s.sessionDate.startsWith(_selectedYear!))
         .toList();
@@ -147,10 +162,11 @@ class _HistoryScreensState extends State<HistoryScreens> {
       final items = byMonth[k]!
           .map(
             (s) => {
-              'title': s.title,
+              'title': sessionTitleMap[s.id ?? s] ?? s.title,
               'date': s.date,
               'mode': s.mode,
               'duration': s.duration,
+              'pressure': s.pressure,
             },
           )
           .toList();

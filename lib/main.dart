@@ -11,11 +11,16 @@ import 'package:vac_dashboard_app/component/grouped_list.dart';
 import 'package:vac_dashboard_app/screens/welcomeScreens.dart';
 import 'package:vac_dashboard_app/screens/homeScreens.dart';
 import 'package:vac_dashboard_app/repositories/auth_repository.dart';
+import 'package:vac_dashboard_app/services/ble_service.dart';
+import 'package:vac_dashboard_app/services/ota_banner_service.dart';
 
 final ValueNotifier<ThemeMode> appThemeMode = ValueNotifier(ThemeMode.light);
+final _navigatorKey = GlobalKey<NavigatorState>();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Request BT permissions + turn on adapter during native splash
+  await BleService.initBluetooth();
   final authRepo = AuthRepository();
   final token = await authRepo.getToken();
   runApp(MainApp(initialToken: token));
@@ -32,7 +37,8 @@ class MainApp extends StatelessWidget {
       valueListenable: appThemeMode,
       builder: (context, mode, child) {
         return MaterialApp(
-          title: 'VAC Dashboard',
+          title: 'VAC apps',
+          navigatorKey: _navigatorKey,
           themeMode: mode,
           theme: ThemeData(
             colorScheme: AppColors.colorScheme,
@@ -53,6 +59,10 @@ class MainApp extends StatelessWidget {
           home: initialToken != null
               ? const HomeScreen()
               : const WelcomeScreens(),
+          builder: (context, child) {
+            OtaBannerService.instance.init(_navigatorKey);
+            return child!;
+          },
         );
       },
     );
