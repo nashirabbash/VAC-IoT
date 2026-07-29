@@ -13,6 +13,7 @@ import 'package:vac_dashboard_app/component/login_form.dart';
 import 'package:vac_dashboard_app/component/register_form.dart';
 import 'package:vac_dashboard_app/component/forgot_password_form.dart';
 import 'package:vac_dashboard_app/component/alert_dialog.dart';
+import 'package:vac_dashboard_app/services/ble_service.dart';
 
 enum AuthMode { login, signUp, forgotPassword }
 
@@ -104,6 +105,7 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> with TickerProviderSt
       );
       if (!mounted) return;
       nav.pop(); // Dismiss bottom sheet
+      bleService.resetForNewSession();
       nav.pushReplacement(
         MaterialPageRoute(builder: (context) => const HomeScreen()),
       );
@@ -175,8 +177,9 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> with TickerProviderSt
       );
       final nav = Navigator.of(context);
       nav.pop(); // Dismiss bottom sheet
-      
+
       // Navigate to HomeScreen as the base so the user sees the connection process
+      bleService.resetForNewSession();
       nav.pushReplacement(
         MaterialPageRoute(builder: (context) => const HomeScreen()),
       );

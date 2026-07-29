@@ -93,17 +93,19 @@ class _HomeScreenState extends State<HomeScreen> {
         _avatarKey.currentContext!.findRenderObject() as RenderBox;
     final size = renderBox.size;
     final offset = renderBox.localToGlobal(Offset.zero);
+    // Capture navigator from widget context BEFORE entering dialog context
+    final nav = Navigator.of(context);
 
     await showDialog(
       context: context,
       barrierColor: Colors.transparent, // Non-dimming barrier
-      builder: (context) {
+      builder: (dialogContext) {
         return Stack(
           children: [
             // Tap detector outside the menu to dismiss it
             Positioned.fill(
               child: GestureDetector(
-                onTap: () => Navigator.of(context).pop(),
+                onTap: () => Navigator.of(dialogContext).pop(),
                 behavior: HitTestBehavior.opaque,
               ),
             ),
@@ -124,9 +126,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         label: 'Ganti Perangkat',
                         leadingIcon: Icons.qr_code_scanner_rounded,
                         onPressed: () async {
-                          Navigator.of(context).pop(); // Dismiss menu
+                          Navigator.of(dialogContext).pop(); // Dismiss menu
                           await Navigator.push(
-                            context,
+                            dialogContext,
                             MaterialPageRoute(
                               builder: (context) => const ScanScreen(),
                             ),
@@ -138,8 +140,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       label: 'Pengaturan',
                       leadingIcon: Icons.settings_rounded,
                       onPressed: () {
-                        Navigator.of(context).pop(); // Dismiss menu
-                        Navigator.of(context).push(
+                        Navigator.of(dialogContext).pop(); // Dismiss menu
+                        nav.push(
                           MaterialPageRoute(
                             builder: (context) => const SettingsScreen(),
                           ),
@@ -151,7 +153,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       leadingIcon: Icons.logout_rounded,
                       isDestructive: true,
                       onPressed: () async {
-                        Navigator.of(context).pop();
+                        Navigator.of(dialogContext).pop();
                         bleService.disconnect();
                         OtaBannerService.instance.disable();
                         try {
@@ -159,14 +161,12 @@ class _HomeScreenState extends State<HomeScreen> {
                         } catch (_) {
                           // BE logout failing should not block local cleanup
                         }
-                        if (context.mounted) {
-                          Navigator.of(context).pushAndRemoveUntil(
-                            MaterialPageRoute(
-                              builder: (_) => const WelcomeScreens(),
-                            ),
-                            (_) => false,
-                          );
-                        }
+                        nav.pushAndRemoveUntil(
+                          MaterialPageRoute(
+                            builder: (_) => const WelcomeScreens(),
+                          ),
+                          (_) => false,
+                        );
                       },
                     ),
                   ],
