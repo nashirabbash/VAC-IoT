@@ -104,7 +104,6 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> with TickerProviderSt
 
   Future<void> _handleLogin() async {
     final nav = Navigator.of(context);
-    final scaffoldMsg = ScaffoldMessenger.of(context);
     setState(() => _isLoading = true);
     try {
       await apiService.login(
@@ -115,8 +114,12 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> with TickerProviderSt
       _navigateToHome(nav);
     } catch (e) {
       if (!mounted) return;
-      scaffoldMsg.showSnackBar(
-        SnackBar(content: AppText(e.toString().replaceAll('Exception: ', ''))),
+      showAppAlertDialog(
+        context,
+        title: 'Login Gagal',
+        description: e.toString().replaceAll('Exception: ', ''),
+        primaryButtonLabel: 'OK',
+        onPrimaryPressed: () => Navigator.of(context).pop(),
       );
     } finally {
       if (mounted) {
@@ -176,9 +179,6 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> with TickerProviderSt
       await apiService.register(dto);
       
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: AppText('Registration successful!')),
-      );
       final nav = Navigator.of(context);
       _navigateToHome(nav);
     } catch (e) {

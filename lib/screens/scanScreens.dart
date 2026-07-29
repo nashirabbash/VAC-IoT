@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:vac_dashboard_app/component/alert_dialog.dart';
 import 'package:vac_dashboard_app/component/button.dart';
 import 'package:vac_dashboard_app/component/text.dart';
 import 'package:vac_dashboard_app/component/header.dart';
@@ -60,10 +61,13 @@ class _ScanScreenState extends State<ScanScreen>
 
     if (qrKey.trim().isEmpty || !qrKey.contains('|')) {
       _scannerController.stop();
-      final snackBar = ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: AppText('Invalid QR Code format')),
+      await showAppAlertDialog(
+        context,
+        title: 'Invalid QR Code',
+        description: 'The scanned QR code is in an invalid format.',
+        primaryButtonLabel: 'OK',
+        onPrimaryPressed: () => Navigator.of(context).pop(),
       );
-      await snackBar.closed;
       if (mounted) {
         _scannerController.start();
         setState(() => _isScanning = true);
@@ -120,10 +124,13 @@ class _ScanScreenState extends State<ScanScreen>
     } catch (e) {
       if (mounted) {
         Navigator.of(context).pop(); // Dismiss dialog
-        final snackBar = ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: AppText(e.toString().replaceAll('Exception: ', ''))),
+        await showAppAlertDialog(
+          context,
+          title: 'Binding Gagal',
+          description: e.toString().replaceAll('Exception: ', ''),
+          primaryButtonLabel: 'OK',
+          onPrimaryPressed: () => Navigator.of(context).pop(),
         );
-        await snackBar.closed;
         if (mounted) {
           setState(() {
             _isProcessing = false;

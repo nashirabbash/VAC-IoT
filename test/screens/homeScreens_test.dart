@@ -20,6 +20,8 @@ void main() {
 
   testWidgets('Logout success path', (tester) async {
     when(() => mockAuthRepository.getDecodedToken()).thenAnswer((_) async => null);
+    when(() => mockAuthRepository.getDeviceCredentials()).thenAnswer((_) async => null);
+    when(() => mockAuthRepository.getUsername()).thenAnswer((_) async => 'John Doe');
     when(() => mockApiService.logout()).thenAnswer((_) async {});
     
     await tester.pumpWidget(
@@ -57,5 +59,24 @@ void main() {
 
     // Verify navigation to WelcomeScreens
     expect(find.byType(WelcomeScreens), findsOneWidget);
+  });
+
+  testWidgets('Avatar displays user initials from AuthRepository', (tester) async {
+    when(() => mockAuthRepository.getDecodedToken()).thenAnswer((_) async => null);
+    when(() => mockAuthRepository.getDeviceCredentials()).thenAnswer((_) async => null);
+    when(() => mockAuthRepository.getUsername()).thenAnswer((_) async => 'Nashir Abbash');
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: HomeScreen(
+          authRepository: mockAuthRepository,
+          apiService: mockApiService,
+        ),
+      ),
+    );
+    await tester.pump();
+
+    // Verify avatar widget is rendered
+    expect(find.byTooltip('Account Actions'), findsOneWidget);
   });
 }

@@ -219,23 +219,6 @@ class _LoginFormState extends State<LoginForm> {
                           });
                           if (widget.formData.isValid) {
                             widget.onLogin();
-                          } else {
-                            final scaffoldMessenger = ScaffoldMessenger.of(context);
-                            scaffoldMessenger.hideCurrentSnackBar();
-                            scaffoldMessenger.showSnackBar(
-                              SnackBar(
-                                backgroundColor: colors.backgroundsSecondaryElevated,
-                                behavior: SnackBarBehavior.floating,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                content: AppText(
-                                  'Please fill in all required fields',
-                                  type: AppTextType.subheadline,
-                                  customColor: colors.labelsPrimary,
-                                ),
-                              ),
-                            );
                           }
                         },
                       ),

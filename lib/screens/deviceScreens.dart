@@ -79,14 +79,6 @@ class _DeviceScreenState extends State<DeviceScreen> {
         // Trigger manual BLE disconnection
         bleService.disconnect();
 
-        // Show a brief disconnection feedback
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: AppText('Disconnecting device...'),
-            duration: Duration(seconds: 1),
-          ),
-        );
-
         Future.delayed(const Duration(milliseconds: 800), () {
           if (context.mounted) {
             // Navigate back to Home screen and clear navigation history

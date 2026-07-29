@@ -222,23 +222,6 @@ class _RegisterFormState extends State<RegisterForm> {
                           });
                           if (widget.formData.isValid) {
                             widget.onNext();
-                          } else {
-                            final scaffoldMessenger = ScaffoldMessenger.of(context);
-                            scaffoldMessenger.hideCurrentSnackBar();
-                            scaffoldMessenger.showSnackBar(
-                              SnackBar(
-                                backgroundColor: colors.backgroundsSecondaryElevated,
-                                behavior: SnackBarBehavior.floating,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                content: AppText(
-                                  'Please fix the errors in the form',
-                                  type: AppTextType.subheadline,
-                                  customColor: colors.labelsPrimary,
-                                ),
-                              ),
-                            );
                           }
                         },
                       ),

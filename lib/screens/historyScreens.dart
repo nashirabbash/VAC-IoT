@@ -64,9 +64,7 @@ class _HistoryScreensState extends State<HistoryScreens> {
         _handleAuthException();
       } catch (e) {
         if (!mounted) return;
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: AppText('Gagal memuat data: $e')));
+        debugPrint('Gagal memuat data: $e');
       }
     });
   }
@@ -116,9 +114,7 @@ class _HistoryScreensState extends State<HistoryScreens> {
       _handleAuthException();
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: AppText('Gagal memuat data: $e')));
+      debugPrint('Gagal memuat data: $e');
     }
   }
 
