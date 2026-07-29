@@ -30,4 +30,25 @@ class TherapySession {
     mode: json['mode'] as String,
     duration: json['duration'] as String,
   );
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is TherapySession &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          sessionDate == other.sessionDate &&
+          title == other.title &&
+          date == other.date &&
+          mode == other.mode &&
+          duration == other.duration;
+
+  @override
+  int get hashCode =>
+      id.hashCode ^
+      sessionDate.hashCode ^
+      title.hashCode ^
+      date.hashCode ^
+      mode.hashCode ^
+      duration.hashCode;
 }
