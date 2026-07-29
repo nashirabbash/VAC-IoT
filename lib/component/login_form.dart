@@ -34,25 +34,36 @@ class _LoginFormState extends State<LoginForm> {
   bool _usernameTouched = false;
   bool _passwordTouched = false;
 
+  void _onUsernameChanged() {
+    if (mounted) {
+      setState(() {
+        _usernameTouched = true;
+        widget.formData.validateAll();
+      });
+    }
+  }
+
+  void _onPasswordChanged() {
+    if (mounted) {
+      setState(() {
+        _passwordTouched = true;
+        widget.formData.validateAll();
+      });
+    }
+  }
+
   @override
   void initState() {
     super.initState();
-    widget.formData.usernameController.addListener(() {
-      if (mounted) {
-        setState(() {
-          _usernameTouched = true;
-          widget.formData.validateAll();
-        });
-      }
-    });
-    widget.formData.passwordController.addListener(() {
-      if (mounted) {
-        setState(() {
-          _passwordTouched = true;
-          widget.formData.validateAll();
-        });
-      }
-    });
+    widget.formData.usernameController.addListener(_onUsernameChanged);
+    widget.formData.passwordController.addListener(_onPasswordChanged);
+  }
+
+  @override
+  void dispose() {
+    widget.formData.usernameController.removeListener(_onUsernameChanged);
+    widget.formData.passwordController.removeListener(_onPasswordChanged);
+    super.dispose();
   }
 
   @override
@@ -199,7 +210,18 @@ class _LoginFormState extends State<LoginForm> {
                             widget.onLogin();
                           } else {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: AppText('Please fill in all required fields')),
+                              SnackBar(
+                                backgroundColor: colors.backgroundsSecondaryElevated,
+                                behavior: SnackBarBehavior.floating,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                content: AppText(
+                                  'Please fill in all required fields',
+                                  type: AppTextType.subheadline,
+                                  customColor: colors.labelsPrimary,
+                                ),
+                              ),
                             );
                           }
                         },

@@ -28,7 +28,11 @@ class LoginFormData {
     }
   }
 
-  bool get isValid => usernameError == null && passwordError == null;
+  bool get isValid => 
+      usernameError == null && 
+      passwordError == null && 
+      usernameController.text.trim().isNotEmpty && 
+      passwordController.text.isNotEmpty;
 }
 
 class ForgotPasswordFormData {
