@@ -41,6 +41,12 @@ class AuthRepository {
     await _storage.write(key: _authPinKey, value: credentials.authPin);
   }
 
+  /// Retrieves the saved [DeviceCredentials] from secure storage.
+  ///
+  /// **Side Effect (Self-Healing Fallback)**: If secure storage is empty (e.g. after fresh login),
+  /// this method checks the decoded JWT token payload for a `deviceId`. If found, it automatically
+  /// persists the extracted credentials to secure storage via [saveDeviceConfig] so future reads
+  /// are fast and consistent across app restarts.
   Future<DeviceCredentials?> getDeviceCredentials() async {
     final deviceId = await _storage.read(key: _deviceIdKey);
     final authPin = await _storage.read(key: _authPinKey);

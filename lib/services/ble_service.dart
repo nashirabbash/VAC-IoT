@@ -119,14 +119,6 @@ class BleService {
       }
     });
 
-    try {
-      await FlutterBluePlus.startScan(
-        timeout: const Duration(seconds: 15),
-      );
-    } catch (e) {
-      debugPrint('BLE startScan error: $e');
-    }
-
     // Retry scan if nothing found
     _isScanningSub = FlutterBluePlus.isScanning.listen((isScanning) {
       if (!isScanning && _device == null && !_connecting && !isConnected) {
@@ -135,6 +127,14 @@ class BleService {
         });
       }
     });
+
+    try {
+      await FlutterBluePlus.startScan(
+        timeout: const Duration(seconds: 15),
+      );
+    } catch (e) {
+      debugPrint('BLE startScan error: $e');
+    }
   }
 
   Future<void> _connect(BluetoothDevice device) async {
