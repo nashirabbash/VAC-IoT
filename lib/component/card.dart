@@ -31,6 +31,8 @@ class _HistoryCardState extends State<HistoryCard> {
             ? '${widget.duration} • ${widget.pressure}'
             : widget.duration;
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return InkWell(
       hoverColor: Colors.transparent,
       focusColor: Colors.transparent,
@@ -45,6 +47,7 @@ class _HistoryCardState extends State<HistoryCard> {
         duration: displayDuration,
       ),
       child: Card(
+        color: isDark ? Theme.of(context).scaffoldBackgroundColor : null,
         shadowColor: Colors.transparent,
         child: Padding(
           padding: const EdgeInsets.all(16.0),

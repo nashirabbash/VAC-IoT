@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:vac_dashboard_app/asset/color_tokens.dart';
 import 'package:vac_dashboard_app/component/card.dart';
 
 class SectionHistory extends StatefulWidget {
@@ -73,6 +74,8 @@ class _TimelineItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final lineColor = context.colors.separatorsNonopaque;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: IntrinsicHeight(
@@ -88,7 +91,7 @@ class _TimelineItem extends StatelessWidget {
                     Container(
                       width: 2,
                       height: _dotTopOffset,
-                      color: Colors.black26,
+                      color: lineColor,
                     ),
                   if (isFirst) const SizedBox(height: _dotTopOffset),
                   Container(
@@ -100,7 +103,7 @@ class _TimelineItem extends StatelessWidget {
                     ),
                   ),
                   if (!isLast)
-                    Expanded(child: Container(width: 2, color: Colors.black26)),
+                    Expanded(child: Container(width: 2, color: lineColor)),
                 ],
               ),
             ),
