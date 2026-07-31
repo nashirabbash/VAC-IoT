@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BLE Reference & Cheatsheet — VAC STECHOQ</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+  <header>
+    <span class="meta-badge">Reference Sheet</span>
+    <h1>Cheatsheet Komunikasi BLE — VAC STECHOQ</h1>
+    <p>Ringkasan teknis GATT UUIDs, struktur payload JSON, dan state machine koneksi BLE.</p>
+  </header>
+
+  <main>
+    <section>
+      <h2>1. Tabel GATT Service & Characteristics</h2>
+      <div class="card">
+        <table style="width:100%; border-collapse: collapse; text-align: left;">
+          <thead>
+            <tr style="border-bottom: 2px solid var(--card-border);">
+              <th style="padding: 8px;">Elemen BLE</th>
+              <th style="padding: 8px;">UUID</th>
+              <th style="padding: 8px;">Arah Komunikasi</th>
+              <th style="padding: 8px;">Fungsi Utama</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom: 1px solid var(--card-border);">
+              <td style="padding: 8px;"><code>Service</code></td>
+              <td style="padding: 8px;"><code>4fafc201-1fb5-459e-8fcc-c5c9c331914b</code></td>
+              <td style="padding: 8px;">—</td>
+              <td style="padding: 8px;">Layanan Utama Perangkat VAC STECHOQ</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--card-border);">
+              <td style="padding: 8px;"><code>RX (Write)</code></td>
+              <td style="padding: 8px;"><code>c083b0f6-bb21-4f15-8120-d4f13b28b7e2</code></td>
+              <td style="padding: 8px;">App ➔ Hardware (ESP32)</td>
+              <td style="padding: 8px;">Mengirim Auth PIN, Time Sync, WiFi Config, Get Status</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px;"><code>TX (Notify)</code></td>
+              <td style="padding: 8px;"><code>6e400003-b5a3-f393-e0a9-e50e24dcca9e</code></td>
+              <td style="padding: 8px;">Hardware ➔ App</td>
+              <td style="padding: 8px;">Menerima notifikasi status WiFi dan data event terapi</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section>
+      <h2>2. Struktur Payload JSON (Outbound / Inbound)</h2>
+      
+      <div class="card">
+        <h3>Outbound (App ➔ Hardware via RX)</h3>
+        <pre><code>// 1. Authenticate Handshake
+{"type": "auth", "pin": "123456"}
+
+// 2. Time Synchronization
+{"type": "time_sync", "timestamp": 1785235200}
+
+// 3. Konfigurasi WiFi
+{"type": "wifi_config", "ssid": "MyClinicWiFi", "password": "SecretPassword"}
+</code></pre>
+      </div>
+
+      <div class="card">
+        <h3>Inbound (Hardware ➔ App via TX)</h3>
+        <pre><code>// 1. WiFi Status Broadcast
+{"type": "wifi_status", "status": "CONNECTED", "ssid": "MyClinicWiFi"}
+
+// 2. Therapy Event Data (Otomatis Disimpan ke SQLite via TherapyReceiver)
+{
+  "type": "therapy_event",
+  "start": 1785230000,
+  "title": "Sesi Terapi Luka",
+  "date": "2026-07-29 10:00",
+  "mode": "Kontinyu",
+  "duration": "30 Menit"
+}
+</code></pre>
+      </div>
+    </section>
+
+    <section>
+      <h2>3. Algoritma RSSI Proximity Guard</h2>
+      <div class="card">
+        <ul>
+          <li><strong>Interval Polling:</strong> Tiap 4 detik via <code>device.readRssi()</code></li>
+          <li><strong>Batas Ambang Jarak (Threshold):</strong> <code>-85 dBm</code> (~8-10 meter)</li>
+          <li><strong>Aturan Disconnect:</strong> Jika RSSI &lt; -85 dBm sebanyak 3 kali berturut-turut (<code>_lowRssiCount >= 3</code>), app memutus koneksi (<code>disconnect()</code>) untuk hemat daya dan menjaga keamanan.</li>
+        </ul>
+      </div>
+    </section>
+
+    <div class="nav-links">
+      <a href="../lessons/0001-konsep-komunikasi-ble-vac-stechoq.html">← Kembali ke Pelajaran 0001</a>
+      <a href="../MISSION.md">Lihat Mission Document →</a>
+    </div>
+  </main>
+
+</body>
+</html>

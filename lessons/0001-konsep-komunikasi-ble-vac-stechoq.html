@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pelajaran 0001: Konsep Komunikasi BLE pada VAC STECHOQ</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+  <header>
+    <span class="meta-badge">Pelajaran 0001 — BLE Fundamentals</span>
+    <h1>Konsep Komunikasi Bluetooth Low Energy (BLE)</h1>
+    <p>Memahami arsitektur, alur data, dan protokol komunikasi antara Aplikasi Flutter dan Perangkat Medis <strong>VAC STECHOQ</strong>.</p>
+  </header>
+
+  <main>
+
+    <!-- Ringkasan Singkat -->
+    <section class="card" style="background: var(--accent-light); border-color: var(--accent-color);">
+      <h3>🎯 Ringkasan Utama</h3>
+      <p>
+        Aplikasi ini menggunakan package <code>flutter_blue_plus</code> di file <a href="file:///home/broo/Documents/apps/vac_dashboard_app/lib/services/ble_service.dart"><code>lib/services/ble_service.dart</code></a> untuk mengelola koneksi nirkabel ke hardware ESP32 VAC. Komunikasi menggunakan model <strong>GATT (Generic Attribute Profile)</strong> dengan payload JSON melalui stream dua arah (RX/TX).
+      </p>
+    </section>
+
+    <!-- Visualisasi Arsitektur -->
+    <section>
+      <h2>1. Arsitektur Komunikasi BLE (GATT)</h2>
+      <p>Dalam ekosistem BLE, terdapat dua peran utama:</p>
+      <ul>
+        <li><strong>GATT Client (Smartphone / Flutter App):</strong> Menginisiasi pemindaian (scan), melakukan koneksi, serta menulis dan menerima pesan.</li>
+        <li><strong>GATT Server / Peripheral (VAC STECHOQ / ESP32):</strong> Memancarkan sinyal Bluetooth (Advertising) dan menyediakan Service & Characteristics.</li>
+      </ul>
+
+      <div class="diagram-box">
++------------------------------------+               +----------------------------------+
+|     FLUTTER APP (GATT Client)      |               |     VAC HARDWARE (GATT Server)   |
+|   lib/services/ble_service.dart    |               |            (ESP32)               |
++------------------------------------+               +----------------------------------+
+                  |                                                   |
+                  | ------------ Scan Device Name (ID) --------------> |
+                  | <----------- Device Found / Advertised ---------- |
+                  |                                                   |
+                  | ================= Connect GATT =================> |
+                  | ============ Discover Services =================> |
+                  |                                                   |
+                  | --- Write JSON (RX: c083b0f6...) --------------> | (Command/Auth/Sync)
+                  | <-- Notify Bytes (TX: 6e400003...) ------------- | (WiFi Status/Therapy)
+                  |                                                   |
+      </div>
+    </section>
+
+    <!-- 3 Elemen Kunci GATT -->
+    <section>
+      <h2>2. Komponen Utama GATT UUID</h2>
+      <p>Setiap layanan dan saluran data pada perangkat VAC STECHOQ diidentifikasi oleh <strong>UUID 128-bit</strong> khusus:</p>
+      
+      <div class="card">
+        <h3>1. Service UUID (<code>4fafc201-1fb5-459e-8fcc-c5c9c331914b</code>)</h3>
+        <p>Layanan utama tempat seluruh fitur VAC STECHOQ dikelompokkan.</p>
+        
+        <h3>2. RX Characteristic — Write Channel (<code>c083b0f6-bb21-4f15-8120-d4f13b28b7e2</code>)</h3>
+        <p>Saluran tempat smartphone <strong>mengirimkan perintah</strong> ke hardware (App ➔ ESP32). Metode tulisan menggunakan UTF-8 JSON.</p>
+
+        <h3>3. TX Characteristic — Notify Channel (<code>6e400003-b5a3-f393-e0a9-e50e24dcca9e</code>)</h3>
+        <p>Saluran tempat hardware <strong>mengirimkan data/status</strong> secara real-time ke smartphone (ESP32 ➔ App) melalui notifikasi Push.</p>
+      </div>
+    </section>
+
+    <!-- Handshake & Data Stream -->
+    <section>
+      <h2>3. Alur Handshake & Sinkronisasi Waktu</h2>
+      <p>Setiap kali koneksi BLE terhubung (<code>_connect</code>), aplikasi melakukan urutan alur berikut secara otomatis:</p>
+      
+      <ol>
+        <li><strong>Subscribe Notifikasi TX:</strong> <code>_txChar.setNotifyValue(true)</code> dipanggil agar aplikasi siap mendengarkan byte masuk dari hardware.</li>
+        <li><strong>Autentikasi Otomatis:</strong> Mengirimkan paket <code>{"type": "auth", "pin": authPin}</code> ke kanal RX.</li>
+        <li><strong>Sinkronisasi Jam (Time Sync):</strong> Mengirimkan Unix Timestamp terkini <code>{"type": "time_sync", "timestamp": epoch_seconds}</code> agar waktu pada hardware presisi dengan jam smartphone.</li>
+        <li><strong>Stream Event Terapi:</strong> Hardware mengirim data sesi terapi via TX. Aplikasi memvalidasi payload dan langsung menyimpannya ke database SQLite lokal via <code>TherapyReceiver.save(data)</code>.</li>
+      </ol>
+
+      <pre><code>// Contoh Potongan Kode Handshake pada BleService (lib/services/ble_service.dart)
+if (authPin != null && authPin.isNotEmpty) {
+  await send('auth', {'pin': authPin});
+}
+
+final ts = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+await send('time_sync', {'timestamp': ts});
+</code></pre>
+    </section>
+
+    <!-- RSSI & Auto Reconnect -->
+    <section>
+      <h2>4. Pemantauan Jarak (RSSI) & Auto-Reconnect</h2>
+      <p>Aplikasi dilengkapi dengan mekanisme perlindungan koneksi cerdas:</p>
+      
+      <div class="card">
+        <ul>
+          <li><strong>Monitoring RSSI:</strong> Setiap 4 detik (<code>_startRssiMonitoring</code>), aplikasi mengecek kekuatan sinyal nirkabel (dBm).</li>
+          <li><strong>Proximity Threshold:</strong> Sinyal di bawah <code>-85 dBm</code> dianggap jarak terlalu jauh (&gt; 8-10 meter).</li>
+          <li><strong>Proteksi Pemutusan:</strong> Jika terdeteksi 3 kali berturut-turut sinyal lemah, koneksi BLE sengaja diputus (<code>disconnect()</code>) untuk menghemat daya baterai.</li>
+          <li><strong>Silent Auto-Reconnect:</strong> Jika koneksi terputus secara tidak disengaja (misal pengguna keluar ruangan), background scanner akan otomatis mencoba reconnect saat pengguna mendekat kembali.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Interactive Quiz -->
+    <section class="quiz-section">
+      <h2>🧠 Uji Pemahaman (Retrieval Practice)</h2>
+      <p>Pilihlah jawaban yang paling tepat untuk menguji daya ingat Anda:</p>
+
+      <div id="quiz-container">
+        <p><strong>Pertanyaan:</strong> Manakah Characteristic UUID yang digunakan aplikasi untuk MEMBACA / MENERIMA notifikasi data terapi dari perangkat VAC STECHOQ?</p>
+        
+        <button class="quiz-option" onclick="checkAnswer(this, false)">
+          A. RX Characteristic (c083b0f6-bb21-4f15-8120-d4f13b28b7e2)
+        </button>
+        <button class="quiz-option" onclick="checkAnswer(this, true)">
+          B. TX Characteristic (6e400003-b5a3-f393-e0a9-e50e24dcca9e)
+        </button>
+        <button class="quiz-option" onclick="checkAnswer(this, false)">
+          C. Service Characteristic (4fafc201-1fb5-459e-8fcc-c5c9c331914b)
+        </button>
+        <button class="quiz-option" onclick="checkAnswer(this, false)">
+          D. Device Characteristic (00002a00-0000-1000-8000-00805f9b34fb)
+        </button>
+
+        <div id="quiz-feedback" class="feedback"></div>
+      </div>
+    </section>
+
+    <div class="nav-links">
+      <a href="../reference/ble-cheatsheet.html">📄 Lihat BLE Cheatsheet & Diagram →</a>
+    </div>
+
+  </main>
+
+  <script>
+    function checkAnswer(button, isCorrect) {
+      const options = document.querySelectorAll('.quiz-option');
+      options.forEach(btn => {
+        btn.disabled = true;
+        btn.classList.remove('correct', 'incorrect');
+      });
+
+      const feedback = document.getElementById('quiz-feedback');
+      if (isCorrect) {
+        button.classList.add('correct');
+        feedback.style.color = 'var(--success-text)';
+        feedback.innerHTML = '🎉 Tepat sekali! TX Characteristic dipasang notifikasi untuk mendengarkan stream data dari hardware ke aplikasi.';
+      } else {
+        button.classList.add('incorrect');
+        feedback.style.color = 'var(--warning-text)';
+        feedback.innerHTML = '❌ Masih kurang tepat. Saluran untuk menerima notifikasi dari alat ke app adalah TX Characteristic (6e400003...). Channel RX digunakan untuk MENULIS pesan dari app ke alat.';
+      }
+    }
+  </script>
+
+</body>
+</html>
