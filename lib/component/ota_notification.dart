@@ -43,10 +43,7 @@ class OtaNotifConfig {
         );
       case 'ota_status':
         final status = msg['status'] as String? ?? '';
-        return OtaNotifConfig(
-          state: _statusToState(status),
-          device: device,
-        );
+        return OtaNotifConfig(state: _statusToState(status), device: device);
       case 'update_pending':
         final pending = msg['pending'] as bool? ?? false;
         return OtaNotifConfig(
@@ -215,10 +212,7 @@ class OtaNotificationOverlay extends StatefulWidget {
         valueListenable: _configNotifier,
         builder: (_, cfg, _) {
           if (cfg == null) return const SizedBox.shrink();
-          return _OtaNotificationBanner(
-            config: cfg,
-            onDismiss: dismiss,
-          );
+          return _OtaNotificationBanner(config: cfg, onDismiss: dismiss);
         },
       ),
     );
@@ -277,9 +271,10 @@ class _OtaNotificationBannerState extends State<_OtaNotificationBanner>
       end: Offset.zero,
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
 
-    _fade = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
-    );
+    _fade = Tween<double>(
+      begin: 0,
+      end: 1,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
 
     _controller.forward();
     _scheduleAutoDismiss();
@@ -347,7 +342,9 @@ class _OtaNotificationBannerState extends State<_OtaNotificationBanner>
                   _dismiss();
                 }
               },
-              onTap: widget.config.state == OtaNotifState.failed ? _dismiss : null,
+              onTap: widget.config.state == OtaNotifState.failed
+                  ? _dismiss
+                  : null,
               child: _NotificationCard(
                 pres: pres,
                 config: widget.config,
@@ -355,7 +352,9 @@ class _OtaNotificationBannerState extends State<_OtaNotificationBanner>
                 isDark: isDark,
                 shimmerValue: _shimmerValue,
                 colors: colors,
-                onDismiss: pres.autoDismiss || widget.config.state == OtaNotifState.failed
+                onDismiss:
+                    pres.autoDismiss ||
+                        widget.config.state == OtaNotifState.failed
                     ? _dismiss
                     : null,
               ),
@@ -391,7 +390,9 @@ class _NotificationCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: isDark ? colors.backgroundsPrimaryElevated : colors.backgroundsPrimary,
+        color: isDark
+            ? colors.backgroundsPrimaryElevated
+            : colors.backgroundsPrimary,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
@@ -407,10 +408,6 @@ class _NotificationCard extends StatelessWidget {
             offset: const Offset(0, 2),
           ),
         ],
-        border: Border.all(
-          color: accent.withValues(alpha: isDark ? 0.28 : 0.16),
-          width: 1,
-        ),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -434,7 +431,11 @@ class _NotificationCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    _DeviceChip(label: config.device, accent: accent, isDark: isDark),
+                    _DeviceChip(
+                      label: config.device,
+                      accent: accent,
+                      isDark: isDark,
+                    ),
                   ],
                 ),
                 const SizedBox(height: 2),
