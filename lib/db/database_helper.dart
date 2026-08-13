@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -41,7 +42,7 @@ class DatabaseHelper {
     return _database!;
   }
 
-  /// Retrieve or generate AES-256 encryption key stored in flutter_secure_storage
+  /// Retrieve or generate clean 256-bit hex encryption key stored in flutter_secure_storage
   Future<String> getOrCreateEncryptionKey() async {
     if (_cachedKey != null) return _cachedKey!;
 
@@ -52,14 +53,19 @@ class DatabaseHelper {
     }
     final secureRandom = Random.secure();
     final bytes = List<int>.generate(32, (_) => secureRandom.nextInt(256));
-    key = base64Url.encode(bytes);
+    key = bytes.map((b) => b.toRadixString(16).padLeft(2, '0')).join();
     await _secureStorage.write(key: _dbKeyStorageKey, value: key);
     _cachedKey = key;
     return key;
   }
 
   Future<Database> _initDatabase() async {
-    final path = join(await getDatabasesPath(), _databaseName);
+    final dbDirPath = await getDatabasesPath();
+    try {
+      await Directory(dbDirPath).create(recursive: true);
+    } catch (_) {}
+
+    final path = join(dbDirPath, _databaseName);
     final password = await getOrCreateEncryptionKey();
     try {
       return await openDatabase(
