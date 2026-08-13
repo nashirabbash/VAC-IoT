@@ -2,7 +2,7 @@
 
 A cross-platform Flutter application (Android, iOS, Web) for real-time therapy monitoring, device control, and session tracking for the **VAC STECHOQ** (Vacuum Assisted Closure) medical device.
 
-The app connects over Bluetooth Low Energy (BLE) for live hardware telemetry, persists session history locally via SQLite (`sqflite`), manages auth tokens securely via `flutter_secure_storage`, and synchronizes records to the cloud REST backend.
+The app connects over Bluetooth Low Energy (BLE) for live hardware telemetry, persists session history and medical audit logs locally in an AES-256 encrypted SQLite database (`sqflite_sqlcipher`), manages auth tokens securely via `flutter_secure_storage`, and synchronizes records to the cloud REST backend over TLS 1.3 / HTTPS.
 
 ---
 
@@ -14,9 +14,11 @@ The app connects over Bluetooth Low Energy (BLE) for live hardware telemetry, pe
 - [API Configuration](#-api-configuration)
 - [System Architecture](#%EF%B8%8F-system--directory-architecture)
 - [Data Layer & Storage](#-data-layer--storage)
-- [BLE Internals](#-ble-internals)
+- [Medical Audit Trail System](#-medical-audit-trail-system)
+- [BLE Internals & Safety Boundaries](#-ble-internals--safety-boundaries)
 - [Therapy Modes & Telemetry](#-therapy-modes--ble-telemetry)
 - [End-to-End Flow](#-end-to-end-therapy--data-flow)
+- [Security & Transport Requirements](#-security--transport-requirements)
 - [Contributing](#-contributing)
 - [Technology Stack](#%EF%B8%8F-technology-stack--dependencies)
 
@@ -24,10 +26,13 @@ The app connects over Bluetooth Low Energy (BLE) for live hardware telemetry, pe
 
 ## 📌 Key Features
 
-- **BLE Device Pairing & Telemetry:** Connects to VAC hardware via `flutter_blue_plus`, subscribes to real-time therapy data streams, and enables device control.
-- **Offline-First Therapy History:** Persists therapy session records locally in SQLite (`vac_dashboard.db`).
-- **Cloud API Synchronization:** Automatically synchronizes unsynced local sessions to the remote REST backend.
-- **QR Code Connectivity:** Integrated QR scanner via `mobile_scanner` for rapid device and Wi-Fi credential provisioning.
+- **BLE Device Pairing & Telemetry:** Connects to VAC hardware via `flutter_blue_plus`, subscribes to real-time therapy data streams, and handles automated handshakes.
+- **Read-Only Telemetry Safety:** Enforces strict command whitelisting to block unauthorized remote therapy parameter modifications over BLE.
+- **AES-256 Encrypted Local Database:** Uses `sqflite_sqlcipher` (schema v3) with 256-bit hex encryption keys derived and stored in `flutter_secure_storage` with self-healing recovery.
+- **Medical Audit Trail Logging:** Records Nakes (medical personnel) clinical and device actions locally (`audit_logs`) and automatically synchronizes them to the cloud REST backend.
+- **Cloud API Synchronization:** Automatically synchronizes unsynced local sessions and audit logs to the remote REST backend via HTTPS / TLS 1.3.
+- **QR Code Provisioning:** Integrated QR scanner via `mobile_scanner` for rapid device pairing and Wi-Fi credential provisioning.
+- **Live System Log Viewer:** Built-in in-app diagnostic log viewer ([`lib/screens/logScreen.dart`](lib/screens/logScreen.dart)) for debugging BLE telemetry, connection states, and API events.
 - **Adaptive Design Token System:** Cupertino & Material combined styling with automatic light/dark mode support ([lib/asset/color_tokens.dart](lib/asset/color_tokens.dart)).
 - **OTA Updates Banner:** Notifies users of Over-The-Air firmware updates for the connected VAC hardware.
 
@@ -49,7 +54,7 @@ Before you begin, make sure the following are installed and configured:
 | Physical Android or iOS device | **Strongly recommended** — BLE and Camera do not work on most emulators |
 | Git | Any recent version |
 
-> **Android minimum SDK:** The app targets a minimum SDK version compatible with `flutter_blue_plus` and `flutter_secure_storage`. Ensure your device runs Android 8.0 (API 26) or higher.
+> **Android minimum SDK:** The app targets a minimum SDK version compatible with `flutter_blue_plus`, `sqflite_sqlcipher`, and `flutter_secure_storage`. Ensure your device runs Android 8.0 (API 26) or higher.
 
 ### 1. Clone the Repository
 
@@ -66,7 +71,7 @@ flutter pub get
 
 ### 3. Configure the Backend URL
 
-The API base URL is hardcoded in [`lib/services/api_service.dart`](lib/services/api_service.dart). If you need to point to a local or staging backend, update this constant before running:
+The API base URL is defined in [`lib/services/api_service.dart`](lib/services/api_service.dart). If you need to point to a local or staging backend, update this constant before running:
 
 ```dart
 // lib/services/api_service.dart
@@ -126,8 +131,6 @@ Permissions are declared in [`android/app/src/main/AndroidManifest.xml`](android
 
 > `BLUETOOTH_SCAN` is declared with `usesPermissionFlags="neverForLocation"` — the app does **not** use Bluetooth to derive location.
 
-> `android:usesCleartextTraffic="true"` is set in the manifest. This is required during development if your backend does not use HTTPS. Remove it for production-only HTTPS environments.
-
 ### iOS
 
 Privacy usage descriptions are declared in [`ios/Runner/Info.plist`](ios/Runner/Info.plist).
@@ -153,21 +156,19 @@ The REST API base URL is defined as a single constant in [`lib/services/api_serv
 static const _baseUrl = 'https://be-vac-production.up.railway.app/api';
 ```
 
-To switch environments (e.g., local development or staging), update this value directly. There is currently no `.env` file or build flavor system — that is a future improvement opportunity.
-
 ### Authentication Flow
 
 1. User submits credentials via the login form ([`lib/component/login_form.dart`](lib/component/login_form.dart)).
 2. `ApiService.login()` sends `POST /api/auth/login` with `{ username, password }`.
-3. On success, the response JWT token is saved via `AuthRepository.saveToken()` to the device Keystore/Keychain using `flutter_secure_storage`.
+3. On success, the response JWT token is saved via `AuthRepository.saveToken()` to device Keystore/Keychain using `flutter_secure_storage`.
 4. Device credentials (`deviceId`, `authPin`) extracted from the login response are also persisted securely.
-5. All subsequent HTTP requests are intercepted by [`lib/network/api_interceptor.dart`](lib/network/api_interceptor.dart), which attaches the `Authorization: Bearer <token>` header automatically.
+5. All subsequent HTTP requests are intercepted by [`lib/network/api_interceptor.dart`](lib/network/api_interceptor.dart), which validates TLS 1.3 / HTTPS transport and attaches the `Authorization: Bearer <token>` header automatically.
 
 ### Logout Flow
 
 1. User triggers logout from the avatar menu in [`lib/screens/homeScreens.dart`](lib/screens/homeScreens.dart).
 2. `ApiService.logout()` sends `POST /api/auth/logout`.
-3. The backend returns HTTP 400 if the user still has an active device connection, with the message: _"Please disconnect the device before logging out."_
+3. The backend returns HTTP 400 if the user still has an active device connection.
 4. On HTTP 200/204, `AuthRepository.clearToken()` wipes the token, device ID, auth PIN, and username from secure storage.
 
 ### REST API Endpoints Summary
@@ -180,17 +181,18 @@ To switch environments (e.g., local development or staging), update this value d
 | `POST` | `/api/device/bind` | Bind a QR-scanned device to account |
 | `GET` | `/api/therapy-sessions` | Fetch cloud session list (optional `?year=`) |
 | `POST` | `/api/therapy-sessions` | Sync a local session to the cloud |
+| `POST` | `/api/audit-logs` | Sync medical personnel audit logs to backend |
 
 ---
 
 ## 🏗️ System & Directory Architecture
 
-The application adopts a modular multi-tier architecture isolating user interfaces, background business logic, and local/remote persistence layers.
+The application adopts a modular multi-tier architecture isolating user interfaces, background business logic, and encrypted persistence layers.
 
 ```mermaid
 flowchart TD
     accTitle: VAC STECHOQ Dashboard System Architecture
-    accDescr: Component architecture showing user interfaces, background services, persistence layers, hardware BLE interfaces, and cloud REST integration.
+    accDescr: Component architecture showing user interfaces, background services, encrypted persistence layers, hardware BLE interfaces, and cloud REST integration.
 
     subgraph UI["UI & Screen Layer"]
         home_screen["HomeScreen<br/>(Dashboard & Summary)"]
@@ -198,51 +200,60 @@ flowchart TD
         history_screen["HistoryScreen<br/>(Session Log & Filter)"]
         scan_screen["ScanScreen<br/>(QR Provisioning)"]
         settings_screen["SettingsScreen<br/>(Theme & Account)"]
+        log_screen["LogScreen<br/>(Live System Logs)"]
     end
 
     subgraph SERVICES["Services & Business Logic"]
-        ble_service["BleService<br/>(Scan & GATT Connection)"]
+        ble_service["BleService<br/>(Scan, Connection & Whitelist)"]
         therapy_receiver["TherapyReceiver<br/>(Live Telemetry Stream)"]
-        therapy_sync["TherapySyncService<br/>(Offline Sync Bridge)"]
+        therapy_sync["TherapySyncService<br/>(Offline Session Sync)"]
+        audit_service["AuditService<br/>(Nakes Audit Trail Logger)"]
+        audit_sync["AuditSyncService<br/>(Audit Log Cloud Sync)"]
         api_service["ApiService<br/>(REST API Client)"]
+        log_service["LogService<br/>(In-Memory Log Notifier)"]
         ota_service["OtaBannerService<br/>(Firmware Notifier)"]
     end
 
     subgraph DATA["Persistence & Repositories"]
         auth_repo["AuthRepository<br/>(Token & Credentials)"]
-        db_helper["DatabaseHelper<br/>(SQLite Singleton)"]
+        db_helper["DatabaseHelper<br/>(SQLCipher Singleton)"]
         secure_storage["Secure Storage<br/>(Keystore / Keychain)"]
-        sqlite_db[("vac_dashboard.db<br/>(therapy_sessions)")]
+        encrypted_db[("vac_dashboard.db<br/>(AES-256 Encrypted Tables)")]
     end
 
     subgraph EXTERNAL["External Ecosystem"]
         vac_hardware["VAC STECHOQ Device<br/>(BLE Hardware)"]
-        cloud_backend["Cloud REST Backend<br/>(Server API)"]
+        cloud_backend["Cloud REST Backend<br/>(TLS 1.3 / HTTPS API)"]
     end
 
     UI --> SERVICES
     device_screen --> ble_service
     device_screen --> therapy_receiver
     scan_screen --> ble_service
+    log_screen --> log_service
     
     SERVICES --> DATA
     therapy_receiver --> db_helper
     therapy_sync --> db_helper
     therapy_sync --> api_service
+    audit_service --> db_helper
+    audit_sync --> db_helper
+    audit_sync --> api_service
     auth_repo --> secure_storage
-    db_helper --> sqlite_db
+    db_helper --> secure_storage
+    db_helper --> encrypted_db
 
-    ble_service <-->|"BLE GATT"| vac_hardware
-    api_service <-->|"HTTPS / REST"| cloud_backend
+    ble_service <-->|"BLE GATT (Whitelisted)"| vac_hardware
+    api_service <-->|"HTTPS / TLS 1.3"| cloud_backend
 
     classDef uiStyle fill:#e0f2fe,stroke:#0284c7,stroke-width:2px,color:#0369a1
     classDef serviceStyle fill:#f0fdf4,stroke:#16a34a,stroke-width:2px,color:#15803d
     classDef dataStyle fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#b45309
     classDef extStyle fill:#fae8ff,stroke:#c026d3,stroke-width:2px,color:#86198f
 
-    class home_screen,device_screen,history_screen,scan_screen,settings_screen uiStyle
-    class ble_service,therapy_receiver,therapy_sync,api_service,ota_service serviceStyle
-    class auth_repo,db_helper,secure_storage,sqlite_db dataStyle
+    class home_screen,device_screen,history_screen,scan_screen,settings_screen,log_screen uiStyle
+    class ble_service,therapy_receiver,therapy_sync,audit_service,audit_sync,api_service,log_service,ota_service serviceStyle
+    class auth_repo,db_helper,secure_storage,encrypted_db dataStyle
     class vac_hardware,cloud_backend extStyle
 ```
 
@@ -277,14 +288,14 @@ lib/
 ├── data/                        # Local mock & seed data
 │   └── dummyData.json           # Development fallback dataset
 ├── db/                          # Database persistence layer
-│   └── database_helper.dart     # SQLite singleton manager & queries
+│   └── database_helper.dart     # SQLCipher AES-256 singleton manager & queries
 ├── models/                      # Business & data transfer models
 │   ├── auth_form_data.dart      # Auth form state validation model
 │   ├── device_credentials.dart  # VAC device connection credentials
 │   ├── register_dto.dart        # Registration payload DTO
 │   └── therapy_session.dart     # TherapySession entity model
 ├── network/                     # Network middleware
-│   └── api_interceptor.dart     # HTTP request interceptor & error handler
+│   └── api_interceptor.dart     # HTTP request interceptor, TLS 1.3 check & error handler
 ├── repositories/                # Data repository layer
 │   ├── auth_repository.dart     # Secure token & credential persistence
 │   └── settings_repository.dart # Preferences repository (theme mode)
@@ -292,16 +303,21 @@ lib/
 │   ├── homeScreens.dart         # Main dashboard & active session summary
 │   ├── historyScreens.dart      # Session history list & year filtering
 │   ├── deviceScreens.dart       # Real-time BLE device control screen
+│   ├── logScreen.dart           # In-app system log viewer for debugging
 │   ├── scanScreens.dart         # QR code device scanning screen
 │   ├── settingsScreen.dart      # Settings, theme toggle & account details
 │   ├── welcomeScreens.dart      # Onboarding welcome screen
 │   └── wifiScreens.dart         # VAC device Wi-Fi configuration screen
 ├── services/                    # Business logic & background services
 │   ├── api_service.dart         # REST API client service
-│   ├── ble_service.dart         # BLE scanning, connecting & GATT characteristic streams
+│   ├── audit_service.dart       # Medical personnel action audit trail logger
+│   ├── audit_sync_service.dart  # Background audit trail cloud sync bridge
+│   ├── ble_service.dart         # BLE scanning, connecting & GATT safety whitelisting
+│   ├── heartbeat_alarm_service.dart # Heartbeat monitor service
+│   ├── log_service.dart         # Global in-memory logging service
 │   ├── ota_banner_service.dart  # OTA firmware update banner manager
 │   ├── therapy_receiver.dart    # Live therapy packet stream handler
-│   └── therapy_sync_service.dart# Synchronization bridge between SQLite and Cloud API
+│   └── therapy_sync_service.dart# Session synchronization bridge between SQLCipher and Cloud
 └── utils/                       # Utility helpers
     ├── mode_color.dart          # Therapy mode visual badge color resolver
     └── text_styles.dart         # Typography text style utilities
@@ -311,9 +327,15 @@ lib/
 
 ## 💾 Data Layer & Storage
 
-### SQLite Local Database
+### SQLCipher AES-256 Local Database
 
-Managed by [`DatabaseHelper`](lib/db/database_helper.dart) (`vac_dashboard.db`, schema version `2`).
+Managed by [`DatabaseHelper`](lib/db/database_helper.dart) via `sqflite_sqlcipher` (`vac_dashboard.db`, schema version `3`).
+
+#### Database Encryption & Key Management
+
+- **Encryption Standard:** AES-256 full database encryption via SQLCipher.
+- **Key Generation:** A clean 256-bit hex encryption key is generated using `Random.secure()` upon first run and cached securely in `flutter_secure_storage` under key `vac_db_encryption_key`.
+- **Self-Healing Recovery:** If database opening fails (e.g. key corruption), `DatabaseHelper` catches the failure, logs the error, safely re-creates the database structure, and prevents application deadlock.
 
 #### Table: `therapy_sessions`
 
@@ -327,23 +349,26 @@ Managed by [`DatabaseHelper`](lib/db/database_helper.dart) (`vac_dashboard.db`, 
 | `duration` | `TEXT` | `NOT NULL` | Session duration string |
 | `is_synced` | `INTEGER` | `NOT NULL DEFAULT 0` | `0` = local only, `1` = synced to cloud |
 
-#### Available DatabaseHelper Methods
+#### Table: `audit_logs`
 
-| Method | Description |
-| :--- | :--- |
-| `insert(session)` | Insert a new therapy session |
-| `getAll()` | Retrieve all sessions |
-| `getByYear(year)` | Retrieve sessions filtered by year string |
-| `getYears()` | Retrieve list of distinct years in the database |
-| `update(session)` | Update an existing session record |
-| `delete(id)` | Delete a session by ID |
+| Column | Type | Modifiers | Description |
+| :--- | :--- | :--- | :--- |
+| `id` | `INTEGER` | `PRIMARY KEY AUTOINCREMENT` | Audit log record identifier |
+| `user_id` | `INTEGER` | `NULLABLE` | ID of logged-in medical personnel |
+| `username` | `TEXT` | `NULLABLE` | Username of Nakes user |
+| `hospital_name` | `TEXT` | `NULLABLE` | Associated hospital / medical facility |
+| `device_id` | `TEXT` | `NULLABLE` | VAC device identifier |
+| `action` | `TEXT` | `NOT NULL` | Action code (`VIEW_SESSION`, `BIND_DEVICE`, `EXPORT_REPORT`, `BLE_DISCONNECT`) |
+| `details` | `TEXT` | `NULLABLE` | Additional context or parameters |
+| `timestamp` | `TEXT` | `NOT NULL` | UTC ISO 8601 timestamp string |
+| `is_synced` | `INTEGER` | `NOT NULL DEFAULT 0` | `0` = local only, `1` = synced to backend |
 
 ### Entity Relationship Diagram
 
 ```mermaid
 erDiagram
-    accTitle: SQLite Database and Storage Entity Relationship
-    accDescr: Entity relationship diagram representing local SQLite tables and encrypted key-value pairs stored in secure storage.
+    accTitle: SQLCipher Database and Storage Entity Relationship
+    accDescr: Entity relationship diagram representing local encrypted SQLCipher tables and keys stored in secure storage.
 
     THERAPY_SESSIONS {
         int id PK "Auto Increment Local ID"
@@ -355,171 +380,74 @@ erDiagram
         int is_synced "0 = Local only, 1 = Cloud synced"
     }
 
+    AUDIT_LOGS {
+        int id PK "Auto Increment Local ID"
+        int user_id "Nakes user identifier"
+        string username "Nakes username"
+        string hospital_name "Hospital / Facility"
+        string device_id "Target VAC device ID"
+        string action "Action code string"
+        string details "Log action details"
+        string timestamp "UTC ISO 8601 timestamp"
+        int is_synced "0 = Local only, 1 = Cloud synced"
+    }
+
     SECURE_STORAGE {
         string jwt_auth_token PK "Encrypted Auth Token"
-        string device_mac_address "Saved VAC Hardware MAC"
-        string wifi_credentials "Encrypted SSID & Password"
+        string vac_db_encryption_key "256-bit Hex SQLCipher Key"
+        string device_id "Saved VAC Hardware ID"
+        string auth_pin "Device BLE Auth PIN"
     }
 
-    APP_SETTINGS {
-        string theme_mode "light or dark or system"
-    }
-
-    THERAPY_SESSIONS ||--o| SECURE_STORAGE : "authenticated by"
-    APP_SETTINGS ||--o| THERAPY_SESSIONS : "styles UI display for"
+    THERAPY_SESSIONS ||--o| SECURE_STORAGE : "authenticated & encrypted by"
+    AUDIT_LOGS ||--o| SECURE_STORAGE : "logged under credentials in"
 ```
-
-### Offline-First Cloud Synchronization Flow
-
-```mermaid
-flowchart TD
-    accTitle: Offline-First Synchronization Decision Flowchart
-    accDescr: Decision flowchart showing local session persistence and conditional remote cloud REST API sync logic.
-
-    start_sync(["Trigger Sync Operation"]) --> check_net{"Network Available?"}
-
-    check_net -- "No (Offline)" --> store_offline["Store Session in SQLite<br/>(is_synced = 0)"]
-    store_offline --> notify_user["Display Saved Locally Status"]
-
-    check_net -- "Yes (Online)" --> fetch_unsynced["Query SQLite for<br/>is_synced == 0"]
-    fetch_unsynced --> has_records{"Unsynced Sessions Exist?"}
-
-    has_records -- "No" --> sync_complete(["DB Up To Date"])
-    has_records -- "Yes" --> iterate_sessions["Loop Unsynced Session Batch"]
-
-    iterate_sessions --> send_api["Send POST /api/sessions"]
-    send_api --> api_success{"Response 200/201?"}
-
-    api_success -- "Yes" --> mark_synced["Update SQLite DB<br/>(is_synced = 1)"]
-    mark_synced --> next_session{"More Sessions?"}
-    next_session -- "Yes" --> iterate_sessions
-    next_session -- "No" --> sync_done(["Cloud Sync Complete"])
-
-    api_success -- "No (Error/Timeout)" --> log_error["Log Sync Failure"]
-    log_error --> keep_local["Keep is_synced = 0 for Retry"]
-    keep_local --> sync_done
-
-    classDef startStyle fill:#dbeafe,stroke:#2563eb,stroke-width:2px,color:#1e3a5f
-    classDef decisionStyle fill:#fef9c3,stroke:#ca8a04,stroke-width:2px,color:#713f12
-    classDef actionStyle fill:#dcfce7,stroke:#16a34a,stroke-width:2px,color:#14532d
-    classDef warnStyle fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#991b1b
-
-    class start_sync,sync_complete,sync_done startStyle
-    class check_net,has_records,api_success,next_session decisionStyle
-    class store_offline,fetch_unsynced,iterate_sessions,send_api,mark_synced actionStyle
-    class log_error,keep_local warnStyle
-```
-
-### Secure Credentials Storage
-
-[`AuthRepository`](lib/repositories/auth_repository.dart) uses `flutter_secure_storage` to encrypt sensitive data via Keystore (Android) and Keychain (iOS).
-
-| Secure Storage Key | Content |
-| :--- | :--- |
-| `jwt_token` | JWT Bearer token from `/api/auth/login` |
-| `device_id` | VAC hardware device identifier (BLE name) |
-| `auth_pin` | Device authentication PIN for BLE handshake |
-| `username` | Logged-in username (display and fallback decode) |
-
-**Self-healing fallback:** If `device_id` is missing from secure storage (e.g., after a fresh install), `AuthRepository.getDeviceCredentials()` decodes the JWT payload and extracts `deviceId` from it automatically, then persists it for subsequent reads.
 
 ---
 
-## 📡 BLE Internals
+## 🩺 Medical Audit Trail System
 
-All BLE communication is managed by [`BleService`](lib/services/ble_service.dart) using the `flutter_blue_plus` package.
+To meet clinical compliance standards, the app implements an audit logging pipeline via [`AuditService`](lib/services/audit_service.dart) and [`AuditSyncService`](lib/services/audit_sync_service.dart).
+
+### Logged Actions (`AuditActions`)
+
+- `VIEW_SESSION` — Medical staff opened and inspected a specific therapy session log.
+- `BIND_DEVICE` — Medical staff bound a new VAC hardware unit via QR code scanning.
+- `EXPORT_REPORT` — Clinical therapy session report was generated or exported.
+- `BLE_DISCONNECT` — Device BLE connection was explicitly closed or lost.
+
+### Synchronization Pipeline
+
+1. **Local Recording:** Every Nakes action calls `AuditService.instance.logAction()`, automatically retrieving user profile details (username, hospital) and writing to the encrypted `audit_logs` SQLite table.
+2. **Background Sync:** Immediately after insertion, `AuditSyncService.instance.syncPendingAuditLogs()` batches unsynced audit logs (`is_synced = 0`) and sends them to `POST /api/audit-logs`.
+3. **Acknowledgment:** Upon receiving HTTP 200/201 from the server, records are marked as `is_synced = 1`.
+
+---
+
+## 📡 BLE Internals & Safety Boundaries
+
+All BLE communication is managed by [`BleService`](lib/services/ble_service.dart) using `flutter_blue_plus`.
+
+### Read-Only Telemetry & GATT Command Whitelisting
+
+To guarantee hardware safety and prevent unauthorized remote modification of therapeutic parameters over BLE:
+
+- **Command Whitelist:** The app permits ONLY non-invasive housekeeping commands via `BleService.isCommandAllowed(type)`.
+- **Allowed Commands:**
+  - `auth` — Initial authentication handshake.
+  - `time_sync` — Synchronize device internal RTC clock.
+  - `get_status` — Query current Wi-Fi status.
+  - `wifi_config` — Provision local Wi-Fi credentials.
+  - `wifi_disconnect` — Unlink Wi-Fi network.
+- **Forbidden Commands:** Any remote RPC attempting to adjust target pressure, continuous/intermittent therapy parameters, or suction motor speed over BLE is rejected before transmission.
 
 ### GATT Profile
-
-The VAC STECHOQ hardware exposes a single GATT service with two characteristics:
 
 | Role | UUID | Direction | Description |
 | :--- | :--- | :--- | :--- |
 | **Service** | `4fafc201-1fb5-459e-8fcc-c5c9c331914b` | — | Primary GATT service |
-| **RX Char** | `c083b0f6-bb21-4f15-8120-d4f13b28b7e2` | App → Device (Write) | Command channel — app writes JSON commands here |
+| **RX Char** | `c083b0f6-bb21-4f15-8120-d4f13b28b7e2` | App → Device (Write) | Command channel — whitelisted JSON commands only |
 | **TX Char** | `6e400003-b5a3-f393-e0a9-e50e24dcca9e` | Device → App (Notify) | Telemetry channel — device notifies JSON events here |
-
-### Connection Lifecycle
-
-```mermaid
-stateDiagram-v2
-    accTitle: VAC STECHOQ Device and Therapy Lifecycle
-    accDescr: State machine diagram detailing BLE connection states and therapy operation modes from idle to completed session.
-
-    [*] --> Disconnected
-
-    state Connection_Phase {
-        Disconnected --> Scanning : Start BLE Scan
-        Scanning --> Connecting : Device Discovered / QR Paired
-        Connecting --> Connected : GATT Handshake Success
-        Connecting --> Disconnected : Connection Timeout / Failed
-    }
-
-    state Therapy_Phase {
-        Connected --> Idle : Ready for Therapy
-        
-        state Mode_Selection {
-            Idle --> KontinyuMode : Select Continuous Mode
-            Idle --> IntermitenMode : Select Intermittent Mode
-        }
-
-        state Active_Therapy {
-            KontinyuMode --> TherapyRunning : Suction Active (Constant)
-            IntermitenMode --> TherapyRunning : Suction Active (Cycled)
-            TherapyRunning --> TherapyPaused : User Pause
-            TherapyPaused --> TherapyRunning : Resume
-        }
-
-        TherapyRunning --> SessionCompleted : Stop Therapy / Timer Reached
-    }
-
-    SessionCompleted --> SavingLocal : Write to SQLite DB
-    SavingLocal --> SyncingCloud : TherapySyncService Active
-    SyncingCloud --> Idle : Session Sync Finished
-    Connected --> Disconnected : Device Disconnected / Link Lost
-```
-
-### Post-Connection Handshake
-
-Immediately after GATT service discovery succeeds, `BleService` performs two automated steps:
-
-1. **Authentication** — sends `{ "type": "auth", "pin": "<authPin>" }` to the RX characteristic if an `authPin` is stored.
-2. **Time Sync** — sends `{ "type": "time_sync", "timestamp": <unix_epoch_seconds> }` to align the device clock.
-
-### JSON Command Protocol
-
-All messages on the RX channel are UTF-8 encoded JSON objects. The `type` field is always present.
-
-**Commands the app sends (App → Device via RX):**
-
-| `type` | Payload fields | Description |
-| :--- | :--- | :--- |
-| `auth` | `pin` | Device authentication handshake |
-| `time_sync` | `timestamp` | Unix epoch (seconds) clock alignment |
-| `wifi_config` | `ssid`, `password` | Provision Wi-Fi credentials |
-| `wifi_disconnect` | — | Disconnect device from Wi-Fi |
-| `get_status` | — | Request current Wi-Fi connection status |
-
-**Events the device sends (Device → App via TX Notify):**
-
-| `type` / key | Description |
-| :--- | :--- |
-| `therapy_event` or `therapy` | Therapy session data packet (triggers `TherapyReceiver.save()`) |
-| `wifi_status` | Wi-Fi connection status update with optional `ssid` field |
-| Presence of `start` key | Alternate therapy event format (used to deduplicate sessions via `_lastStart`) |
-
-### RSSI Proximity Monitoring
-
-`BleService` polls RSSI every **4 seconds** after connecting. If the signal drops below **-85 dBm** for **3 consecutive readings**, the service automatically disconnects. This prevents the device from staying "connected" when the user has walked out of range.
-
-### Auto-Reconnect Behavior
-
-| Trigger | Behavior |
-| :--- | :--- |
-| Connection timeout / GATT failure | Retry scan after 3 seconds |
-| Unexpected disconnection (link lost) | Retry scan after 5 seconds (if not explicitly disconnected) |
-| User-initiated disconnect (`disconnect()`) | No auto-reconnect; sets `isExplicitlyDisconnected = true` |
-| New login session (`resetForNewSession()`) | Clears the explicit disconnect guard, re-enables auto-reconnect |
 
 ---
 
@@ -534,55 +462,57 @@ The VAC STECHOQ device operates in two primary therapy modes:
 
 Badge colors are resolved by [`lib/utils/mode_color.dart`](lib/utils/mode_color.dart) via `modeBadgeColor(mode)`.
 
-Live telemetry packets received over BLE via [`therapy_receiver.dart`](lib/services/therapy_receiver.dart) are processed in real-time, displayed on [`deviceScreens.dart`](lib/screens/deviceScreens.dart), and persisted to SQLite upon session completion.
-
 ---
 
 ## 🔄 End-to-End Therapy & Data Flow
 
-The following sequence illustrates the complete path from therapy start to cloud sync.
-
 ```mermaid
 sequenceDiagram
     accTitle: End-to-End Therapy Session and Cloud Sync Flow
-    accDescr: Sequence diagram illustrating device connection, telemetry stream reception, session completion local persistence, and cloud sync.
+    accDescr: Sequence diagram illustrating device connection, telemetry stream reception, session completion local persistence, audit logging, and cloud sync.
 
-    actor User
+    actor User as Medical Personnel
     participant UI as DeviceScreen / UI
     participant BLE as BleService
     participant VAC as VAC Hardware
-    participant Rx as TherapyReceiver
-    participant DB as DatabaseHelper (SQLite)
-    participant Sync as TherapySyncService
+    participant Audit as AuditService
+    participant DB as DatabaseHelper (SQLCipher)
+    participant Sync as TherapySyncService & AuditSyncService
     participant API as Cloud REST API
 
-    User->>UI: 1. Select Therapy Mode (Kontinyu / Intermiten) & Start
-    UI->>BLE: 2. Send Start Command via GATT Characteristic
-    BLE->>VAC: 3. BLE Command Write
-    VAC-->>BLE: 4. Command Acknowledged & Suction Started
+    User->>UI: 1. View Session / Connect Device
+    UI->>Audit: 2. Record Nakes Audit Action (e.g. BIND_DEVICE / VIEW_SESSION)
+    Audit->>DB: 3. Insert audit log (is_synced = 0)
+    
+    UI->>BLE: 4. Initiate Whitelisted BLE Handshake (auth & time_sync)
+    BLE->>VAC: 5. BLE GATT Command Write
+    VAC-->>BLE: 6. Handshake Success & Live Telemetry Stream
     
     loop Real-Time Telemetry Stream
-        VAC-->>BLE: 5. BLE Notification (Pressure, Duration, Mode)
-        BLE-->>Rx: 6. Forward Data Packet Stream
-        Rx-->>UI: 7. Emit Live Telemetry to Dashboard UI
+        VAC-->>BLE: 7. BLE Notification (Pressure, Duration, Mode)
+        BLE-->>UI: 8. Emit Live Telemetry to Dashboard UI
     end
 
-    User->>UI: 8. Stop Therapy Session
-    UI->>BLE: 9. Send Stop Command
-    BLE->>VAC: 10. BLE Command Write
-    
-    UI->>DB: 11. Save Session Record (is_synced = 0)
-    DB-->>UI: 12. Session Saved Locally
+    User->>UI: 9. Complete Therapy Session
+    UI->>DB: 10. Save Session Record (is_synced = 0)
+    DB-->>UI: 11. Session Saved in Encrypted Local Storage
 
-    opt Background / Automatic Cloud Sync
-        Sync->>DB: 13. Query Unsynced Sessions (is_synced = 0)
-        DB-->>Sync: 14. Return Unsynced Session List
-        Sync->>API: 15. POST /api/therapy-sessions (Payload)
-        API-->>Sync: 16. HTTP 201 Created Confirmation
-        Sync->>DB: 17. Update Record (is_synced = 1)
-        DB-->>Sync: 18. Sync Status Updated
+    opt Background Cloud Sync (HTTPS / TLS 1.3)
+        Sync->>DB: 12. Query Unsynced Sessions & Audit Logs
+        DB-->>Sync: 13. Return Unsynced Batches
+        Sync->>API: 14. POST /api/therapy-sessions & POST /api/audit-logs
+        API-->>Sync: 15. HTTP 200/201 Confirmation
+        Sync->>DB: 16. Update Records (is_synced = 1)
     end
 ```
+
+---
+
+## 🛡️ Security & Transport Requirements
+
+1. **Mandatory TLS 1.3 / HTTPS:** [`ApiInterceptor`](lib/network/api_interceptor.dart) inspects every outgoing HTTP request. Plaintext HTTP traffic is rejected in release builds (`SecurityException`).
+2. **AES-256 Storage Encryption:** Local databases use SQLCipher (`sqflite_sqlcipher`) with randomly generated 256-bit keys stored in platform-native secure enclaves (Keystore / Keychain).
+3. **No Safety-Critical Control via BLE:** Control parameters for wound therapy suction levels are enforced at hardware boundary level and protected against BLE parameter modification.
 
 ---
 
@@ -598,35 +528,14 @@ sequenceDiagram
 | `docs/` | Documentation updates only |
 | `chore/` | Maintenance tasks (deps, configs) |
 
-Example: `feat/ota-progress-indicator`, `fix/ble-reconnect-loop`.
-
 ### Before Submitting
 
 Run both checks and fix any issues before opening a pull request:
 
 ```bash
-flutter analyze   # must exit with 0 issues
-flutter test      # all tests must pass
+flutter analyze   # check code style & lints
+flutter test      # run unit & widget test suite
 ```
-
-### Adding a New Screen
-
-1. Create the screen file under `lib/screens/`.
-2. Register it in the appropriate navigation flow in `lib/main.dart`.
-3. Use `context.colors.<token>` from [`lib/asset/color_tokens.dart`](lib/asset/color_tokens.dart) for all colors — never hardcode `Colors.black` or `Colors.white`.
-4. Use `AppText` from [`lib/component/text.dart`](lib/component/text.dart) for all typography.
-
-### Adding a New API Endpoint
-
-1. Add a method to [`lib/services/api_service.dart`](lib/services/api_service.dart).
-2. Use the existing `_client` (which is an `ApiInterceptor`) — do not create a raw `http.Client`.
-3. Throw `ApiException` for error responses so callers can handle them uniformly.
-
-### Adding a New BLE Command
-
-1. Add a method to [`lib/services/ble_service.dart`](lib/services/ble_service.dart) that calls `send(type, payload)`.
-2. If the command expects a response, add a handler branch in `handleIncomingBytes()`.
-3. Document the new `type` string and expected payload fields in the [BLE Internals](#-ble-internals) section of this README.
 
 ---
 
@@ -637,9 +546,9 @@ flutter test      # all tests must pass
 | Package | Version | Purpose |
 | :--- | :--- | :--- |
 | Flutter SDK | `^3.12.2` | Core application framework |
-| `sqflite` | `^2.4.3` | Local SQLite database engine |
+| `sqflite_sqlcipher` | `^3.4.1` | AES-256 encrypted local SQLite database engine |
 | `flutter_blue_plus` | `^1.32.12` | BLE scanning, connecting, and GATT streaming |
-| `flutter_secure_storage` | `^10.3.1` | Encrypted storage for JWT tokens and device credentials |
+| `flutter_secure_storage` | `^10.3.1` | Encrypted storage for JWT tokens and database keys |
 | `http` | `^1.3.0` | REST API HTTP client |
 | `mobile_scanner` | `^7.2.0` | QR code scanner engine |
 | `camera` | `^0.10.6` | Camera hardware module integration |
