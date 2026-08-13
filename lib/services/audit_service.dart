@@ -29,13 +29,14 @@ class AuditService {
   }) async {
     try {
       final creds = await _authRepository.getDeviceCredentials();
+      final userProfile = await _authRepository.getUserProfile();
       final targetDeviceId = deviceId ?? creds?.deviceId;
       final timestamp = DateTime.now().toUtc().toIso8601String();
 
       final row = {
-        'userId': null,
-        'username': null,
-        'hospitalName': null,
+        'userId': userProfile['userId'],
+        'username': userProfile['username'],
+        'hospitalName': userProfile['hospitalName'],
         'deviceId': targetDeviceId,
         'action': action,
         'details': details,
@@ -44,7 +45,7 @@ class AuditService {
       };
 
       await _dbHelper.insertAuditLog(row);
-      LogService.log('[AUDIT] Action logged: $action (device: $targetDeviceId)');
+      LogService.log('[AUDIT] Action logged: $action (user: ${userProfile['username']}, device: $targetDeviceId)');
 
       // Attempt background sync
       AuditSyncService.instance.syncPendingAuditLogs().catchError((_) {});

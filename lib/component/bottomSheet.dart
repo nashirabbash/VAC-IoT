@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:vac_dashboard_app/component/mode_badge.dart';
-import 'package:vac_dashboard_app/utils/text_styles.dart';
 import 'package:vac_dashboard_app/asset/color_tokens.dart';
-
+import 'package:vac_dashboard_app/component/button.dart';
+import 'package:vac_dashboard_app/component/mode_badge.dart';
+import 'package:vac_dashboard_app/component/text.dart';
 import 'package:vac_dashboard_app/services/audit_service.dart';
+import 'package:vac_dashboard_app/utils/text_styles.dart';
 
 class HistoryBottomSheet extends StatelessWidget {
   const HistoryBottomSheet({
@@ -83,8 +84,31 @@ class HistoryBottomSheet extends StatelessWidget {
                 ),
               ),
               ModeBadge(mode: mode),
-              const SizedBox(height: 16),
             ],
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            child: AppButton(
+              label: 'Ekspor Laporan Terapi',
+              icon: Icons.ios_share_rounded,
+              variant: ButtonVariant.secondary,
+              onPressed: () {
+                AuditService.instance.logAction(
+                  action: AuditActions.exportReport,
+                  details: 'Exported therapy session report: $title ($date)',
+                );
+                Navigator.of(context).pop();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: AppText(
+                      'Laporan terapi berhasil diekspor',
+                      type: AppTextType.caption1,
+                    ),
+                  ),
+                );
+              },
+            ),
           ),
         ],
       ),
