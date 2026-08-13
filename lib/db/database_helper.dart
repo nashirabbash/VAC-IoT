@@ -8,7 +8,7 @@ import 'package:vac_dashboard_app/services/log_service.dart';
 
 class DatabaseHelper {
   static const _databaseName = "vac_dashboard.db";
-  static const _databaseVersion = 2;
+  static const _databaseVersion = 3;
   static const _dbKeyStorageKey = 'vac_db_encryption_key';
 
   static const table = 'therapy_sessions';
@@ -70,8 +70,20 @@ class DatabaseHelper {
         onUpgrade: _onUpgrade,
       );
     } catch (e) {
-      LogService.log('[DB] SQLCipher open database failed: $e');
-      rethrow;
+      LogService.log('[DB] SQLCipher open database failed: $e. Attempting database recovery/re-creation...');
+      try {
+        await deleteDatabase(path);
+        return await openDatabase(
+          path,
+          password: password,
+          version: _databaseVersion,
+          onCreate: _onCreate,
+          onUpgrade: _onUpgrade,
+        );
+      } catch (recoveryError) {
+        LogService.log('[DB] Recovery open failed: $recoveryError');
+        rethrow;
+      }
     }
   }
 
@@ -110,6 +122,21 @@ class DatabaseHelper {
       await db.execute(
         'ALTER TABLE $table ADD COLUMN $columnIsSynced INTEGER NOT NULL DEFAULT 0',
       );
+    }
+    if (oldVersion < 3) {
+      await db.execute('''
+        CREATE TABLE $auditTable (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          user_id INTEGER,
+          username TEXT,
+          hospital_name TEXT,
+          device_id TEXT,
+          action TEXT NOT NULL,
+          details TEXT,
+          timestamp TEXT NOT NULL,
+          is_synced INTEGER NOT NULL DEFAULT 0
+        )
+      ''');
     }
   }
 
