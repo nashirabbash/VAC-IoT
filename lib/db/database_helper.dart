@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:path/path.dart';
 import 'package:sqflite_sqlcipher/sqflite.dart';
+import 'package:vac_dashboard_app/services/log_service.dart';
 
 class DatabaseHelper {
   static const _databaseName = "vac_dashboard.db";
@@ -21,6 +22,7 @@ class DatabaseHelper {
   static const columnIsSynced = 'is_synced';
 
   final FlutterSecureStorage _secureStorage;
+  String? _cachedKey;
 
   DatabaseHelper._privateConstructor({FlutterSecureStorage? secureStorage})
       : _secureStorage = secureStorage ?? const FlutterSecureStorage();
@@ -41,27 +43,36 @@ class DatabaseHelper {
 
   /// Retrieve or generate AES-256 encryption key stored in flutter_secure_storage
   Future<String> getOrCreateEncryptionKey() async {
+    if (_cachedKey != null) return _cachedKey!;
+
     String? key = await _secureStorage.read(key: _dbKeyStorageKey);
     if (key != null && key.isNotEmpty) {
+      _cachedKey = key;
       return key;
     }
     final secureRandom = Random.secure();
     final bytes = List<int>.generate(32, (_) => secureRandom.nextInt(256));
     key = base64Url.encode(bytes);
     await _secureStorage.write(key: _dbKeyStorageKey, value: key);
+    _cachedKey = key;
     return key;
   }
 
   Future<Database> _initDatabase() async {
     final path = join(await getDatabasesPath(), _databaseName);
     final password = await getOrCreateEncryptionKey();
-    return await openDatabase(
-      path,
-      password: password,
-      version: _databaseVersion,
-      onCreate: _onCreate,
-      onUpgrade: _onUpgrade,
-    );
+    try {
+      return await openDatabase(
+        path,
+        password: password,
+        version: _databaseVersion,
+        onCreate: _onCreate,
+        onUpgrade: _onUpgrade,
+      );
+    } catch (e) {
+      LogService.log('[DB] SQLCipher open database failed: $e');
+      rethrow;
+    }
   }
 
   Future _onCreate(Database db, int version) async {
@@ -87,7 +98,7 @@ class DatabaseHelper {
   }
 
   Future<int> insert(Map<String, dynamic> row, {bool isSynced = false}) async {
-    Database db = await instance.database;
+    Database db = await database;
     final dbRow = {
       columnSessionDate: row['sessionDate'],
       columnTitle: row['title'],
@@ -100,17 +111,17 @@ class DatabaseHelper {
   }
 
   Future<List<Map<String, dynamic>>> getAll() async {
-    Database db = await instance.database;
+    Database db = await database;
     return await db.query(table, orderBy: '$columnId DESC');
   }
 
   Future<List<Map<String, dynamic>>> getUnsynced() async {
-    Database db = await instance.database;
+    Database db = await database;
     return await db.query(table, where: '$columnIsSynced = ?', whereArgs: [0]);
   }
 
   Future<int> markAsSynced(int id) async {
-    Database db = await instance.database;
+    Database db = await database;
     return await db.update(
       table,
       {columnIsSynced: 1},
@@ -120,7 +131,7 @@ class DatabaseHelper {
   }
 
   Future<List<Map<String, dynamic>>> getByYear(String year) async {
-    Database db = await instance.database;
+    Database db = await database;
     return await db.query(
       table,
       where: '$columnSessionDate LIKE ?',
@@ -130,7 +141,7 @@ class DatabaseHelper {
   }
 
   Future<List<String>> getYears() async {
-    Database db = await instance.database;
+    Database db = await database;
     final result = await db.rawQuery(
       'SELECT DISTINCT substr($columnSessionDate, 1, 4) as year FROM $table ORDER BY year DESC',
     );
@@ -138,13 +149,13 @@ class DatabaseHelper {
   }
 
   Future<int> update(Map<String, dynamic> row) async {
-    Database db = await instance.database;
+    Database db = await database;
     int id = row[columnId];
     return await db.update(table, row, where: '$columnId = ?', whereArgs: [id]);
   }
 
   Future<int> delete(int id) async {
-    Database db = await instance.database;
+    Database db = await database;
     return await db.delete(table, where: '$columnId = ?', whereArgs: [id]);
   }
 }
