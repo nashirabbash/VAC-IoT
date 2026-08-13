@@ -7,6 +7,7 @@ import 'package:vac_dashboard_app/models/therapy_session.dart';
 import 'package:vac_dashboard_app/repositories/auth_repository.dart';
 import 'package:vac_dashboard_app/services/therapy_receiver.dart';
 import 'package:vac_dashboard_app/services/log_service.dart';
+import 'package:vac_dashboard_app/services/audit_service.dart';
 
 class BleService {
   static const _serviceUuid = '4fafc201-1fb5-459e-8fcc-c5c9c331914b';
@@ -215,6 +216,10 @@ class BleService {
       LogService.log('[BLE] Device raw connection state event: $state for ${device.remoteId}');
       if (state == BluetoothConnectionState.disconnected) {
         LogService.log('[BLE] Disconnected from device (explicit: $isExplicitlyDisconnected, autoReconnect: $_shouldAutoReconnect)');
+        AuditService.instance.logAction(
+          action: AuditActions.bleDisconnect,
+          details: 'BLE connection disconnected for device ${device.remoteId}',
+        );
         _stopRssiMonitoring();
         _device = null;
         _rxChar = null;

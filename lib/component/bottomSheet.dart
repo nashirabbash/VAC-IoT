@@ -3,6 +3,8 @@ import 'package:vac_dashboard_app/component/mode_badge.dart';
 import 'package:vac_dashboard_app/utils/text_styles.dart';
 import 'package:vac_dashboard_app/asset/color_tokens.dart';
 
+import 'package:vac_dashboard_app/services/audit_service.dart';
+
 class HistoryBottomSheet extends StatelessWidget {
   const HistoryBottomSheet({
     required this.title,
@@ -24,6 +26,11 @@ class HistoryBottomSheet extends StatelessWidget {
     required String mode,
     required String duration,
   }) {
+    AuditService.instance.logAction(
+      action: AuditActions.viewSession,
+      details: 'Viewed therapy session: $title ($date)',
+    );
+
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
