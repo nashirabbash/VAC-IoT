@@ -292,16 +292,7 @@ class BleService {
 
   /// Returns true if command is an allowed housekeeping command and NOT a therapy RPC.
   static bool isCommandAllowed(String type) {
-    final lower = type.trim().toLowerCase();
-    if (lower.startsWith('set_') ||
-        lower.startsWith('start_') ||
-        lower.startsWith('stop_') ||
-        lower.contains('therapy') ||
-        lower.contains('pressure') ||
-        lower.contains('mode')) {
-      return false;
-    }
-    return allowedHousekeepingCommands.contains(lower);
+    return allowedHousekeepingCommands.contains(type.trim().toLowerCase());
   }
 
   Future<bool> send(String type, [Map<String, dynamic>? payload]) async {
