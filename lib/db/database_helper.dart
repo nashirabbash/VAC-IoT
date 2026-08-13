@@ -75,6 +75,8 @@ class DatabaseHelper {
     }
   }
 
+  static const auditTable = 'audit_logs';
+
   Future _onCreate(Database db, int version) async {
     await db.execute('''
           CREATE TABLE $table (
@@ -85,6 +87,20 @@ class DatabaseHelper {
             $columnMode TEXT NOT NULL,
             $columnDuration TEXT NOT NULL,
             $columnIsSynced INTEGER NOT NULL DEFAULT 0
+          )
+          ''');
+
+    await db.execute('''
+          CREATE TABLE $auditTable (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            username TEXT,
+            hospital_name TEXT,
+            device_id TEXT,
+            action TEXT NOT NULL,
+            details TEXT,
+            timestamp TEXT NOT NULL,
+            is_synced INTEGER NOT NULL DEFAULT 0
           )
           ''');
   }
@@ -157,5 +173,37 @@ class DatabaseHelper {
   Future<int> delete(int id) async {
     Database db = await database;
     return await db.delete(table, where: '$columnId = ?', whereArgs: [id]);
+  }
+
+  Future<int> insertAuditLog(Map<String, dynamic> row) async {
+    Database db = await database;
+    return await db.insert(auditTable, {
+      'user_id': row['userId'],
+      'username': row['username'],
+      'hospital_name': row['hospitalName'],
+      'device_id': row['deviceId'],
+      'action': row['action'],
+      'details': row['details'],
+      'timestamp': row['timestamp'] ?? DateTime.now().toIso8601String(),
+      'is_synced': row['isSynced'] == true ? 1 : 0,
+    });
+  }
+
+  Future<List<Map<String, dynamic>>> getUnsyncedAuditLogs() async {
+    Database db = await database;
+    try {
+      return await db.query(auditTable, where: 'is_synced = ?', whereArgs: [0]);
+    } catch (_) {
+      return [];
+    }
+  }
+
+  Future<int> markAuditLogsAsSynced(List<int> ids) async {
+    if (ids.isEmpty) return 0;
+    Database db = await database;
+    final inClause = ids.join(',');
+    return await db.rawUpdate(
+      'UPDATE $auditTable SET is_synced = 1 WHERE id IN ($inClause)',
+    );
   }
 }

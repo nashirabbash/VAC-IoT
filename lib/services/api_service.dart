@@ -5,6 +5,7 @@ import 'package:vac_dashboard_app/models/register_dto.dart';
 import 'package:vac_dashboard_app/models/device_credentials.dart';
 import 'package:vac_dashboard_app/network/api_interceptor.dart';
 import 'package:vac_dashboard_app/repositories/auth_repository.dart';
+import 'package:vac_dashboard_app/services/audit_service.dart';
 
 class ApiException implements Exception {
   final String message;
@@ -125,6 +126,10 @@ class ApiService {
     }
 
     await _saveDeviceCredentials(qrKey);
+    AuditService.instance.logAction(
+      action: AuditActions.bindDevice,
+      details: 'Bound device with QR key: $qrKey',
+    );
   }
 
   Future<void> logout() async {
@@ -137,6 +142,19 @@ class ApiService {
       throw ApiException('Failed to logout');
     }
     await _authRepository.clearToken();
+  }
+
+  Future<void> postAuditLogs(List<Map<String, dynamic>> logs) async {
+    if (logs.isEmpty) return;
+    final uri = Uri.parse('$_baseUrl/audit-logs');
+    final res = await _client.post(
+      uri,
+      body: jsonEncode(logs),
+      headers: {'Content-Type': 'application/json'},
+    );
+    if (res.statusCode != 200 && res.statusCode != 201) {
+      throw Exception('Failed to send audit logs: ${res.statusCode} ${res.body}');
+    }
   }
 
   Future<void> _saveDeviceCredentials(String qrKey) async {

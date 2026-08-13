@@ -129,4 +129,16 @@ class AuthRepository {
       return null;
     }
   }
+
+  Future<Map<String, dynamic>> getUserProfile() async {
+    final username = await getUsername();
+    final decoded = await getDecodedToken();
+    final userId = (decoded?['userId'] ?? decoded?['id'] ?? decoded?['sub']) as int?;
+    final hospitalName = (decoded?['hospitalName'] ?? decoded?['hospital_name']) as String?;
+    return {
+      'userId': userId,
+      'username': username,
+      'hospitalName': hospitalName,
+    };
+  }
 }
