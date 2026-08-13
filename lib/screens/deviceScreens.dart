@@ -45,12 +45,15 @@ class _DeviceScreenState extends State<DeviceScreen> {
 
     // Fetch Wi-Fi status jika BLE sudah terhubung
     if (bleService.isConnected) {
+      debugPrint('[DeviceScreen] BLE connected at initState, fetching Wi-Fi status...');
       _fetchWifiStatus();
     }
 
     // Listen koneksi BLE: Navigasi jika terputus, atau auto-fetch Wi-Fi jika reconnect
     _connSub = bleService.onConnectionStateChanged.listen((connected) {
+      debugPrint('[DeviceScreen] onConnectionStateChanged event: connected=$connected');
       if (!connected && mounted) {
+        debugPrint('[DeviceScreen] Disconnection detected while on DeviceScreen! Navigating to HomeScreen...');
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(builder: (context) => const HomeScreen()),
           (route) => false,

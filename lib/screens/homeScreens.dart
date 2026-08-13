@@ -6,6 +6,7 @@ import 'package:vac_dashboard_app/screens/welcomeScreens.dart';
 import 'package:vac_dashboard_app/screens/scanScreens.dart';
 import 'package:vac_dashboard_app/screens/deviceScreens.dart';
 import 'package:vac_dashboard_app/screens/settingsScreen.dart';
+import 'package:vac_dashboard_app/screens/logScreen.dart';
 import 'package:vac_dashboard_app/asset/color_tokens.dart';
 import 'package:vac_dashboard_app/repositories/auth_repository.dart';
 import 'package:vac_dashboard_app/services/api_service.dart';
@@ -168,6 +169,18 @@ class _HomeScreenState extends State<HomeScreen> {
                         nav.push(
                           MaterialPageRoute(
                             builder: (context) => const SettingsScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                    AppMenuItem(
+                      label: 'Log Sistem',
+                      leadingIcon: Icons.terminal_rounded,
+                      onPressed: () {
+                        Navigator.of(dialogContext).pop(); // Dismiss menu
+                        nav.push(
+                          MaterialPageRoute(
+                            builder: (context) => const LogScreen(),
                           ),
                         );
                       },
