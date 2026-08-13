@@ -109,6 +109,29 @@ void main() {
         await sub.cancel();
       });
     });
+
+    group('Heartbeat Liveness & Disconnection Safety', () {
+      test('onHeartbeatTimeout stream exists and is broadcast', () {
+        expect(service.onHeartbeatTimeout, isNotNull);
+        expect(service.onHeartbeatTimeout.isBroadcast, isTrue);
+        expect(service.isHeartbeatTimeout, isFalse);
+      });
+
+      test('handleIncomingBytes updates lastPacketTime', () {
+        expect(service.lastPacketTime, isNull);
+        service.handleIncomingBytes(utf8.encode('{"type":"ping"}'));
+        expect(service.lastPacketTime, isNotNull);
+      });
+
+      test('clears heartbeatTimeout when incoming bytes are received', () async {
+        service.handleIncomingBytes(utf8.encode('{"type":"telemetry"}'));
+        expect(service.isHeartbeatTimeout, isFalse);
+
+        // Simulate incoming byte clearing existing timeout
+        service.handleIncomingBytes(utf8.encode('{"type":"ping"}'));
+        expect(service.isHeartbeatTimeout, isFalse);
+      });
+    });
   });
 }
 

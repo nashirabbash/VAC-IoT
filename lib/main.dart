@@ -14,6 +14,7 @@ import 'package:vac_dashboard_app/repositories/auth_repository.dart';
 import 'package:vac_dashboard_app/services/ble_service.dart';
 import 'package:vac_dashboard_app/repositories/settings_repository.dart';
 import 'package:vac_dashboard_app/services/ota_banner_service.dart';
+import 'package:vac_dashboard_app/services/heartbeat_alarm_service.dart';
 
 final ValueNotifier<ThemeMode> appThemeMode = ValueNotifier(ThemeMode.system);
 final _navigatorKey = GlobalKey<NavigatorState>();
@@ -67,6 +68,7 @@ class MainApp extends StatelessWidget {
               : const WelcomeScreens(),
           builder: (context, child) {
             OtaBannerService.instance.init(_navigatorKey);
+            HeartbeatAlarmService.instance.init(_navigatorKey);
             return child!;
           },
         );

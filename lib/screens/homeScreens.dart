@@ -6,6 +6,7 @@ import 'package:vac_dashboard_app/screens/welcomeScreens.dart';
 import 'package:vac_dashboard_app/screens/scanScreens.dart';
 import 'package:vac_dashboard_app/screens/deviceScreens.dart';
 import 'package:vac_dashboard_app/screens/settingsScreen.dart';
+import 'package:vac_dashboard_app/screens/logScreen.dart';
 import 'package:vac_dashboard_app/asset/color_tokens.dart';
 import 'package:vac_dashboard_app/repositories/auth_repository.dart';
 import 'package:vac_dashboard_app/services/api_service.dart';
@@ -173,6 +174,18 @@ class _HomeScreenState extends State<HomeScreen> {
                       },
                     ),
                     AppMenuItem(
+                      label: 'Log Sistem',
+                      leadingIcon: Icons.terminal_rounded,
+                      onPressed: () {
+                        Navigator.of(dialogContext).pop(); // Dismiss menu
+                        nav.push(
+                          MaterialPageRoute(
+                            builder: (context) => const LogScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                    AppMenuItem(
                       label: 'Keluar',
                       leadingIcon: Icons.logout_rounded,
                       isDestructive: true,
@@ -214,17 +227,15 @@ class _HomeScreenState extends State<HomeScreen> {
           height: 42,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: const Color(
-              0xFF6750A4,
-            ).withValues(alpha: 0.1), // Brand color background
-            border: Border.all(color: const Color(0x1F000000), width: 1),
+            color: context.colors.accentsPurple.withValues(alpha: 0.1),
+            border: Border.all(color: context.colors.separatorsNonopaque, width: 1),
           ),
           child: Center(
             child: AppText(
               _userInitials,
               type: AppTextType.caption1,
               fontWeight: FontWeight.w600,
-              customColor: const Color(0xFF6750A4),
+              customColor: context.colors.accentsPurple,
             ),
           ),
         ),
@@ -373,9 +384,9 @@ class _PulsingScannerState extends State<PulsingScanner>
                     ),
                   ],
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.bluetooth_searching_rounded,
-                  color: Colors.white,
+                  color: context.colors.graysWhite,
                   size: 32,
                 ),
               ),
