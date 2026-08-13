@@ -132,6 +132,29 @@ void main() {
         expect(service.isHeartbeatTimeout, isFalse);
       });
     });
+
+    group('Read-Only Telemetry Safety & Command Whitelisting', () {
+      test('allows safe housekeeping utility commands', () {
+        expect(BleService.isCommandAllowed('auth'), isTrue);
+        expect(BleService.isCommandAllowed('time_sync'), isTrue);
+        expect(BleService.isCommandAllowed('get_status'), isTrue);
+        expect(BleService.isCommandAllowed('wifi_config'), isTrue);
+        expect(BleService.isCommandAllowed('wifi_disconnect'), isTrue);
+      });
+
+      test('blocks forbidden remote therapy parameter modification RPCs', () {
+        expect(BleService.isCommandAllowed('start_therapy'), isFalse);
+        expect(BleService.isCommandAllowed('set_pressure'), isFalse);
+        expect(BleService.isCommandAllowed('set_mode'), isFalse);
+        expect(BleService.isCommandAllowed('stop_therapy'), isFalse);
+        expect(BleService.isCommandAllowed('modify_therapy'), isFalse);
+      });
+
+      test('send returns false for forbidden therapy RPCs', () async {
+        final res = await service.send('start_therapy', {'pressure': -125});
+        expect(res, isFalse);
+      });
+    });
   });
 }
 

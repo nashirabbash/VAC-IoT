@@ -282,7 +282,33 @@ class BleService {
     }
   }
 
+  static const Set<String> allowedHousekeepingCommands = {
+    'auth',
+    'time_sync',
+    'get_status',
+    'wifi_config',
+    'wifi_disconnect',
+  };
+
+  /// Returns true if command is an allowed housekeeping command and NOT a therapy RPC.
+  static bool isCommandAllowed(String type) {
+    final lower = type.trim().toLowerCase();
+    if (lower.startsWith('set_') ||
+        lower.startsWith('start_') ||
+        lower.startsWith('stop_') ||
+        lower.contains('therapy') ||
+        lower.contains('pressure') ||
+        lower.contains('mode')) {
+      return false;
+    }
+    return allowedHousekeepingCommands.contains(lower);
+  }
+
   Future<bool> send(String type, [Map<String, dynamic>? payload]) async {
+    if (!isCommandAllowed(type)) {
+      LogService.log('[BLE SAFETY] Write blocked: Remote therapy parameter modification RPC ($type) is forbidden!');
+      return false;
+    }
     if (_rxChar == null) {
       LogService.log('[BLE] send failed: _rxChar is null (type=$type)');
       return false;

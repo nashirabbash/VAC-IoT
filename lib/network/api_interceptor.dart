@@ -9,6 +9,14 @@ class AuthException implements Exception {
   String toString() => 'AuthException: $message';
 }
 
+class SecurityException implements Exception {
+  final String message;
+  SecurityException(this.message);
+
+  @override
+  String toString() => 'SecurityException: $message';
+}
+
 class ApiInterceptor extends http.BaseClient {
   final http.Client _inner = http.Client();
   final AuthRepository authRepository;
@@ -17,6 +25,11 @@ class ApiInterceptor extends http.BaseClient {
 
   @override
   Future<http.StreamedResponse> send(http.BaseRequest request) async {
+    // Enforce HTTPS / TLS 1.3 transport encryption requirement
+    if (request.url.scheme != 'https') {
+      throw SecurityException('Insecure HTTP transport rejected. Mandatory TLS 1.3 / HTTPS required.');
+    }
+
     // Inject token if available (except for login/register routes)
     final token = await authRepository.getToken();
     if (token != null &&
