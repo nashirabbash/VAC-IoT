@@ -1,9 +1,14 @@
-import 'package:sqflite/sqflite.dart';
+import 'dart:convert';
+import 'dart:math';
+
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:path/path.dart';
+import 'package:sqflite_sqlcipher/sqflite.dart';
 
 class DatabaseHelper {
   static const _databaseName = "vac_dashboard.db";
   static const _databaseVersion = 2;
+  static const _dbKeyStorageKey = 'vac_db_encryption_key';
 
   static const table = 'therapy_sessions';
 
@@ -15,8 +20,16 @@ class DatabaseHelper {
   static const columnDuration = 'duration';
   static const columnIsSynced = 'is_synced';
 
-  DatabaseHelper._privateConstructor();
+  final FlutterSecureStorage _secureStorage;
+
+  DatabaseHelper._privateConstructor({FlutterSecureStorage? secureStorage})
+      : _secureStorage = secureStorage ?? const FlutterSecureStorage();
+
   static final DatabaseHelper instance = DatabaseHelper._privateConstructor();
+
+  factory DatabaseHelper.withStorage(FlutterSecureStorage storage) {
+    return DatabaseHelper._privateConstructor(secureStorage: storage);
+  }
 
   static Database? _database;
 
@@ -26,10 +39,25 @@ class DatabaseHelper {
     return _database!;
   }
 
+  /// Retrieve or generate AES-256 encryption key stored in flutter_secure_storage
+  Future<String> getOrCreateEncryptionKey() async {
+    String? key = await _secureStorage.read(key: _dbKeyStorageKey);
+    if (key != null && key.isNotEmpty) {
+      return key;
+    }
+    final secureRandom = Random.secure();
+    final bytes = List<int>.generate(32, (_) => secureRandom.nextInt(256));
+    key = base64Url.encode(bytes);
+    await _secureStorage.write(key: _dbKeyStorageKey, value: key);
+    return key;
+  }
+
   Future<Database> _initDatabase() async {
-    String path = join(await getDatabasesPath(), _databaseName);
+    final path = join(await getDatabasesPath(), _databaseName);
+    final password = await getOrCreateEncryptionKey();
     return await openDatabase(
       path,
+      password: password,
       version: _databaseVersion,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
