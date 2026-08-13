@@ -227,17 +227,15 @@ class _HomeScreenState extends State<HomeScreen> {
           height: 42,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: const Color(
-              0xFF6750A4,
-            ).withValues(alpha: 0.1), // Brand color background
-            border: Border.all(color: const Color(0x1F000000), width: 1),
+            color: context.colors.accentsPurple.withValues(alpha: 0.1),
+            border: Border.all(color: context.colors.separatorsNonopaque, width: 1),
           ),
           child: Center(
             child: AppText(
               _userInitials,
               type: AppTextType.caption1,
               fontWeight: FontWeight.w600,
-              customColor: const Color(0xFF6750A4),
+              customColor: context.colors.accentsPurple,
             ),
           ),
         ),
@@ -386,9 +384,9 @@ class _PulsingScannerState extends State<PulsingScanner>
                     ),
                   ],
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.bluetooth_searching_rounded,
-                  color: Colors.white,
+                  color: context.colors.graysWhite,
                   size: 32,
                 ),
               ),

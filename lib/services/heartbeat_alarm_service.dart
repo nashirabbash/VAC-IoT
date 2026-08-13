@@ -14,9 +14,12 @@ class HeartbeatAlarmService {
   StreamSubscription<bool>? _sub;
   Timer? _audioTimer;
   bool _enabled = true;
+  bool _isInitialized = false;
 
   void init(GlobalKey<NavigatorState> key) {
     _navigatorKey = key;
+    if (_isInitialized) return;
+    _isInitialized = true;
     _sub?.cancel();
     _sub = bleService.onHeartbeatTimeout.listen(_onHeartbeatTimeout);
   }

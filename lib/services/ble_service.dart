@@ -81,7 +81,10 @@ class BleService {
       _connectionStateController.add(connected);
       if (connected) {
         _lastPacketTime = DateTime.now();
-        _isHeartbeatTimeout = false;
+        if (_isHeartbeatTimeout) {
+          _isHeartbeatTimeout = false;
+          _heartbeatTimeoutController.add(false);
+        }
         _startHeartbeatTimer();
       } else {
         _stopHeartbeatTimer();

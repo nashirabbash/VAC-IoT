@@ -38,7 +38,9 @@ class LogScreen extends StatelessWidget {
           onPressed: () {
             LogService.clear();
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Log berhasil dibersihkan')),
+              const SnackBar(
+                content: AppText('Log berhasil dibersihkan', type: AppTextType.caption1),
+              ),
             );
           },
         ),
@@ -78,19 +80,16 @@ class LogScreen extends StatelessWidget {
               return ListTile(
                 dense: true,
                 contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                title: Text(
+                title: AppText(
                   logEntry,
-                  style: TextStyle(
-                    fontFamily: 'monospace',
-                    fontSize: 12,
-                    color: logColor,
-                  ),
+                  type: AppTextType.caption1,
+                  customColor: logColor,
                 ),
                 onTap: () {
                   Clipboard.setData(ClipboardData(text: logEntry));
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('Log disalin ke clipboard'),
+                      content: AppText('Log disalin ke clipboard', type: AppTextType.caption1),
                       duration: Duration(seconds: 1),
                     ),
                   );
